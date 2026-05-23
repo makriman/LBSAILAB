@@ -15,19 +15,19 @@ featured: true
 members:
   - name: Pranav Bangalore Sathyachandan
     email: pranavb.mam2026@london.edu
-    role: AI Lab participant
+    role: MAM2026
     showEmailPublicly: true
   - name: Jash Damani
     email: jdamani.mam2026@london.edu
-    role: AI Lab participant
+    role: MAM2026
     showEmailPublicly: true
   - name: Eric Du
     email: edu.mam2026@london.edu
-    role: AI Lab participant
+    role: MAM2026
     showEmailPublicly: true
   - name: Angela Chan
     email: achan.mba2026@london.edu
-    role: AI Lab participant
+    role: MBA2026
     showEmailPublicly: true
 contactPolicy: Participant emails are approved for public display on the team page.
 visibilityNotes: >-

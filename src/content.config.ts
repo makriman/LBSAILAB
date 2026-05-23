@@ -6,7 +6,7 @@ const peopleSchema = z.object({
   id: z.string(),
   name: z.string(),
   email: z.email(),
-  role: z.enum(["AI Lab participant", "Mentor"]),
+  role: z.string(),
   team: z.string().optional(),
   publicTeam: z.string().optional(),
   mentorType: z.string().optional(),

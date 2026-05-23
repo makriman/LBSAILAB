@@ -14,7 +14,7 @@ summary: >-
 members:
   - name: Simon Scott
     email: sscott.mifpt2025@london.edu
-    role: AI Lab participant
+    role: MIFPT2025
     showEmailPublicly: true
 contactPolicy: Participant emails are approved for public display on the team page.
 visibilityNotes: >-

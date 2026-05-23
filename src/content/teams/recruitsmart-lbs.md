@@ -15,19 +15,19 @@ featured: true
 members:
   - name: Rita Antunes Figueiredo Carvalho
     email: ritaa.mba2027@london.edu
-    role: AI Lab participant
+    role: MBA2027
     showEmailPublicly: true
   - name: Lavanya Saberwal
     email: lsaberwal.mba2027@london.edu
-    role: AI Lab participant
+    role: MBA2027
     showEmailPublicly: true
   - name: Jamie Aplin
     email: japlin.mba2027@london.edu
-    role: AI Lab participant
+    role: MBA2027
     showEmailPublicly: true
   - name: Andreea Galusca
     email: agalusca.mam2026@london.edu
-    role: AI Lab participant
+    role: MAM2026
     showEmailPublicly: true
 contactPolicy: Participant emails are approved for public display on the team page.
 visibilityNotes: >-

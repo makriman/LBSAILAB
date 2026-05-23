@@ -14,11 +14,11 @@ summary: >-
 members:
   - name: Burcu Magemizoglu
     email: bmagemizoglu.mba2027@london.edu
-    role: AI Lab participant
+    role: MBA2027
     showEmailPublicly: true
   - name: Ana Vitoria Aragao Andrade
     email: anavitoriaa.mba2027@london.edu
-    role: AI Lab participant
+    role: MBA2027
     showEmailPublicly: true
 contactPolicy: Participant emails are approved for public display on the team page.
 visibilityNotes: >-
