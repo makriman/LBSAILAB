@@ -15,8 +15,11 @@ const currentPath = Astro.url.pathname;
 <header class="site-header" data-site-header>
   <div class="header-inner">
     <a class="brand" href="/" aria-label="LBS AI Lab home">
+      <span class="brand-logo" aria-hidden="true">
+        <img src="/lbs-logo.svg" alt="" width="44" height="44" />
+      </span>
       <span class="brand-text">
-        <strong>LBS AI Lab</strong>
+        <strong>AI Lab</strong>
         <span>Build. Test. Iterate.</span>
       </span>
     </a>
@@ -104,9 +107,26 @@ const currentPath = Astro.url.pathname;
   }
 
   .brand {
+    align-items: center;
     color: var(--color-lbs-blue);
-    display: inline-block;
+    display: inline-flex;
+    gap: 11px;
     text-decoration: none;
+  }
+
+  .brand-logo {
+    align-items: center;
+    background: var(--color-lbs-blue);
+    display: inline-flex;
+    height: 44px;
+    justify-content: center;
+    width: 44px;
+  }
+
+  .brand-logo img {
+    display: block;
+    height: 44px;
+    width: 44px;
   }
 
   .brand-text {
