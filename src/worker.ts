@@ -94,7 +94,7 @@ async function handleCreateApplication(
 
 async function handleListApplications(env: Env): Promise<Response> {
   try {
-    const file = await readSubmissionsFile(env, false);
+    const file = await readSubmissionsFile(env, Boolean(env.GITHUB_TOKEN));
     return json({ applications: parseApplications(file.content) }, 200);
   } catch (error) {
     return json({ error: errorMessage(error), applications: [] }, 200);

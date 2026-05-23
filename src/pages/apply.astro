@@ -280,6 +280,10 @@ import Button from "@components/atoms/Button.astro";
         throw new Error(data.error || "Submissions are not available yet.");
       }
 
+      if (data.error) {
+        throw new Error("Submissions are not available yet.");
+      }
+
       renderSubmissions(data.applications || []);
     } catch (error) {
       submissionsList.hidden = true;
