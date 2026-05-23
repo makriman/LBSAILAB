@@ -1,58 +1,173 @@
 ---
 import { DSAI_URL, LBS_URL } from "@utils/site";
+
+const labLinks = [
+  { href: "/about/", label: "About the Lab" },
+  { href: "/cohorts/", label: "Cohorts" },
+  { href: "/teams/", label: "Teams" },
+  { href: "/mentors/", label: "Mentors" },
+  { href: "/apply/", label: "Register interest" },
+];
+
+const builderLinks = [
+  { href: "/apply/#submissions", label: "Find co-builders" },
+  { href: "/apply/#register-interest", label: "Submit an idea" },
+  { href: "/contact/", label: "Contact the Lab" },
+  { href: DSAI_URL, label: "Data Science & AI Initiative", external: true },
+];
+
+const lbsLinks = [
+  { href: `${LBS_URL}newsroom`, label: "Newsroom", external: true },
+  { href: `${LBS_URL}events`, label: "Events", external: true },
+  {
+    href: `${LBS_URL}recruiters-and-organisations`,
+    label: "Organisations",
+    external: true,
+  },
+  { href: `${LBS_URL}about/contact`, label: "Contact LBS", external: true },
+  { href: `${LBS_URL}about/our-campuses`, label: "Find us", external: true },
+  { href: `${LBS_URL}jobs-at-lbs`, label: "Jobs at LBS", external: true },
+  { href: `${LBS_URL}give-to-lbs`, label: "Give to LBS", external: true },
+];
+
+const socialLinks = [
+  {
+    href: "http://www.linkedin.com/company/london-business-school",
+    label: "LinkedIn",
+  },
+  {
+    href: "http://www.youtube.com/user/londonbusinessschool",
+    label: "YouTube",
+  },
+  {
+    href: "https://www.instagram.com/londonbschool/?hl=en",
+    label: "Instagram",
+  },
+  { href: "http://www.facebook.com/londonbusinessschool", label: "Facebook" },
+  { href: "http://www.twitter.com/lbs", label: "X" },
+  {
+    href: "https://mp.weixin.qq.com/s/tR-No6jRcyxTTAkghnfmwA",
+    label: "WeChat",
+  },
+  {
+    href: "https://www.rednote.com/user/profile/66686da60000000007007d32?xsec_token=AB0FHoU_3finTNE7HFaFnCS4tYmOmaf8SX2HS1Cbg85qQ",
+    label: "Rednote",
+  },
+  {
+    href: "https://www.weibo.com/londonbusinessschool?is_all=1",
+    label: "Weibo",
+  },
+  { href: "https://admissionsblog.london.edu/", label: "Admissions Blog" },
+];
+
+const legalLinks = [
+  {
+    href: `${LBS_URL}about/london-business-school/policies-and-legislation/website-privacy-policy`,
+    label: "Privacy policy",
+  },
+  {
+    href: `${LBS_URL}about/london-business-school/policies-and-legislation`,
+    label: "Policies and legislation",
+  },
+  { href: `${LBS_URL}sitemap`, label: "Sitemap" },
+];
+
+const year = new Date().getFullYear();
 ---
 
 <footer class="site-footer">
   <div class="footer-inner">
-    <div class="footer-main">
+    <div class="footer-top">
       <div class="footer-brand">
         <a class="brand" href="/" aria-label="LBS AI Lab home">
           <strong>LBS AI Lab</strong>
           <span>Build. Test. Iterate.</span>
         </a>
         <p>
-          A practical AI lab for LBS students learning to build products, test
-          with real users, and improve from feedback.
+          A practical AI lab for London Business School students learning to
+          build AI products, test with real users, and improve from feedback.
         </p>
       </div>
 
-      <div class="footer-cta">
-        <span>Next cohort</span>
-        <strong>September 2026</strong>
+      <div class="footer-actions" aria-label="Primary footer actions">
         <a href="/apply/">Register interest</a>
+        <a href="/apply/#submissions">Find co-builders</a>
       </div>
     </div>
 
     <div class="footer-nav-grid">
-      <nav aria-label="Explore" class="footer-links">
-        <h2>Explore</h2>
-        <a href="/about/">About</a>
-        <a href="/cohorts/">Cohorts</a>
-        <a href="/teams/">Teams</a>
-        <a href="/mentors/">Mentors</a>
+      <nav aria-label="AI Lab" class="footer-links">
+        <h2>AI Lab</h2>
+        {labLinks.map((link) => <a href={link.href}>{link.label}</a>)}
       </nav>
 
       <nav aria-label="Build loop" class="footer-links">
         <h2>Build loop</h2>
-        <a href="/apply/#register-interest">Register interest</a>
-        <a href="/apply/#submissions">Find co-builders</a>
-        <a href="/contact/">Contact the Lab</a>
+        {
+          builderLinks.map((link) => (
+            <a
+              href={link.href}
+              target={link.external ? "_blank" : undefined}
+              rel={link.external ? "noreferrer" : undefined}
+            >
+              {link.label}
+            </a>
+          ))
+        }
       </nav>
 
-      <nav aria-label="Institution links" class="footer-links">
-        <h2>LBS</h2>
-        <a href={DSAI_URL} target="_blank" rel="noreferrer">
-          Data Science & AI Initiative
-        </a>
+      <nav aria-label="London Business School" class="footer-links footer-lbs">
+        <h2>London Business School</h2>
         <a href={LBS_URL} target="_blank" rel="noreferrer">
           London Business School
         </a>
+        {
+          lbsLinks.map((link) => (
+            <a href={link.href} target="_blank" rel="noreferrer">
+              {link.label}
+            </a>
+          ))
+        }
+      </nav>
+    </div>
+
+    <div class="footer-institution">
+      <div>
+        <p>Get fresh ideas from business experts</p>
+        <a
+          href={`${LBS_URL}about/contact?entry=true#subscribeScreen`}
+          target="_blank"
+          rel="noreferrer"
+        >
+          Sign up
+        </a>
+      </div>
+
+      <nav aria-label="LBS in social media" class="footer-social">
+        <h2>LBS in social media</h2>
+        <div>
+          {
+            socialLinks.map((link) => (
+              <a href={link.href} target="_blank" rel="noreferrer">
+                {link.label}
+              </a>
+            ))
+          }
+        </div>
       </nav>
     </div>
 
     <div class="footer-bottom">
-      <span>London Business School</span>
-      <span>Student-built AI products for real LBS use cases.</span>
+      <span>© London Business School {year}</span>
+      <nav aria-label="Legal links">
+        {
+          legalLinks.map((link) => (
+            <a href={link.href} target="_blank" rel="noreferrer">
+              {link.label}
+            </a>
+          ))
+        }
+      </nav>
     </div>
   </div>
 </footer>
@@ -65,30 +180,30 @@ import { DSAI_URL, LBS_URL } from "@utils/site";
 
   .footer-inner {
     display: grid;
-    gap: clamp(32px, 5vw, 58px);
+    gap: 0;
     margin-inline: auto;
     max-width: var(--container);
-    padding: clamp(42px, 7vw, 72px) var(--gutter) 28px;
+    padding: clamp(42px, 7vw, 74px) var(--gutter) 26px;
   }
 
-  .footer-main {
+  .footer-top {
     align-items: end;
     border-bottom: 1px solid rgba(255, 255, 255, 0.18);
     display: grid;
-    gap: 28px;
-    grid-template-columns: minmax(0, 1fr) minmax(240px, 0.35fr);
-    padding-bottom: clamp(28px, 4vw, 42px);
+    gap: clamp(26px, 5vw, 64px);
+    grid-template-columns: minmax(0, 1fr) auto;
+    padding-bottom: clamp(30px, 5vw, 50px);
   }
 
   .brand {
     color: var(--color-white);
     display: inline-grid;
-    gap: 5px;
+    gap: 6px;
     text-decoration: none;
   }
 
   .brand strong {
-    font-size: clamp(1.55rem, 3vw, 2.4rem);
+    font-size: clamp(1.8rem, 3.4vw, 3rem);
     line-height: 1;
   }
 
@@ -103,50 +218,40 @@ import { DSAI_URL, LBS_URL } from "@utils/site";
     font-size: var(--step-1);
     line-height: 1.38;
     margin: 22px 0 0;
-    max-width: 680px;
+    max-width: 760px;
   }
 
-  .footer-cta {
-    border: 1px solid rgba(255, 255, 255, 0.22);
-    display: grid;
+  .footer-actions {
+    display: flex;
+    flex-wrap: wrap;
     gap: 12px;
-    padding: 20px;
+    justify-content: flex-end;
   }
 
-  .footer-cta span,
-  .footer-links h2,
-  .footer-bottom {
-    color: rgba(255, 255, 255, 0.62);
-    font-size: 0.78rem;
-    font-weight: 850;
-    letter-spacing: 0.04em;
-    text-transform: uppercase;
-  }
-
-  .footer-cta strong {
-    color: var(--color-white);
-    font-family: var(--font-serif);
-    font-size: var(--step-1);
-    line-height: 1;
-  }
-
-  .footer-cta a {
+  .footer-actions a {
     align-items: center;
-    background: var(--color-white);
+    border: 1px solid rgba(255, 255, 255, 0.28);
     border-radius: var(--radius-button);
-    color: var(--color-lbs-blue);
+    color: var(--color-white);
     display: inline-flex;
-    font-weight: 900;
-    justify-content: center;
+    font-size: var(--step--1);
+    font-weight: 880;
     min-height: 42px;
-    padding: 10px 16px;
+    padding: 11px 16px;
     text-decoration: none;
   }
 
+  .footer-actions a:first-child {
+    background: var(--color-white);
+    color: var(--color-lbs-blue);
+  }
+
   .footer-nav-grid {
+    border-bottom: 1px solid rgba(255, 255, 255, 0.14);
     display: grid;
-    gap: 28px;
-    grid-template-columns: repeat(3, minmax(0, 1fr));
+    gap: 34px;
+    grid-template-columns: minmax(0, 0.8fr) minmax(0, 0.9fr) minmax(0, 1.2fr);
+    padding-block: clamp(30px, 5vw, 48px);
   }
 
   .footer-links {
@@ -155,34 +260,136 @@ import { DSAI_URL, LBS_URL } from "@utils/site";
     gap: 12px;
   }
 
-  .footer-links h2 {
-    margin: 0 0 4px;
+  .footer-lbs {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
   }
 
-  .footer-links a {
+  .footer-lbs h2 {
+    grid-column: 1 / -1;
+  }
+
+  .footer-links h2,
+  .footer-social h2 {
+    color: rgba(255, 255, 255, 0.58);
+    font-size: 0.78rem;
+    font-weight: 880;
+    letter-spacing: 0.04em;
+    margin: 0 0 5px;
+    text-transform: uppercase;
+  }
+
+  .footer-links a,
+  .footer-social a,
+  .footer-bottom a {
     color: rgba(255, 255, 255, 0.84);
+    font-size: var(--step--1);
     font-weight: 760;
     text-decoration: none;
   }
 
-  .footer-links a:hover {
+  .footer-links a:hover,
+  .footer-social a:hover,
+  .footer-bottom a:hover {
     color: var(--color-white);
   }
 
-  .footer-bottom {
-    border-top: 1px solid rgba(255, 255, 255, 0.14);
-    display: flex;
-    flex-wrap: wrap;
-    gap: 12px;
-    justify-content: space-between;
-    padding-top: 22px;
-    text-transform: none;
+  .footer-institution {
+    align-items: end;
+    border-bottom: 1px solid rgba(255, 255, 255, 0.14);
+    display: grid;
+    gap: 28px;
+    grid-template-columns: minmax(220px, 0.55fr) minmax(0, 1fr);
+    padding-block: clamp(28px, 4vw, 40px);
   }
 
-  @media (max-width: 820px) {
-    .footer-main,
-    .footer-nav-grid {
+  .footer-institution p {
+    color: var(--color-white);
+    font-family: var(--font-serif);
+    font-size: var(--step-1);
+    line-height: 1.08;
+    margin: 0 0 16px;
+    max-width: 310px;
+  }
+
+  .footer-institution > div > a {
+    align-items: center;
+    border: 1px solid rgba(255, 255, 255, 0.32);
+    border-radius: var(--radius-button);
+    color: var(--color-white);
+    display: inline-flex;
+    font-size: var(--step--1);
+    font-weight: 860;
+    min-height: 40px;
+    padding: 10px 15px;
+    text-decoration: none;
+  }
+
+  .footer-social {
+    display: grid;
+    gap: 15px;
+  }
+
+  .footer-social div {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 10px;
+  }
+
+  .footer-social a {
+    align-items: center;
+    border: 1px solid rgba(255, 255, 255, 0.18);
+    display: inline-flex;
+    min-height: 38px;
+    padding: 8px 12px;
+  }
+
+  .footer-bottom {
+    align-items: center;
+    color: rgba(255, 255, 255, 0.62);
+    display: flex;
+    flex-wrap: wrap;
+    gap: 14px;
+    justify-content: space-between;
+    padding-top: 24px;
+  }
+
+  .footer-bottom span {
+    font-size: var(--step--1);
+    font-weight: 760;
+  }
+
+  .footer-bottom nav {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 14px;
+  }
+
+  @media (max-width: 900px) {
+    .footer-top,
+    .footer-nav-grid,
+    .footer-institution {
       grid-template-columns: 1fr;
+    }
+
+    .footer-actions {
+      justify-content: flex-start;
+    }
+  }
+
+  @media (max-width: 560px) {
+    .footer-lbs {
+      grid-template-columns: 1fr;
+    }
+
+    .footer-actions a,
+    .footer-institution > div > a {
+      justify-content: center;
+      width: 100%;
+    }
+
+    .footer-social a {
+      flex: 1 1 calc(50% - 10px);
+      justify-content: center;
     }
   }
 </style>

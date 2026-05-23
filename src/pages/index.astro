@@ -21,7 +21,6 @@ const cohort01 = cohorts.find((cohort) => cohort.data.id === "cohort-01");
 const cohortTeams = cohort01
   ? sortTeamsByCohortList(teams, cohort01.data.teams)
   : teams;
-const featuredTeams = cohortTeams.filter((team) => team.data.featured);
 
 const jsonLd = {
   "@context": "https://schema.org",
@@ -211,17 +210,6 @@ const jsonLd = {
     </div>
     <div class="container team-list">
       <TeamGrid teams={cohortTeams} />
-    </div>
-  </section>
-
-  <section class="section featured">
-    <div class="container">
-      <SectionHeader
-        eyebrow="Featured builds"
-        title="LBS use cases that can meet real users quickly."
-        body="RecruitSmart LBS, EventOS, and Zentra show the range of Cohort 01: career AI, organisational automation, and professional workflow tools with clear audiences to test with."
-      />
-      <TeamGrid teams={featuredTeams} featured />
     </div>
   </section>
 
@@ -493,7 +481,6 @@ const jsonLd = {
     margin-top: 42px;
   }
 
-  .featured :global(.section-header),
   .mentor-section :global(.section-header) {
     margin-bottom: 34px;
   }
