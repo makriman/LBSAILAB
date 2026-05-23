@@ -15,7 +15,6 @@ interface Props {
 
 const { cohort, teams, mentors } = Astro.props;
 const isUpcoming = cohort.data.status === 'upcoming';
-const categories = [...new Set(teams.map((team) => team.data.category))];
 ---
 
 <article class="cohort-detail">
@@ -103,11 +102,6 @@ const categories = [...new Set(teams.map((team) => team.data.category))];
                 <p class="eyebrow">Team portfolio</p>
                 <h2>Nine teams building across the LBS experience.</h2>
               </div>
-              <nav class="category-list" aria-label="Project categories">
-                {categories.map((category) => (
-                  <a href="#teams">{category}</a>
-                ))}
-              </nav>
             </div>
             <div id="teams">
               <TeamGrid teams={teams} />
@@ -190,30 +184,13 @@ const categories = [...new Set(teams.map((team) => team.data.category))];
     align-items: end;
     display: grid;
     gap: 26px;
-    grid-template-columns: minmax(0, 0.8fr) minmax(260px, 0.65fr);
+    grid-template-columns: 1fr;
     margin-bottom: 32px;
   }
 
   .section-top h2 {
     color: var(--color-lbs-blue);
     margin: 16px 0 0;
-  }
-
-  .category-list {
-    display: flex;
-    flex-wrap: wrap;
-    gap: 8px;
-  }
-
-  .category-list a {
-    background: var(--color-white);
-    border: 1px solid var(--color-border);
-    border-radius: var(--radius-button);
-    color: var(--color-lbs-blue);
-    font-size: 0.78rem;
-    font-weight: 800;
-    padding: 9px 12px;
-    text-decoration: none;
   }
 
   .upcoming-grid {

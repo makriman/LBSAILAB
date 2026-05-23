@@ -15,8 +15,8 @@ members:
   - name: Matt Bodsworth
     email: mbodsworth.mba2027@london.edu
     role: AI Lab participant
-    showEmailPublicly: false
-contactPolicy: Show public contact link only after member consent. Keep raw email in content data for internal use.
+    showEmailPublicly: true
+contactPolicy: Participant emails are approved for public display on the team page.
 visibilityNotes: >-
   Mention Next.js only on the team page or technical notes, not homepage card.
 ---

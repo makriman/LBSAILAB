@@ -50,4 +50,4 @@ Primary content lives in:
 - `src/data/people.json`
 - `src/data/mentors.json`
 
-Participant emails are stored in source content for internal use, but public rendering is disabled unless `showEmailPublicly` is explicitly set to `true`.
+Participant names and emails are rendered publicly on team pages for direct product inquiries.

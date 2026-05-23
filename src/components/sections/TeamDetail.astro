@@ -1,6 +1,5 @@
 ---
 import type { TeamEntry } from '@utils/collections';
-import { teamMemberLabel } from '@utils/collections';
 import Button from '@components/atoms/Button.astro';
 
 interface Props {
@@ -19,16 +18,17 @@ const { team, relatedTeams } = Astro.props;
         <h1>{team.data.displayName}</h1>
         <p class="lede">{team.data.tagline}</p>
         <div class="hero-actions">
-          {team.data.productUrl && <Button href={team.data.productUrl} variant="red" size="lg">View product</Button>}
-          <Button href={`/contact/?team=${team.data.slug}`} variant="ghost" size="lg">Contact team</Button>
+          {
+            team.data.productUrl && (
+              <Button href={team.data.productUrl} variant="red" size="lg">
+                View product
+              </Button>
+            )
+          }
         </div>
       </div>
       <aside class="meta-panel" aria-label="Project metadata">
         <dl>
-          <div>
-            <dt>Category</dt>
-            <dd>{team.data.category}</dd>
-          </div>
           <div>
             <dt>Cohort</dt>
             <dd>{team.data.cohortLabel}</dd>
@@ -36,10 +36,6 @@ const { team, relatedTeams } = Astro.props;
           <div>
             <dt>Status</dt>
             <dd>{team.data.status}</dd>
-          </div>
-          <div>
-            <dt>Team size</dt>
-            <dd>{teamMemberLabel(team.data.members.length)}</dd>
           </div>
         </dl>
       </aside>
@@ -83,24 +79,11 @@ const { team, relatedTeams } = Astro.props;
                 <li>
                   <strong>{member.name}</strong>
                   <span>{member.role}</span>
-                  {member.showEmailPublicly ? (
-                    <a href={`mailto:${member.email}`}>Email</a>
-                  ) : (
-                    <em>Contact via Lab</em>
-                  )}
+                  <a href={`mailto:${member.email}`}>{member.email}</a>
                 </li>
               ))
             }
           </ul>
-        </section>
-
-        <section class="member-card">
-          <h2>Connect</h2>
-          <p>
-            Public email display is disabled until participant consent is confirmed. Use
-            the Lab contact route for introductions.
-          </p>
-          <Button href={`/contact/?team=${team.data.slug}`} variant="secondary">Contact team</Button>
         </section>
       </aside>
     </div>
@@ -116,7 +99,7 @@ const { team, relatedTeams } = Astro.props;
             {relatedTeams.map((related) => (
               <a href={`/teams/${related.data.slug}/`}>
                 <strong>{related.data.displayName}</strong>
-                <span>{related.data.category}</span>
+                <span>{related.data.tagline}</span>
               </a>
             ))}
           </div>

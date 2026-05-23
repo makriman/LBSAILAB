@@ -1,6 +1,5 @@
 ---
 import type { TeamEntry } from '@utils/collections';
-import { teamMemberLabel } from '@utils/collections';
 
 interface Props {
   team: TeamEntry;
@@ -8,22 +7,29 @@ interface Props {
 }
 
 const { team, featured = false } = Astro.props;
-const memberCount = team.data.members.length;
+const builderNames = team.data.members.map((member) => member.name);
 ---
 
 <article class:list={['team-card', { featured }]}>
   <div class="meta">
-    <span>{team.data.category}</span>
     <span>{team.data.cohortLabel}</span>
   </div>
   <div class="content">
     <h3>{team.data.displayName}</h3>
     <p>{team.data.tagline}</p>
+    <ul class="builders" aria-label={`${team.data.displayName} builders`}>
+      {builderNames.map((name) => <li>{name}</li>)}
+    </ul>
   </div>
   <div class="footer">
-    <span>{teamMemberLabel(memberCount)}</span>
     <div class="links">
-      {team.data.productUrl && <a href={team.data.productUrl} target="_blank" rel="noreferrer">Product</a>}
+      {
+        team.data.productUrl && (
+          <a href={team.data.productUrl} target="_blank" rel="noreferrer">
+            Product
+          </a>
+        )
+      }
       <a href={`/teams/${team.data.slug}/`}>Profile</a>
     </div>
   </div>
@@ -68,10 +74,6 @@ const memberCount = team.data.members.length;
     font-weight: 780;
   }
 
-  .meta span:first-child {
-    color: var(--color-lbs-red);
-  }
-
   .content {
     align-content: start;
     display: grid;
@@ -88,6 +90,26 @@ const memberCount = team.data.members.length;
     color: var(--color-ink-soft);
   }
 
+  .builders {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 8px;
+    list-style: none;
+    margin: 4px 0 0;
+    padding: 0;
+  }
+
+  .builders li {
+    background: var(--color-cloud);
+    border: 1px solid var(--color-border);
+    border-radius: var(--radius-button);
+    color: var(--color-ink-soft);
+    font-size: 0.76rem;
+    font-weight: 780;
+    line-height: 1.2;
+    padding: 7px 10px;
+  }
+
   .footer {
     align-self: end;
     border-top: 1px solid var(--color-border);
@@ -96,12 +118,6 @@ const memberCount = team.data.members.length;
     gap: 12px;
     justify-content: space-between;
     padding-top: 18px;
-  }
-
-  .footer span {
-    color: var(--color-muted);
-    font-size: var(--step--1);
-    font-weight: 800;
   }
 
   .links {

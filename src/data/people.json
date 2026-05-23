@@ -7,7 +7,7 @@
     "publicTeam": "Briefd",
     "email": "ythakker.mba2027@london.edu",
     "cohort": "cohort-01",
-    "showEmailPublicly": false
+    "showEmailPublicly": true
   },
   {
     "id": "richa-aggarwal",
@@ -17,7 +17,7 @@
     "publicTeam": "Briefd",
     "email": "raggarwal.mba2027@london.edu",
     "cohort": "cohort-01",
-    "showEmailPublicly": false
+    "showEmailPublicly": true
   },
   {
     "id": "pritika-nayak",
@@ -27,7 +27,7 @@
     "publicTeam": "Cafe Smart",
     "email": "pnayak.mba2027@london.edu",
     "cohort": "cohort-01",
-    "showEmailPublicly": false
+    "showEmailPublicly": true
   },
   {
     "id": "emma-wang",
@@ -37,7 +37,7 @@
     "publicTeam": "Cafe Smart",
     "email": "ewang.mba2027@london.edu",
     "cohort": "cohort-01",
-    "showEmailPublicly": false
+    "showEmailPublicly": true
   },
   {
     "id": "caitlyn-espiritu",
@@ -47,7 +47,7 @@
     "publicTeam": "Cafe Smart",
     "email": "cespiritu.mba2027@london.edu",
     "cohort": "cohort-01",
-    "showEmailPublicly": false
+    "showEmailPublicly": true
   },
   {
     "id": "matt-bodsworth",
@@ -57,7 +57,7 @@
     "publicTeam": "EMS++",
     "email": "mbodsworth.mba2027@london.edu",
     "cohort": "cohort-01",
-    "showEmailPublicly": false
+    "showEmailPublicly": true
   },
   {
     "id": "pranav-bangalore-sathyachandan",
@@ -67,7 +67,7 @@
     "publicTeam": "EventOS",
     "email": "pranavb.mam2026@london.edu",
     "cohort": "cohort-01",
-    "showEmailPublicly": false
+    "showEmailPublicly": true
   },
   {
     "id": "jash-damani",
@@ -77,7 +77,7 @@
     "publicTeam": "EventOS",
     "email": "jdamani.mam2026@london.edu",
     "cohort": "cohort-01",
-    "showEmailPublicly": false
+    "showEmailPublicly": true
   },
   {
     "id": "eric-du",
@@ -87,7 +87,7 @@
     "publicTeam": "EventOS",
     "email": "edu.mam2026@london.edu",
     "cohort": "cohort-01",
-    "showEmailPublicly": false
+    "showEmailPublicly": true
   },
   {
     "id": "angela-chan",
@@ -97,7 +97,7 @@
     "publicTeam": "EventOS",
     "email": "achan.mba2026@london.edu",
     "cohort": "cohort-01",
-    "showEmailPublicly": false
+    "showEmailPublicly": true
   },
   {
     "id": "nothando-ntombela",
@@ -107,7 +107,7 @@
     "publicTeam": "FundEd",
     "email": "nntombela.mba2027@london.edu",
     "cohort": "cohort-01",
-    "showEmailPublicly": false
+    "showEmailPublicly": true
   },
   {
     "id": "nasreen-begum",
@@ -117,7 +117,7 @@
     "publicTeam": "FundEd",
     "email": "nbegum.mba2027@london.edu",
     "cohort": "cohort-01",
-    "showEmailPublicly": false
+    "showEmailPublicly": true
   },
   {
     "id": "misri-parikh",
@@ -127,7 +127,7 @@
     "publicTeam": "FundEd",
     "email": "misriparikh11@gmail.com",
     "cohort": "cohort-01",
-    "showEmailPublicly": false
+    "showEmailPublicly": true
   },
   {
     "id": "burcu-magemizoglu",
@@ -137,7 +137,7 @@
     "publicTeam": "LBS Compass",
     "email": "bmagemizoglu.mba2027@london.edu",
     "cohort": "cohort-01",
-    "showEmailPublicly": false
+    "showEmailPublicly": true
   },
   {
     "id": "ana-vitoria-aragao-andrade",
@@ -147,7 +147,7 @@
     "publicTeam": "LBS Compass",
     "email": "anavitoriaa.mba2027@london.edu",
     "cohort": "cohort-01",
-    "showEmailPublicly": false
+    "showEmailPublicly": true
   },
   {
     "id": "rita-antunes-figueiredo-carvalho",
@@ -157,7 +157,7 @@
     "publicTeam": "RecruitSmart LBS",
     "email": "ritaa.mba2027@london.edu",
     "cohort": "cohort-01",
-    "showEmailPublicly": false
+    "showEmailPublicly": true
   },
   {
     "id": "lavanya-saberwal",
@@ -167,7 +167,7 @@
     "publicTeam": "RecruitSmart LBS",
     "email": "lsaberwal.mba2027@london.edu",
     "cohort": "cohort-01",
-    "showEmailPublicly": false
+    "showEmailPublicly": true
   },
   {
     "id": "jamie-aplin",
@@ -177,7 +177,7 @@
     "publicTeam": "RecruitSmart LBS",
     "email": "japlin.mba2027@london.edu",
     "cohort": "cohort-01",
-    "showEmailPublicly": false
+    "showEmailPublicly": true
   },
   {
     "id": "andreea-galusca",
@@ -187,7 +187,7 @@
     "publicTeam": "RecruitSmart LBS",
     "email": "agalusca.mam2026@london.edu",
     "cohort": "cohort-01",
-    "showEmailPublicly": false
+    "showEmailPublicly": true
   },
   {
     "id": "simon-scott",
@@ -197,7 +197,7 @@
     "publicTeam": "The Wayfinders",
     "email": "sscott.mifpt2025@london.edu",
     "cohort": "cohort-01",
-    "showEmailPublicly": false
+    "showEmailPublicly": true
   },
   {
     "id": "victoria-manning",
@@ -207,7 +207,7 @@
     "publicTeam": "Zentra",
     "email": "vmanning.mba2027@london.edu",
     "cohort": "cohort-01",
-    "showEmailPublicly": false
+    "showEmailPublicly": true
   },
   {
     "id": "leanne-chen",
@@ -217,6 +217,6 @@
     "publicTeam": "Zentra",
     "email": "leannec.mba2027@london.edu",
     "cohort": "cohort-01",
-    "showEmailPublicly": false
+    "showEmailPublicly": true
   }
 ]

@@ -16,12 +16,12 @@ members:
   - name: Victoria Manning
     email: vmanning.mba2027@london.edu
     role: AI Lab participant
-    showEmailPublicly: false
+    showEmailPublicly: true
   - name: Leanne Chen
     email: leannec.mba2027@london.edu
     role: AI Lab participant
-    showEmailPublicly: false
-contactPolicy: Show public contact link only after member consent. Keep raw email in content data for internal use.
+    showEmailPublicly: true
+contactPolicy: Participant emails are approved for public display on the team page.
 visibilityNotes: >-
   Most externally venture-like product; good for demonstrating beyond-campus applications.
 ---

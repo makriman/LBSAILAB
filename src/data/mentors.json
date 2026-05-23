@@ -6,7 +6,7 @@
     "mentorType": "Technical Mentor",
     "email": "rlokanathan.mba2027@london.edu",
     "cohort": "cohort-01",
-    "showEmailPublicly": false
+    "showEmailPublicly": true
   },
   {
     "id": "akshay-nagpal",
@@ -15,7 +15,7 @@
     "mentorType": "Technical Mentor",
     "email": "akshaynagpal1995@gmail.com",
     "cohort": "cohort-01",
-    "showEmailPublicly": false
+    "showEmailPublicly": true
   },
   {
     "id": "zahra-mogadasi",
@@ -24,7 +24,7 @@
     "mentorType": "Product Mentor",
     "email": "zmogadasi.mba2025@london.edu",
     "cohort": "cohort-01",
-    "showEmailPublicly": false
+    "showEmailPublicly": true
   },
   {
     "id": "rhea-bisaria",
@@ -33,6 +33,6 @@
     "mentorType": "Product Mentor",
     "email": "rbisaria.mba2027@london.edu",
     "cohort": "cohort-01",
-    "showEmailPublicly": false
+    "showEmailPublicly": true
   }
 ]

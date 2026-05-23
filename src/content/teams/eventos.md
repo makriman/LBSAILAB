@@ -16,20 +16,20 @@ members:
   - name: Pranav Bangalore Sathyachandan
     email: pranavb.mam2026@london.edu
     role: AI Lab participant
-    showEmailPublicly: false
+    showEmailPublicly: true
   - name: Jash Damani
     email: jdamani.mam2026@london.edu
     role: AI Lab participant
-    showEmailPublicly: false
+    showEmailPublicly: true
   - name: Eric Du
     email: edu.mam2026@london.edu
     role: AI Lab participant
-    showEmailPublicly: false
+    showEmailPublicly: true
   - name: Angela Chan
     email: achan.mba2026@london.edu
     role: AI Lab participant
-    showEmailPublicly: false
-contactPolicy: Show public contact link only after member consent. Keep raw email in content data for internal use.
+    showEmailPublicly: true
+contactPolicy: Participant emails are approved for public display on the team page.
 visibilityNotes: >-
   Strong operational transformation story for clubs; good for AI transformation positioning.
 ---

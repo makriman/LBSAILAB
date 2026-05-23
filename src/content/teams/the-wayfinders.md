@@ -15,8 +15,8 @@ members:
   - name: Simon Scott
     email: sscott.mifpt2025@london.edu
     role: AI Lab participant
-    showEmailPublicly: false
-contactPolicy: Show public contact link only after member consent. Keep raw email in content data for internal use.
+    showEmailPublicly: true
+contactPolicy: Participant emails are approved for public display on the team page.
 visibilityNotes: >-
   Normalize roster alias WayFinders to public product name The Wayfinders.
 ---

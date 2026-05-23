@@ -14,13 +14,7 @@ const { mentor } = Astro.props;
   <div>
     <h3>{mentor.data.name}</h3>
     <p>{mentor.data.mentorType}</p>
-    {
-      mentor.data.showEmailPublicly ? (
-        <a href={`mailto:${mentor.data.email}`}>Email mentor</a>
-      ) : (
-        <span>Contact via Lab</span>
-      )
-    }
+    <a href={`mailto:${mentor.data.email}`}>{mentor.data.email}</a>
   </div>
 </article>
 

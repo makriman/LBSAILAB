@@ -1,6 +1,8 @@
 ---
 import BaseLayout from '@layouts/BaseLayout.astro';
 import Button from '@components/atoms/Button.astro';
+
+const registerInterestEmail = 'rlokanathan.mba2027@london.edu';
 ---
 
 <BaseLayout
@@ -16,13 +18,60 @@ import Button from '@components/atoms/Button.astro';
           LBS AI Lab is for students who want hands-on experience building AI products and
           leading AI transformation from the inside.
         </p>
-        <Button href="/contact/" variant="red" size="lg">Register interest for September 2026</Button>
+        <Button href="#register-interest" variant="red" size="lg" external={false}>
+          Register interest for September 2026
+        </Button>
       </div>
       <aside>
         <span>Cohort 02</span>
         <strong>Starts September 2026</strong>
         <p>Applications will open for LBS students ready to build, test, learn, and ship.</p>
       </aside>
+    </div>
+  </section>
+
+  <section class="section section-warm" id="register-interest">
+    <div class="container form-grid">
+      <div>
+        <p class="eyebrow">Register interest</p>
+        <h2>Tell us who you are.</h2>
+        <p>
+          Share your LBS details for the September 2026 cohort list. The Lab team will use
+          this to follow up when applications open.
+        </p>
+      </div>
+
+      <form
+        class="interest-form"
+        action={`mailto:${registerInterestEmail}?subject=LBS%20AI%20Lab%20September%202026%20interest`}
+        method="post"
+        enctype="text/plain"
+      >
+        <label>
+          <span>Name</span>
+          <input name="name" autocomplete="name" required />
+        </label>
+        <label>
+          <span>LBS email</span>
+          <input
+            name="lbs_email"
+            type="email"
+            autocomplete="email"
+            pattern={'^[^@\\s]+@london\\.edu$'}
+            placeholder="name.program@london.edu"
+            required
+          />
+        </label>
+        <label>
+          <span>Course name</span>
+          <input name="course_name" autocomplete="organization-title" placeholder="MBA, MiF, MAM..." required />
+        </label>
+        <label>
+          <span>What would you like to build?</span>
+          <textarea name="build_interest" rows="4"></textarea>
+        </label>
+        <button type="submit">Submit interest</button>
+      </form>
     </div>
   </section>
 
@@ -144,9 +193,73 @@ import Button from '@components/atoms/Button.astro';
     padding-left: 19px;
   }
 
+  .form-grid {
+    align-items: start;
+    display: grid;
+    gap: clamp(28px, 5vw, 70px);
+    grid-template-columns: minmax(0, 0.58fr) minmax(320px, 0.72fr);
+  }
+
+  .form-grid h2 {
+    color: var(--color-lbs-blue);
+    margin: 16px 0;
+  }
+
+  .form-grid p:not(.eyebrow) {
+    color: var(--color-ink-soft);
+    font-size: var(--step-1);
+  }
+
+  .interest-form {
+    background: var(--color-white);
+    border: 1px solid var(--color-border);
+    display: grid;
+    gap: 18px;
+    padding: clamp(22px, 4vw, 36px);
+  }
+
+  label {
+    display: grid;
+    gap: 8px;
+  }
+
+  label span {
+    color: var(--color-lbs-blue);
+    font-size: var(--step--1);
+    font-weight: 820;
+  }
+
+  input,
+  textarea {
+    background: var(--color-white);
+    border: 1px solid var(--color-border-strong);
+    border-radius: 0;
+    color: var(--color-ink);
+    min-height: 48px;
+    padding: 12px 14px;
+    width: 100%;
+  }
+
+  textarea {
+    min-height: 120px;
+    resize: vertical;
+  }
+
+  button {
+    background: var(--color-lbs-red);
+    border: 0;
+    border-radius: var(--radius-button);
+    color: var(--color-white);
+    cursor: pointer;
+    font-weight: 850;
+    min-height: 52px;
+    padding: 14px 22px;
+  }
+
   @media (max-width: 940px) {
     .hero-grid,
-    .apply-grid {
+    .apply-grid,
+    .form-grid {
       grid-template-columns: 1fr;
     }
   }

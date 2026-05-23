@@ -15,12 +15,12 @@ members:
   - name: Yashwin Thakker
     email: ythakker.mba2027@london.edu
     role: AI Lab participant
-    showEmailPublicly: false
+    showEmailPublicly: true
   - name: Richa Aggarwal
     email: raggarwal.mba2027@london.edu
     role: AI Lab participant
-    showEmailPublicly: false
-contactPolicy: Show public contact link only after member consent. Keep raw email in content data for internal use.
+    showEmailPublicly: true
+contactPolicy: Participant emails are approved for public display on the team page.
 visibilityNotes: >-
   Normalize roster alias Briefed to public product name Briefd.
 ---

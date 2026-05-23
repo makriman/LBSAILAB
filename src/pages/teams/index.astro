@@ -8,7 +8,6 @@ import { SITE_URL } from '@utils/site';
 const [teams, cohorts] = await Promise.all([getCollection('teams'), getCollection('cohorts')]);
 const cohort01 = cohorts.find((cohort) => cohort.data.id === 'cohort-01');
 const sortedTeams = cohort01 ? sortTeamsByCohortList(teams, cohort01.data.teams) : teams;
-const categories = [...new Set(sortedTeams.map((team) => team.data.category))];
 
 const jsonLd = {
   '@context': 'https://schema.org',
@@ -46,12 +45,6 @@ const jsonLd = {
           <strong>Cohort</strong>
           <a href="#teams">Cohort 01</a>
         </div>
-        <div>
-          <strong>Categories</strong>
-          <nav aria-label="Project categories">
-            {categories.map((category) => <a href="#teams">{category}</a>)}
-          </nav>
-        </div>
       </div>
       <div id="teams">
         <TeamGrid teams={sortedTeams} />
@@ -86,7 +79,7 @@ const jsonLd = {
     border: 1px solid var(--color-border);
     display: grid;
     gap: 18px;
-    grid-template-columns: minmax(180px, 0.28fr) minmax(0, 1fr);
+    grid-template-columns: 1fr;
     margin-bottom: 28px;
     padding: 20px;
   }

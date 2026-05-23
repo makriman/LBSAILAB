@@ -15,16 +15,16 @@ members:
   - name: Nothando Ntombela
     email: nntombela.mba2027@london.edu
     role: AI Lab participant
-    showEmailPublicly: false
+    showEmailPublicly: true
   - name: Nasreen Begum
     email: nbegum.mba2027@london.edu
     role: AI Lab participant
-    showEmailPublicly: false
+    showEmailPublicly: true
   - name: Misri Parikh
     email: misriparikh11@gmail.com
     role: AI Lab participant
-    showEmailPublicly: false
-contactPolicy: Show public contact link only after member consent. Keep raw email in content data for internal use.
+    showEmailPublicly: true
+contactPolicy: Participant emails are approved for public display on the team page.
 visibilityNotes: >-
   Use prospective-student framing; avoid making scholarship availability claims unless validated.
 ---
