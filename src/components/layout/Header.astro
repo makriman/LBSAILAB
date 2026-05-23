@@ -7,7 +7,6 @@ const navItems = [
   { href: "/cohorts/", label: "Cohorts" },
   { href: "/teams/", label: "Teams" },
   { href: "/mentors/", label: "Mentors" },
-  { href: "/apply/", label: "Apply" },
 ];
 
 const currentPath = Astro.url.pathname;
@@ -16,7 +15,6 @@ const currentPath = Astro.url.pathname;
 <header class="site-header" data-site-header>
   <div class="header-inner">
     <a class="brand" href="/" aria-label="LBS AI Lab home">
-      <span class="brand-mark" aria-hidden="true"></span>
       <span class="brand-text">
         <strong>LBS AI Lab</strong>
         <span>Build. Test. Iterate.</span>
@@ -106,40 +104,9 @@ const currentPath = Astro.url.pathname;
   }
 
   .brand {
-    align-items: center;
     color: var(--color-lbs-blue);
-    display: inline-flex;
-    gap: 13px;
-    text-decoration: none;
-  }
-
-  .brand-mark {
-    background: transparent;
     display: inline-block;
-    height: 34px;
-    position: relative;
-    width: 34px;
-  }
-
-  .brand-mark::before,
-  .brand-mark::after {
-    content: "";
-    display: block;
-    left: 0;
-    position: absolute;
-    top: 0;
-  }
-
-  .brand-mark::before {
-    background: var(--color-lbs-red);
-    height: 34px;
-    width: 6px;
-  }
-
-  .brand-mark::after {
-    background: var(--color-lbs-blue);
-    height: 6px;
-    width: 34px;
+    text-decoration: none;
   }
 
   .brand-text {

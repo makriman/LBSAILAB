@@ -16,6 +16,10 @@ members:
     email: sscott.mifpt2025@london.edu
     role: MIFPT2025
     showEmailPublicly: true
+  - name: Rita Antunes Figueiredo Carvalho
+    email: ritaa.mba2027@london.edu
+    role: MBA2027
+    showEmailPublicly: true
 contactPolicy: Participant emails are approved for public display on the team page.
 visibilityNotes: >-
   Normalize roster alias WayFinders to public product name The Wayfinders.

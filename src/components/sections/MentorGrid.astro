@@ -1,6 +1,7 @@
 ---
-import MentorCard from '@components/cards/MentorCard.astro';
-import type { MentorEntry } from '@utils/collections';
+import DirectorCard from "@components/cards/DirectorCard.astro";
+import MentorCard from "@components/cards/MentorCard.astro";
+import type { MentorEntry } from "@utils/collections";
 
 interface Props {
   mentors: MentorEntry[];
@@ -11,6 +12,7 @@ const { mentors } = Astro.props;
 
 <div class="mentor-grid">
   {mentors.map((mentor) => <MentorCard mentor={mentor} />)}
+  <DirectorCard />
 </div>
 
 <style>

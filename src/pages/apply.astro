@@ -10,20 +10,30 @@ import Button from "@components/atoms/Button.astro";
   <section class="page-hero">
     <div class="container hero-grid">
       <div>
-        <p class="eyebrow">Apply</p>
-        <h1>Build with AI. Learn from real users.</h1>
+        <p class="eyebrow">September 2026 cohort</p>
+        <h1>Register interest for September 2026.</h1>
         <p class="lede">
-          The September 2026 cohort is for LBS students who want to prototype
-          fast, test with students and alumni, and improve from feedback.
+          Build with AI, find real LBS users, and learn the product loop by
+          shipping.
         </p>
-        <Button
-          href="#register-interest"
-          variant="red"
-          size="lg"
-          external={false}
-        >
-          Register interest for September 2026
-        </Button>
+        <div class="hero-actions">
+          <Button
+            href="#register-interest"
+            variant="red"
+            size="lg"
+            external={false}
+          >
+            Register interest
+          </Button>
+          <Button
+            href="#submissions"
+            variant="ghost"
+            size="lg"
+            external={false}
+          >
+            View submissions
+          </Button>
+        </div>
       </div>
       <aside>
         <span>Cohort 02</span>
@@ -95,27 +105,6 @@ import Button from "@components/atoms/Button.astro";
     </div>
   </section>
 
-  <section class="section submissions-section" id="submissions">
-    <div class="container submissions-grid">
-      <div>
-        <p class="eyebrow">Find co-builders</p>
-        <h2>See who is looking for people to build with.</h2>
-        <p>
-          Students who opt in can share their name, course, and build idea here.
-          Use the contact button to start a conversation about working together.
-        </p>
-      </div>
-
-      <div class="submissions-panel">
-        <div class="submissions-top">
-          <strong>September 2026 submissions</strong>
-        </div>
-        <p class="submissions-status" data-submissions-status role="status" hidden></p>
-        <div class="submission-list" data-submission-list hidden></div>
-      </div>
-    </div>
-  </section>
-
   <section class="section">
     <div class="container apply-grid">
       <section>
@@ -154,6 +143,33 @@ import Button from "@components/atoms/Button.astro";
           product loop.
         </p>
       </section>
+    </div>
+  </section>
+
+  <section class="section submissions-section" id="submissions">
+    <div class="container submissions-grid">
+      <div>
+        <p class="eyebrow">Find co-builders</p>
+        <h2>See who is looking for people to build with.</h2>
+        <p>
+          Students who opt in can share their name, course, and build idea here.
+          Use the contact button to start a conversation about working together.
+        </p>
+      </div>
+
+      <div class="submissions-panel">
+        <div class="submissions-top">
+          <strong>September 2026 submissions</strong>
+        </div>
+        <p
+          class="submissions-status"
+          data-submissions-status
+          role="status"
+          hidden
+        >
+        </p>
+        <div class="submission-list" data-submission-list hidden></div>
+      </div>
     </div>
   </section>
 </BaseLayout>
@@ -413,12 +429,20 @@ import Button from "@components/atoms/Button.astro";
   h1 {
     color: var(--color-white);
     margin: 20px 0;
+    max-width: 860px;
   }
 
   .lede {
     color: rgba(255, 255, 255, 0.78);
-    margin-bottom: 30px;
-    max-width: 820px;
+    margin-bottom: 0;
+    max-width: 720px;
+  }
+
+  .hero-actions {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 12px;
+    margin-top: 28px;
   }
 
   aside {
@@ -781,6 +805,25 @@ import Button from "@components/atoms/Button.astro";
   @media (max-width: 520px) {
     .page-hero {
       padding-block: 42px 48px;
+    }
+
+    h1 {
+      font-size: clamp(2.05rem, 10vw, 2.6rem);
+      max-width: 15ch;
+    }
+
+    .lede {
+      font-size: 1rem;
+    }
+
+    .hero-actions {
+      align-items: stretch;
+      flex-direction: column;
+      max-width: 360px;
+    }
+
+    .hero-actions :global(.button) {
+      width: 100%;
     }
 
     aside {

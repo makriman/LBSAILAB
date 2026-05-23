@@ -55,6 +55,13 @@ const { mentor } = Astro.props;
     {mentor.data.focus && <p class="mentor-focus">{mentor.data.focus}</p>}
     <div class="mentor-links">
       {
+        mentor.data.showEmailPublicly && (
+          <a class="connect-link" href={`mailto:${mentor.data.email}`}>
+            Connect
+          </a>
+        )
+      }
+      {
         mentor.data.linkedinUrl && (
           <a
             class="linkedin-link"
@@ -63,13 +70,6 @@ const { mentor } = Astro.props;
             rel="noreferrer"
           >
             LinkedIn
-          </a>
-        )
-      }
-      {
-        mentor.data.showEmailPublicly && (
-          <a class="email-link" href={`mailto:${mentor.data.email}`}>
-            Email
           </a>
         )
       }
@@ -82,6 +82,7 @@ const { mentor } = Astro.props;
     background: var(--color-white);
     border: 1px solid var(--color-border);
     display: grid;
+    grid-template-rows: auto 1fr;
     min-height: 100%;
   }
 
@@ -114,6 +115,7 @@ const { mentor } = Astro.props;
   .mentor-body {
     display: grid;
     gap: 12px;
+    grid-template-rows: auto auto 1fr auto;
     padding: 18px;
   }
 
@@ -149,28 +151,29 @@ const { mentor } = Astro.props;
     margin-top: 4px;
   }
 
-  .linkedin-link,
-  .email-link {
+  .connect-link,
+  .linkedin-link {
     align-items: center;
     display: inline-flex;
     font-size: var(--step--1);
     font-weight: 850;
+    justify-content: center;
     min-height: 38px;
     padding: 9px 13px;
     text-decoration: none;
   }
 
-  .linkedin-link {
+  .connect-link {
     background: var(--color-lbs-blue);
     border-radius: var(--radius-button);
     color: var(--color-white);
   }
 
-  .linkedin-link:hover {
+  .connect-link:hover {
     background: var(--color-lbs-red);
   }
 
-  .email-link {
+  .linkedin-link {
     color: var(--color-lbs-blue);
     text-decoration: underline;
     text-decoration-color: rgba(205, 13, 47, 0.36);
