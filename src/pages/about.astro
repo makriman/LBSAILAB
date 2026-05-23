@@ -1,6 +1,6 @@
 ---
 import BaseLayout from "@layouts/BaseLayout.astro";
-import SectionHeader from "@components/atoms/SectionHeader.astro";
+import Button from "@components/atoms/Button.astro";
 import DSAIBlock from "@components/sections/DSAIBlock.astro";
 ---
 
@@ -8,96 +8,154 @@ import DSAIBlock from "@components/sections/DSAIBlock.astro";
   title="About LBS AI Lab"
   description="LBS AI Lab teaches London Business School students to build AI products, test with real users, and iterate from feedback."
 >
-  <section class="page-hero">
-    <div class="container">
-      <p class="eyebrow">About LBS AI Lab</p>
-      <h1>The Lab teaches the full build loop.</h1>
-      <p class="lede">
-        Students learn how to build quickly with AI-assisted tools, put products
-        in front of real LBS users, and improve based on what those users
-        actually do and say.
-      </p>
-    </div>
-  </section>
-
-  <section class="section">
-    <div class="container editorial-grid">
-      <article>
-        <p class="eyebrow">Why now</p>
-        <h2>Building has become easier. Learning from users has not.</h2>
-        <p>
-          Agentic engineering, AI-assisted coding, and modern automation tools
-          have made it dramatically easier to create software. The new
-          bottleneck is not only technical execution. It is getting real users,
-          learning from their feedback, and improving the product until it
-          solves a problem that matters.
+  <section class="about-hero">
+    <div class="container hero-grid">
+      <div>
+        <p class="eyebrow">About LBS AI Lab</p>
+        <h1>Building is easier now. Users are the hard part.</h1>
+        <p class="lede">
+          AI-assisted coding has made it possible to move from idea to prototype
+          quickly. The Lab teaches the harder skill: choosing a real problem,
+          testing with real LBS users, and improving until the product becomes
+          useful.
         </p>
-      </article>
+        <div class="hero-actions">
+          <Button href="/apply/" variant="red" size="lg"
+            >Register interest</Button
+          >
+          <Button href="/cohorts/cohort-01/" variant="ghost" size="lg"
+            >See Cohort 01</Button
+          >
+        </div>
+      </div>
 
-      <article>
-        <p class="eyebrow">What makes the Lab different</p>
-        <h2>The audience is built into the model.</h2>
-        <ul>
-          <li>Every project is built for an LBS use case.</li>
-          <li>
-            Teams can test with the 2,000-student LBS community and alumni
-            network.
-          </li>
-          <li>Students learn the new build stack through hands-on sessions.</li>
-          <li>
-            Mentors and partners help teams sharpen product and technical
-            decisions.
-          </li>
-          <li>
-            The goal is not a demo alone. It is learning how to build something
-            people want.
-          </li>
-        </ul>
-      </article>
+      <aside class="hero-note" aria-label="Lab thesis">
+        <span>The Lab model</span>
+        <ol>
+          <li>Learn the modern AI build stack.</li>
+          <li>Build for an LBS use case.</li>
+          <li>Test with students, alumni, and operators.</li>
+          <li>Iterate from evidence, not opinion.</li>
+        </ol>
+      </aside>
     </div>
   </section>
 
-  <section class="section section-warm">
+  <section class="section thesis-section">
+    <div class="container thesis-grid">
+      <div class="rule" aria-hidden="true"></div>
+      <div>
+        <p class="eyebrow">Why it exists</p>
+        <h2>The bottleneck moved from building to learning.</h2>
+        <p>
+          Vibe coding, agentic engineering, and automation have compressed the
+          cost of making software. That changes what students need to learn. The
+          question is no longer only “can we build it?” It is “can we find the
+          right users, understand the real workflow, and keep improving?”
+        </p>
+      </div>
+    </div>
+  </section>
+
+  <section class="section section-cloud audience-section">
+    <div class="container audience-grid">
+      <div>
+        <p class="eyebrow">What makes it different</p>
+        <h2>The audience is built into the Lab.</h2>
+      </div>
+      <div class="audience-copy">
+        <p>
+          Every Lab project starts with an LBS use case. That gives teams access
+          to the thing most builders struggle to get: real people who can use,
+          reject, critique, and shape the product.
+        </p>
+        <dl>
+          <div>
+            <dt>2,000+</dt>
+            <dd>LBS students to learn from</dd>
+          </div>
+          <div>
+            <dt>Alumni</dt>
+            <dd>A global network for feedback and expertise</dd>
+          </div>
+          <div>
+            <dt>Live workflows</dt>
+            <dd>Careers, clubs, learning, funding, campus, and work</dd>
+          </div>
+        </dl>
+      </div>
+    </div>
+  </section>
+
+  <section class="section how-section">
     <div class="container">
-      <SectionHeader
-        eyebrow="How the Lab works"
-        title="A cohort-based build environment with a real feedback loop."
-        body="Students form or join teams, choose LBS problems, build prototypes with modern AI tools, test with real users, and iterate with mentor support."
-      />
-      <div class="process-grid">
+      <div class="section-intro">
+        <p class="eyebrow">How the Lab works</p>
+        <h2>A practical loop, taught by doing.</h2>
+        <p>
+          The Lab is cohort-based, mentor-supported, and built around shipping.
+          Students learn by moving through the same product loop they will use
+          as founders, operators, and product builders.
+        </p>
+      </div>
+
+      <div class="process-list">
         <article>
           <span>01</span>
-          <h3>Choose an LBS use case</h3>
-          <p>
-            Teams start from practical student, alumni, operator, or campus
-            workflows.
-          </p>
+          <div>
+            <h3>Choose a real LBS workflow</h3>
+            <p>
+              Start with a visible problem in student life, alumni life, campus
+              operations, recruiting, learning, funding, or professional work.
+            </p>
+          </div>
         </article>
         <article>
           <span>02</span>
-          <h3>Build with AI tools</h3>
-          <p>
-            Sessions teach students how to use agentic engineering to move from
-            thesis to working product.
-          </p>
+          <div>
+            <h3>Build quickly with AI-assisted tools</h3>
+            <p>
+              Use agentic engineering, automation, and product judgement to move
+              from idea to working prototype without waiting months.
+            </p>
+          </div>
         </article>
         <article>
           <span>03</span>
-          <h3>Test with real users</h3>
-          <p>
-            Teams put prototypes in front of LBS students and alumni to learn
-            from real behaviour.
-          </p>
+          <div>
+            <h3>Put it in front of users</h3>
+            <p>
+              Test with people who feel the problem now. Watch what they do,
+              listen to what they say, and separate signal from politeness.
+            </p>
+          </div>
         </article>
         <article>
           <span>04</span>
-          <h3>Iterate and demo</h3>
-          <p>
-            Cohorts culminate in a showcase after teams have improved through
-            feedback.
-          </p>
+          <div>
+            <h3>Improve and show the work</h3>
+            <p>
+              Iterate from feedback, sharpen the product, and demo what changed
+              because of real user evidence.
+            </p>
+          </div>
         </article>
       </div>
+    </div>
+  </section>
+
+  <section class="section section-warm outcomes-section">
+    <div class="container outcomes-grid">
+      <div>
+        <p class="eyebrow">What students learn</p>
+        <h2>Not just how to prompt. How to build.</h2>
+      </div>
+      <ul>
+        <li>How to turn a messy workflow into a clear product scope.</li>
+        <li>How to use AI tools to build faster without losing judgement.</li>
+        <li>How to recruit early users and interpret feedback honestly.</li>
+        <li>How to keep shipping when the first version is not right.</li>
+      </ul>
     </div>
   </section>
 
@@ -105,86 +163,274 @@ import DSAIBlock from "@components/sections/DSAIBlock.astro";
 </BaseLayout>
 
 <style>
-  .page-hero {
+  .about-hero {
     background: var(--color-lbs-blue);
     color: var(--color-white);
-    padding-block: clamp(52px, 7vw, 92px);
+    padding-block: clamp(56px, 7vw, 96px);
   }
 
-  :global(.page-hero .eyebrow) {
+  .hero-grid {
+    align-items: center;
+    display: grid;
+    gap: clamp(32px, 6vw, 76px);
+    grid-template-columns: minmax(0, 1fr) minmax(300px, 0.42fr);
+  }
+
+  .hero-grid > * {
+    min-width: 0;
+  }
+
+  :global(.about-hero .eyebrow) {
     color: rgba(255, 255, 255, 0.82);
   }
 
   h1 {
     color: var(--color-white);
-    margin: 20px 0;
+    font-size: clamp(3rem, 5.4vw, 4.8rem);
+    margin: 18px 0;
     max-width: 900px;
   }
 
   .lede {
-    color: rgba(255, 255, 255, 0.78);
+    color: rgba(255, 255, 255, 0.8);
     max-width: 780px;
   }
 
-  .editorial-grid {
+  .hero-actions {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 12px;
+    margin-top: 28px;
+  }
+
+  .hero-note {
+    border-left: 4px solid var(--color-lbs-red);
     display: grid;
-    gap: clamp(36px, 6vw, 86px);
-    grid-template-columns: minmax(0, 1fr) minmax(0, 0.92fr);
+    gap: 18px;
+    padding-left: clamp(20px, 3vw, 30px);
   }
 
-  article {
-    border-top: 3px solid var(--color-lbs-red);
-    padding-top: 24px;
+  .hero-note span {
+    color: rgba(255, 255, 255, 0.62);
+    font-size: var(--step--1);
+    font-weight: 880;
+    text-transform: uppercase;
   }
 
-  article h2 {
+  .hero-note ol {
+    counter-reset: item;
+    display: grid;
+    gap: 14px;
+    list-style: none;
+    margin: 0;
+    padding: 0;
+  }
+
+  .hero-note li {
+    color: rgba(255, 255, 255, 0.84);
+    font-size: var(--step-0);
+    font-weight: 760;
+    line-height: 1.35;
+  }
+
+  .thesis-grid {
+    display: grid;
+    gap: clamp(28px, 6vw, 74px);
+    grid-template-columns: minmax(4px, 0.13fr) minmax(0, 1fr);
+  }
+
+  .rule {
+    background: var(--color-lbs-red);
+    min-height: 100%;
+    width: 4px;
+  }
+
+  .thesis-grid h2,
+  .audience-grid h2,
+  .section-intro h2,
+  .outcomes-grid h2 {
     color: var(--color-lbs-blue);
-    font-size: var(--step-2);
     margin: 16px 0;
+    max-width: 900px;
   }
 
-  article p,
-  li {
+  .thesis-grid p:not(.eyebrow),
+  .audience-copy p,
+  .section-intro p:not(.eyebrow) {
     color: var(--color-ink-soft);
     font-size: var(--step-1);
+    max-width: 900px;
   }
 
-  ul {
+  .audience-grid,
+  .outcomes-grid {
+    align-items: start;
     display: grid;
-    gap: 12px;
+    gap: clamp(28px, 6vw, 74px);
+    grid-template-columns: minmax(0, 0.62fr) minmax(0, 1fr);
+  }
+
+  .audience-copy {
+    display: grid;
+    gap: 30px;
+  }
+
+  dl {
+    border-block: 1px solid var(--color-border);
+    display: grid;
+    grid-template-columns: repeat(3, minmax(0, 1fr));
     margin: 0;
-    padding-left: 20px;
   }
 
-  .process-grid {
+  dl div {
+    border-left: 1px solid var(--color-border);
+    padding: 18px;
+  }
+
+  dl div:first-child {
+    border-left: 0;
+  }
+
+  dt {
+    color: var(--color-lbs-blue);
+    font-family: var(--font-serif);
+    font-size: var(--step-2);
+    font-weight: 700;
+    line-height: 1;
+  }
+
+  dd {
+    color: var(--color-muted);
+    font-weight: 780;
+    line-height: 1.25;
+    margin: 9px 0 0;
+  }
+
+  .section-intro {
+    max-width: 860px;
+  }
+
+  .process-list {
+    border-top: 1px solid var(--color-border);
+    margin-top: 42px;
+  }
+
+  .process-list article {
+    border-bottom: 1px solid var(--color-border);
     display: grid;
-    gap: 20px;
-    grid-template-columns: repeat(4, minmax(0, 1fr));
-    margin-top: 34px;
+    gap: clamp(18px, 4vw, 46px);
+    grid-template-columns: 80px minmax(0, 1fr);
+    padding-block: clamp(22px, 4vw, 34px);
   }
 
-  .process-grid article {
-    background: var(--color-white);
-    border: 1px solid var(--color-border);
-    display: grid;
-    gap: 12px;
-    grid-template-rows: auto minmax(3.1rem, auto) 1fr;
-    padding: clamp(24px, 4vw, 34px);
-  }
-
-  .process-grid span {
+  .process-list span {
     color: var(--color-lbs-red);
     font-weight: 900;
   }
 
-  @media (max-width: 860px) {
-    .editorial-grid,
-    .process-grid {
+  .process-list h3 {
+    color: var(--color-lbs-blue);
+    font-family: var(--font-sans);
+    font-size: var(--step-1);
+    line-height: 1.15;
+    margin: 0 0 8px;
+  }
+
+  .process-list p {
+    color: var(--color-ink-soft);
+    max-width: 820px;
+  }
+
+  .outcomes-grid ul {
+    display: grid;
+    gap: 0;
+    list-style: none;
+    margin: 0;
+    padding: 0;
+  }
+
+  .outcomes-grid li {
+    border-top: 1px solid var(--color-border);
+    color: var(--color-ink-soft);
+    font-size: var(--step-1);
+    font-weight: 720;
+    line-height: 1.35;
+    padding-block: 18px;
+  }
+
+  .outcomes-grid li:last-child {
+    border-bottom: 1px solid var(--color-border);
+  }
+
+  @media (max-width: 900px) {
+    .hero-grid,
+    .audience-grid,
+    .outcomes-grid {
+      grid-template-columns: 1fr;
+    }
+  }
+
+  @media (max-width: 640px) {
+    .about-hero {
+      padding-block: 42px 50px;
+    }
+
+    h1 {
+      font-size: clamp(2.35rem, 11vw, 3rem);
+    }
+
+    .hero-actions {
+      flex-direction: column;
+    }
+
+    .hero-actions :global(.button) {
+      width: 100%;
+    }
+
+    .hero-note {
+      border-left: 0;
+      border-top: 3px solid var(--color-lbs-red);
+      gap: 12px;
+      padding-left: 0;
+      padding-top: 16px;
+    }
+
+    .hero-note ol {
+      gap: 10px 14px;
+      grid-template-columns: repeat(2, minmax(0, 1fr));
+    }
+
+    .hero-note li {
+      font-size: 0.92rem;
+    }
+
+    .thesis-grid {
       grid-template-columns: 1fr;
     }
 
-    .process-grid article {
-      grid-template-rows: auto;
+    .rule {
+      height: 4px;
+      min-height: 0;
+      width: 58px;
+    }
+
+    dl {
+      grid-template-columns: 1fr;
+    }
+
+    dl div,
+    dl div:first-child {
+      border-left: 0;
+      border-top: 1px solid var(--color-border);
+      padding: 16px 0;
+    }
+
+    dl div:first-child {
+      border-top: 0;
+    }
+
+    .process-list article {
+      grid-template-columns: 1fr;
     }
   }
 </style>

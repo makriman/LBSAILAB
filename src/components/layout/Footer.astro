@@ -2,32 +2,16 @@
 import { DSAI_URL, LBS_URL } from "@utils/site";
 
 const labLinks = [
-  { href: "/about/", label: "About the Lab" },
+  { href: "/about/", label: "About" },
   { href: "/cohorts/", label: "Cohorts" },
   { href: "/teams/", label: "Teams" },
   { href: "/mentors/", label: "Mentors" },
-  { href: "/apply/", label: "Register interest" },
+  { href: "/contact/", label: "Contact" },
 ];
 
-const builderLinks = [
-  { href: "/apply/#submissions", label: "Find co-builders" },
-  { href: "/apply/#register-interest", label: "Submit an idea" },
-  { href: "/contact/", label: "Contact the Lab" },
-  { href: DSAI_URL, label: "Data Science & AI Initiative", external: true },
-];
-
-const lbsLinks = [
-  { href: `${LBS_URL}newsroom`, label: "Newsroom", external: true },
-  { href: `${LBS_URL}events`, label: "Events", external: true },
-  {
-    href: `${LBS_URL}recruiters-and-organisations`,
-    label: "Organisations",
-    external: true,
-  },
-  { href: `${LBS_URL}about/contact`, label: "Contact LBS", external: true },
-  { href: `${LBS_URL}about/our-campuses`, label: "Find us", external: true },
-  { href: `${LBS_URL}jobs-at-lbs`, label: "Jobs at LBS", external: true },
-  { href: `${LBS_URL}give-to-lbs`, label: "Give to LBS", external: true },
+const institutionLinks = [
+  { href: DSAI_URL, label: "DSAI Initiative" },
+  { href: LBS_URL, label: "London Business School" },
 ];
 
 const socialLinks = [
@@ -63,11 +47,11 @@ const socialLinks = [
 const legalLinks = [
   {
     href: `${LBS_URL}about/london-business-school/policies-and-legislation/website-privacy-policy`,
-    label: "Privacy policy",
+    label: "Privacy",
   },
   {
     href: `${LBS_URL}about/london-business-school/policies-and-legislation`,
-    label: "Policies and legislation",
+    label: "Policies",
   },
   { href: `${LBS_URL}sitemap`, label: "Sitemap" },
 ];
@@ -77,83 +61,48 @@ const year = new Date().getFullYear();
 
 <footer class="site-footer">
   <div class="footer-inner">
-    <div class="footer-top">
+    <div class="footer-main">
       <div class="footer-brand">
         <a class="brand" href="/" aria-label="LBS AI Lab home">
           <strong>LBS AI Lab</strong>
           <span>Build. Test. Iterate.</span>
         </a>
         <p>
-          A practical AI lab for London Business School students learning to
-          build AI products, test with real users, and improve from feedback.
+          A practical AI lab for LBS students building products, testing with
+          real users, and improving from feedback.
         </p>
       </div>
 
-      <div class="footer-actions" aria-label="Primary footer actions">
+      <nav aria-label="AI Lab links" class="footer-links">
+        {labLinks.map((link) => <a href={link.href}>{link.label}</a>)}
+      </nav>
+
+      <div class="footer-actions">
         <a href="/apply/">Register interest</a>
         <a href="/apply/#submissions">Find co-builders</a>
       </div>
     </div>
 
-    <div class="footer-nav-grid">
-      <nav aria-label="AI Lab" class="footer-links">
-        <h2>AI Lab</h2>
-        {labLinks.map((link) => <a href={link.href}>{link.label}</a>)}
-      </nav>
-
-      <nav aria-label="Build loop" class="footer-links">
-        <h2>Build loop</h2>
+    <div class="footer-meta">
+      <nav aria-label="Institution links" class="institution-links">
         {
-          builderLinks.map((link) => (
-            <a
-              href={link.href}
-              target={link.external ? "_blank" : undefined}
-              rel={link.external ? "noreferrer" : undefined}
-            >
-              {link.label}
-            </a>
-          ))
-        }
-      </nav>
-
-      <nav aria-label="London Business School" class="footer-links footer-lbs">
-        <h2>London Business School</h2>
-        <a href={LBS_URL} target="_blank" rel="noreferrer">
-          London Business School
-        </a>
-        {
-          lbsLinks.map((link) => (
+          institutionLinks.map((link) => (
             <a href={link.href} target="_blank" rel="noreferrer">
               {link.label}
             </a>
           ))
         }
       </nav>
-    </div>
 
-    <div class="footer-institution">
-      <div>
-        <p>Get fresh ideas from business experts</p>
-        <a
-          href={`${LBS_URL}about/contact?entry=true#subscribeScreen`}
-          target="_blank"
-          rel="noreferrer"
-        >
-          Sign up
-        </a>
-      </div>
-
-      <nav aria-label="LBS in social media" class="footer-social">
-        <h2>LBS in social media</h2>
-        <div>
-          {
-            socialLinks.map((link) => (
-              <a href={link.href} target="_blank" rel="noreferrer">
-                {link.label}
-              </a>
-            ))
-          }
-        </div>
+      <nav aria-label="LBS in social media" class="social-links">
+        <span>LBS social</span>
+        {
+          socialLinks.map((link) => (
+            <a href={link.href} target="_blank" rel="noreferrer">
+              {link.label}
+            </a>
+          ))
+        }
       </nav>
     </div>
 
@@ -180,64 +129,97 @@ const year = new Date().getFullYear();
 
   .footer-inner {
     display: grid;
-    gap: 0;
+    gap: 12px;
     margin-inline: auto;
     max-width: var(--container);
-    padding: clamp(42px, 7vw, 74px) var(--gutter) 26px;
+    padding: clamp(24px, 3vw, 34px) var(--gutter) 18px;
   }
 
-  .footer-top {
-    align-items: end;
-    border-bottom: 1px solid rgba(255, 255, 255, 0.18);
+  .footer-main {
+    align-items: center;
+    border-bottom: 1px solid rgba(255, 255, 255, 0.16);
     display: grid;
-    gap: clamp(26px, 5vw, 64px);
-    grid-template-columns: minmax(0, 1fr) auto;
-    padding-bottom: clamp(30px, 5vw, 50px);
+    gap: 18px;
+    grid-template-columns: minmax(260px, 0.95fr) minmax(260px, 0.85fr) auto;
+    padding-bottom: 14px;
   }
 
   .brand {
     color: var(--color-white);
     display: inline-grid;
-    gap: 6px;
+    gap: 5px;
     text-decoration: none;
   }
 
   .brand strong {
-    font-size: clamp(1.8rem, 3.4vw, 3rem);
+    font-size: clamp(1.35rem, 2vw, 1.75rem);
     line-height: 1;
   }
 
-  .brand span {
-    color: rgba(255, 255, 255, 0.72);
-    font-size: var(--step--1);
+  .brand span,
+  .footer-brand p,
+  .footer-meta span,
+  .footer-bottom {
+    color: rgba(255, 255, 255, 0.66);
+  }
+
+  .brand span,
+  .footer-meta span,
+  .footer-bottom {
+    font-size: 0.78rem;
     font-weight: 820;
   }
 
   .footer-brand p {
-    color: rgba(255, 255, 255, 0.75);
-    font-size: var(--step-1);
-    line-height: 1.38;
-    margin: 22px 0 0;
-    max-width: 760px;
+    font-size: var(--step--1);
+    line-height: 1.32;
+    margin: 8px 0 0;
+    max-width: 480px;
+  }
+
+  .footer-links,
+  .institution-links,
+  .social-links,
+  .footer-bottom nav {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 10px 14px;
+  }
+
+  .footer-links a,
+  .institution-links a,
+  .social-links a,
+  .footer-bottom a {
+    color: rgba(255, 255, 255, 0.84);
+    font-size: 0.86rem;
+    font-weight: 760;
+    text-decoration: none;
+  }
+
+  .footer-links a:hover,
+  .institution-links a:hover,
+  .social-links a:hover,
+  .footer-bottom a:hover {
+    color: var(--color-white);
   }
 
   .footer-actions {
     display: flex;
     flex-wrap: wrap;
-    gap: 12px;
+    gap: 10px;
     justify-content: flex-end;
   }
 
   .footer-actions a {
     align-items: center;
-    border: 1px solid rgba(255, 255, 255, 0.28);
+    border: 1px solid rgba(255, 255, 255, 0.26);
     border-radius: var(--radius-button);
     color: var(--color-white);
     display: inline-flex;
-    font-size: var(--step--1);
+    font-size: 0.8rem;
     font-weight: 880;
-    min-height: 42px;
-    padding: 11px 16px;
+    min-height: 34px;
+    padding: 7px 11px;
     text-decoration: none;
   }
 
@@ -246,128 +228,39 @@ const year = new Date().getFullYear();
     color: var(--color-lbs-blue);
   }
 
-  .footer-nav-grid {
-    border-bottom: 1px solid rgba(255, 255, 255, 0.14);
-    display: grid;
-    gap: 34px;
-    grid-template-columns: minmax(0, 0.8fr) minmax(0, 0.9fr) minmax(0, 1.2fr);
-    padding-block: clamp(30px, 5vw, 48px);
-  }
-
-  .footer-links {
-    align-content: start;
+  .footer-meta {
+    align-items: center;
+    border-bottom: 1px solid rgba(255, 255, 255, 0.12);
     display: grid;
     gap: 12px;
+    grid-template-columns: minmax(0, 0.45fr) minmax(0, 1fr);
+    padding-bottom: 12px;
   }
 
-  .footer-lbs {
-    grid-template-columns: repeat(2, minmax(0, 1fr));
+  .social-links {
+    align-items: center;
   }
 
-  .footer-lbs h2 {
-    grid-column: 1 / -1;
-  }
-
-  .footer-links h2,
-  .footer-social h2 {
-    color: rgba(255, 255, 255, 0.58);
-    font-size: 0.78rem;
-    font-weight: 880;
-    letter-spacing: 0.04em;
-    margin: 0 0 5px;
+  .social-links span {
+    color: rgba(255, 255, 255, 0.56);
     text-transform: uppercase;
-  }
-
-  .footer-links a,
-  .footer-social a,
-  .footer-bottom a {
-    color: rgba(255, 255, 255, 0.84);
-    font-size: var(--step--1);
-    font-weight: 760;
-    text-decoration: none;
-  }
-
-  .footer-links a:hover,
-  .footer-social a:hover,
-  .footer-bottom a:hover {
-    color: var(--color-white);
-  }
-
-  .footer-institution {
-    align-items: end;
-    border-bottom: 1px solid rgba(255, 255, 255, 0.14);
-    display: grid;
-    gap: 28px;
-    grid-template-columns: minmax(220px, 0.55fr) minmax(0, 1fr);
-    padding-block: clamp(28px, 4vw, 40px);
-  }
-
-  .footer-institution p {
-    color: var(--color-white);
-    font-family: var(--font-serif);
-    font-size: var(--step-1);
-    line-height: 1.08;
-    margin: 0 0 16px;
-    max-width: 310px;
-  }
-
-  .footer-institution > div > a {
-    align-items: center;
-    border: 1px solid rgba(255, 255, 255, 0.32);
-    border-radius: var(--radius-button);
-    color: var(--color-white);
-    display: inline-flex;
-    font-size: var(--step--1);
-    font-weight: 860;
-    min-height: 40px;
-    padding: 10px 15px;
-    text-decoration: none;
-  }
-
-  .footer-social {
-    display: grid;
-    gap: 15px;
-  }
-
-  .footer-social div {
-    display: flex;
-    flex-wrap: wrap;
-    gap: 10px;
-  }
-
-  .footer-social a {
-    align-items: center;
-    border: 1px solid rgba(255, 255, 255, 0.18);
-    display: inline-flex;
-    min-height: 38px;
-    padding: 8px 12px;
   }
 
   .footer-bottom {
     align-items: center;
-    color: rgba(255, 255, 255, 0.62);
     display: flex;
     flex-wrap: wrap;
-    gap: 14px;
+    gap: 12px;
     justify-content: space-between;
-    padding-top: 24px;
   }
 
-  .footer-bottom span {
-    font-size: var(--step--1);
-    font-weight: 760;
+  .footer-bottom a {
+    font-size: 0.78rem;
   }
 
-  .footer-bottom nav {
-    display: flex;
-    flex-wrap: wrap;
-    gap: 14px;
-  }
-
-  @media (max-width: 900px) {
-    .footer-top,
-    .footer-nav-grid,
-    .footer-institution {
+  @media (max-width: 940px) {
+    .footer-main,
+    .footer-meta {
       grid-template-columns: 1fr;
     }
 
@@ -377,19 +270,54 @@ const year = new Date().getFullYear();
   }
 
   @media (max-width: 560px) {
-    .footer-lbs {
-      grid-template-columns: 1fr;
+    .footer-inner {
+      padding-block: 22px 16px;
     }
 
-    .footer-actions a,
-    .footer-institution > div > a {
-      justify-content: center;
+    .footer-main {
+      gap: 10px;
+      padding-bottom: 10px;
+    }
+
+    .footer-brand p {
+      display: none;
+    }
+
+    .footer-actions {
+      display: grid;
+      gap: 8px;
+      grid-template-columns: repeat(2, minmax(0, 1fr));
       width: 100%;
     }
 
-    .footer-social a {
-      flex: 1 1 calc(50% - 10px);
+    .footer-actions a {
       justify-content: center;
+      min-height: 36px;
+      padding-inline: 9px;
+      text-align: center;
+      white-space: nowrap;
+    }
+
+    .social-links {
+      flex-wrap: nowrap;
+      margin-inline: calc(var(--gutter) * -1);
+      overflow-x: auto;
+      padding-inline: var(--gutter);
+      scrollbar-width: none;
+      white-space: nowrap;
+    }
+
+    .social-links::-webkit-scrollbar {
+      display: none;
+    }
+
+    .footer-meta {
+      gap: 8px;
+      padding-bottom: 10px;
+    }
+
+    .footer-bottom {
+      gap: 8px;
     }
   }
 </style>
