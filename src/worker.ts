@@ -28,6 +28,7 @@ const GITHUB_API = "https://api.github.com";
 const INSERT_MARKER = "<!-- APPLICATIONS:START -->";
 const END_MARKER = "<!-- APPLICATIONS:END -->";
 const APPLICATION_RE = /<!-- application:(.*?) -->/gs;
+const APPLICATIONS_CACHE_TTL_SECONDS = 300;
 
 const jsonHeaders = {
   "Content-Type": "application/json; charset=utf-8",
@@ -85,7 +86,8 @@ async function handleCreateApplication(
   }
 
   try {
-    await appendSubmission(env, submission);
+    const applications = await appendSubmission(env, submission);
+    await writeCachedApplications(env, applications);
     return json({ ok: true }, 201);
   } catch (error) {
     return json({ error: errorMessage(error) }, 502);
@@ -94,8 +96,15 @@ async function handleCreateApplication(
 
 async function handleListApplications(env: Env): Promise<Response> {
   try {
+    const cachedApplications = await readCachedApplications(env);
+    if (cachedApplications) {
+      return json({ applications: cachedApplications }, 200);
+    }
+
     const file = await readSubmissionsFile(env, Boolean(env.GITHUB_TOKEN));
-    return json({ applications: parseApplications(file.content) }, 200);
+    const applications = parseApplications(file.content);
+    await writeCachedApplications(env, applications);
+    return json({ applications }, 200);
   } catch (error) {
     return json({ error: errorMessage(error), applications: [] }, 200);
   }
@@ -104,18 +113,66 @@ async function handleListApplications(env: Env): Promise<Response> {
 async function appendSubmission(
   env: Env,
   submission: ApplicationSubmission,
-): Promise<void> {
+): Promise<unknown[]> {
   for (let attempt = 0; attempt < 2; attempt += 1) {
     const file = await readSubmissionsFile(env, true);
     const nextContent = insertSubmission(file.content, submission);
     const response = await putSubmissionsFile(env, nextContent, file.sha);
 
-    if (response.ok) return;
+    if (response.ok) return parseApplications(nextContent);
 
     if (response.status !== 409 || attempt === 1) {
       throw new Error(await githubError(response));
     }
   }
+
+  throw new Error("Submission failed. Please try again.");
+}
+
+async function readCachedApplications(env: Env): Promise<unknown[] | null> {
+  const cache = defaultCache();
+  if (!cache) return null;
+
+  try {
+    const cached = await cache.match(applicationsCacheRequest(env));
+    if (!cached) return null;
+
+    const data = (await cached.json()) as { applications?: unknown[] };
+    return Array.isArray(data.applications) ? data.applications : null;
+  } catch {
+    return null;
+  }
+}
+
+async function writeCachedApplications(
+  env: Env,
+  applications: unknown[],
+): Promise<void> {
+  const cache = defaultCache();
+  if (!cache) return;
+
+  try {
+    await cache.put(
+      applicationsCacheRequest(env),
+      new Response(JSON.stringify({ applications }), {
+        headers: {
+          "Cache-Control": `public, max-age=${APPLICATIONS_CACHE_TTL_SECONDS}`,
+          "Content-Type": "application/json; charset=utf-8",
+          Expires: new Date(
+            Date.now() + APPLICATIONS_CACHE_TTL_SECONDS * 1000,
+          ).toUTCString(),
+        },
+      }),
+    );
+  } catch {
+    // The public GitHub file remains the source of truth if edge caching fails.
+  }
+}
+
+function defaultCache(): Cache | null {
+  if (typeof caches === "undefined") return null;
+
+  return (caches as CacheStorage & { default?: Cache }).default || null;
 }
 
 async function readSubmissionsFile(
@@ -261,6 +318,16 @@ function githubConfig(env: Env): {
     path: env.GITHUB_SUBMISSIONS_PATH || DEFAULT_SUBMISSIONS_PATH,
     repo: env.GITHUB_REPO || DEFAULT_REPO,
   };
+}
+
+function applicationsCacheRequest(env: Env): Request {
+  const config = githubConfig(env);
+  const url = new URL("https://lbs-ai-lab.worker-cache/applications");
+  url.searchParams.set("branch", config.branch);
+  url.searchParams.set("path", config.path);
+  url.searchParams.set("repo", config.repo);
+
+  return new Request(url.toString());
 }
 
 function githubHeaders(env: Env, useAuth: boolean): HeadersInit {
