@@ -1,0 +1,50 @@
+---
+import { getCollection } from 'astro:content';
+import BaseLayout from '@layouts/BaseLayout.astro';
+import MentorGrid from '@components/sections/MentorGrid.astro';
+const mentors = await getCollection('mentors');
+---
+
+<BaseLayout
+  title="Mentors"
+  description="Meet the product and technical mentors supporting LBS AI Lab teams as they move from idea to prototype."
+>
+  <section class="page-hero">
+    <div class="container">
+      <p class="eyebrow">Mentors</p>
+      <h1>Mentors helping teams build with focus.</h1>
+      <p class="lede">
+        Product and technical mentors support teams as they move from idea to prototype
+        and from prototype to launch-ready product.
+      </p>
+    </div>
+  </section>
+
+  <section class="section section-cloud">
+    <div class="container">
+      <MentorGrid mentors={mentors} />
+    </div>
+  </section>
+</BaseLayout>
+
+<style>
+  .page-hero {
+    background: var(--color-lbs-blue);
+    color: var(--color-white);
+    padding-block: clamp(74px, 11vw, 132px);
+  }
+
+  :global(.page-hero .eyebrow) {
+    color: rgba(255, 255, 255, 0.82);
+  }
+
+  h1 {
+    color: var(--color-white);
+    margin: 20px 0;
+  }
+
+  .lede {
+    color: rgba(255, 255, 255, 0.78);
+    max-width: 820px;
+  }
+</style>

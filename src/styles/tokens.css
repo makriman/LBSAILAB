@@ -1,0 +1,25 @@
+:root {
+  --color-lbs-blue: #14175d;
+  --color-lbs-red: #cd0d2f;
+  --color-ink: #11133f;
+  --color-ink-soft: #3e4278;
+  --color-muted: #6b7198;
+  --color-white: #ffffff;
+  --color-warm-white: #f8f7f4;
+  --color-cloud: #f4f6fb;
+  --color-border: rgba(20, 23, 93, 0.14);
+  --color-border-strong: rgba(20, 23, 93, 0.28);
+  --shadow-card: 0 18px 50px rgba(20, 23, 93, 0.08);
+  --radius-card: 0px;
+  --radius-button: 999px;
+  --container: 1180px;
+  --gutter: clamp(20px, 4vw, 56px);
+  --font-sans: "Inter Variable", Inter, Arial, sans-serif;
+  --font-serif: "Source Serif 4", Georgia, "Times New Roman", serif;
+  --step--1: clamp(0.82rem, 0.78rem + 0.2vw, 0.94rem);
+  --step-0: clamp(1rem, 0.96rem + 0.22vw, 1.125rem);
+  --step-1: clamp(1.2rem, 1.08rem + 0.55vw, 1.5rem);
+  --step-2: clamp(1.55rem, 1.32rem + 1.1vw, 2.25rem);
+  --step-3: clamp(2.1rem, 1.65rem + 2.2vw, 3.6rem);
+  --step-4: clamp(3rem, 2.1rem + 4.5vw, 6.5rem);
+}

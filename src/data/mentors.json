@@ -1,0 +1,38 @@
+[
+  {
+    "id": "ramakrishnan-lokanathan",
+    "role": "Mentor",
+    "name": "Ramakrishnan Lokanathan",
+    "mentorType": "Technical Mentor",
+    "email": "rlokanathan.mba2027@london.edu",
+    "cohort": "cohort-01",
+    "showEmailPublicly": false
+  },
+  {
+    "id": "akshay-nagpal",
+    "role": "Mentor",
+    "name": "Akshay Nagpal",
+    "mentorType": "Technical Mentor",
+    "email": "akshaynagpal1995@gmail.com",
+    "cohort": "cohort-01",
+    "showEmailPublicly": false
+  },
+  {
+    "id": "zahra-mogadasi",
+    "role": "Mentor",
+    "name": "Zahra Mogadasi",
+    "mentorType": "Product Mentor",
+    "email": "zmogadasi.mba2025@london.edu",
+    "cohort": "cohort-01",
+    "showEmailPublicly": false
+  },
+  {
+    "id": "rhea-bisaria",
+    "role": "Mentor",
+    "name": "Rhea Bisaria",
+    "mentorType": "Product Mentor",
+    "email": "rbisaria.mba2027@london.edu",
+    "cohort": "cohort-01",
+    "showEmailPublicly": false
+  }
+]

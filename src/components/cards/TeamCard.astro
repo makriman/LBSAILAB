@@ -1,0 +1,129 @@
+---
+import type { TeamEntry } from '@utils/collections';
+import { teamMemberLabel } from '@utils/collections';
+
+interface Props {
+  team: TeamEntry;
+  featured?: boolean;
+}
+
+const { team, featured = false } = Astro.props;
+const memberCount = team.data.members.length;
+---
+
+<article class:list={['team-card', { featured }]}>
+  <div class="meta">
+    <span>{team.data.category}</span>
+    <span>{team.data.cohortLabel}</span>
+  </div>
+  <div class="content">
+    <h3>{team.data.displayName}</h3>
+    <p>{team.data.tagline}</p>
+  </div>
+  <div class="footer">
+    <span>{teamMemberLabel(memberCount)}</span>
+    <div class="links">
+      {team.data.productUrl && <a href={team.data.productUrl} target="_blank" rel="noreferrer">Product</a>}
+      <a href={`/teams/${team.data.slug}/`}>Profile</a>
+    </div>
+  </div>
+</article>
+
+<style>
+  .team-card {
+    background: var(--color-white);
+    border: 1px solid var(--color-border);
+    border-radius: var(--radius-card);
+    box-shadow: 0 0 0 rgba(20, 23, 93, 0);
+    display: grid;
+    gap: clamp(24px, 3vw, 34px);
+    min-height: 280px;
+    padding: clamp(22px, 3vw, 30px);
+    transition:
+      border-color 180ms ease,
+      box-shadow 180ms ease,
+      transform 180ms ease;
+  }
+
+  .team-card:hover {
+    border-color: var(--color-lbs-blue);
+    box-shadow: var(--shadow-card);
+    transform: translateY(-3px);
+  }
+
+  .team-card.featured {
+    grid-template-columns: minmax(0, 0.9fr) minmax(0, 1.6fr);
+    min-height: 230px;
+  }
+
+  .meta {
+    align-content: start;
+    display: grid;
+    gap: 8px;
+  }
+
+  .meta span {
+    color: var(--color-muted);
+    font-size: var(--step--1);
+    font-weight: 780;
+  }
+
+  .meta span:first-child {
+    color: var(--color-lbs-red);
+  }
+
+  .content {
+    align-content: start;
+    display: grid;
+    gap: 14px;
+  }
+
+  h3 {
+    color: var(--color-lbs-blue);
+    font-size: clamp(1.8rem, 3vw, 3rem);
+    margin: 0;
+  }
+
+  p {
+    color: var(--color-ink-soft);
+  }
+
+  .footer {
+    align-self: end;
+    border-top: 1px solid var(--color-border);
+    display: flex;
+    flex-wrap: wrap;
+    gap: 12px;
+    justify-content: space-between;
+    padding-top: 18px;
+  }
+
+  .footer span {
+    color: var(--color-muted);
+    font-size: var(--step--1);
+    font-weight: 800;
+  }
+
+  .links {
+    display: flex;
+    gap: 14px;
+  }
+
+  .links a {
+    color: var(--color-lbs-blue);
+    font-size: var(--step--1);
+    font-weight: 820;
+    text-decoration: none;
+  }
+
+  .links a::after {
+    color: var(--color-lbs-red);
+    content: " ->";
+  }
+
+  @media (max-width: 760px) {
+    .team-card.featured {
+      grid-template-columns: 1fr;
+    }
+  }
+</style>

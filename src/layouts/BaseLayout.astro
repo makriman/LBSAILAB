@@ -1,0 +1,66 @@
+---
+import Header from '@components/layout/Header.astro';
+import Footer from '@components/layout/Footer.astro';
+import SkipLink from '@components/layout/SkipLink.astro';
+import '@styles/global.css';
+import { defaultDescription, SITE_NAME, SITE_URL } from '@utils/site';
+
+interface Props {
+  title?: string;
+  description?: string;
+  image?: string;
+  noindex?: boolean;
+  jsonLd?: Record<string, unknown> | Record<string, unknown>[];
+}
+
+const {
+  title = `${SITE_NAME} | The AI venture lab for future operators and founders`,
+  description = defaultDescription,
+  image = '/og-default.svg',
+  noindex = false,
+  jsonLd,
+} = Astro.props;
+
+const canonical = new URL(Astro.url.pathname, Astro.site ?? SITE_URL).toString();
+const ogImage = new URL(image, Astro.site ?? SITE_URL).toString();
+const pageTitle = title.includes(SITE_NAME) ? title : `${title} | ${SITE_NAME}`;
+const jsonLdItems = Array.isArray(jsonLd) ? jsonLd : jsonLd ? [jsonLd] : [];
+---
+
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width" />
+    <meta name="generator" content={Astro.generator} />
+    <title>{pageTitle}</title>
+    <meta name="description" content={description} />
+    <link rel="canonical" href={canonical} />
+    <link rel="icon" type="image/svg+xml" href="/favicon.svg" />
+    <link rel="icon" href="/favicon.ico" />
+    {noindex && <meta name="robots" content="noindex,nofollow" />}
+    <meta property="og:type" content="website" />
+    <meta property="og:site_name" content={SITE_NAME} />
+    <meta property="og:title" content={pageTitle} />
+    <meta property="og:description" content={description} />
+    <meta property="og:url" content={canonical} />
+    <meta property="og:image" content={ogImage} />
+    <meta name="twitter:card" content="summary_large_image" />
+    <meta name="twitter:title" content={pageTitle} />
+    <meta name="twitter:description" content={description} />
+    <meta name="twitter:image" content={ogImage} />
+    {
+      jsonLdItems.map((item) => (
+        <script is:inline type="application/ld+json" set:html={JSON.stringify(item)} />
+      ))
+    }
+  </head>
+  <body>
+    <SkipLink />
+    <Header />
+    <main id="main-content">
+      <slot />
+    </main>
+    <Footer />
+  </body>
+</html>

@@ -1,0 +1,65 @@
+---
+import { getCollection } from 'astro:content';
+import BaseLayout from '@layouts/BaseLayout.astro';
+import CohortCard from '@components/cards/CohortCard.astro';
+
+const cohorts = (await getCollection('cohorts')).sort((a, b) =>
+  a.data.startsAt < b.data.startsAt ? 1 : -1,
+);
+---
+
+<BaseLayout
+  title="Cohorts"
+  description="Explore LBS AI Lab cohorts of AI-native builders, including the founding Spring 2026 cohort and the upcoming September 2026 cohort."
+>
+  <section class="page-hero">
+    <div class="container">
+      <p class="eyebrow">Cohorts</p>
+      <h1>Cohorts of AI-native builders.</h1>
+      <p class="lede">
+        Each cohort brings together LBS students building practical AI products across
+        careers, learning, operations, campus life, funding, and venture opportunities.
+      </p>
+    </div>
+  </section>
+
+  <section class="section section-warm">
+    <div class="container cohort-grid">
+      {cohorts.map((cohort) => <CohortCard cohort={cohort} />)}
+    </div>
+  </section>
+</BaseLayout>
+
+<style>
+  .page-hero {
+    background: var(--color-lbs-blue);
+    color: var(--color-white);
+    padding-block: clamp(74px, 11vw, 132px);
+  }
+
+  :global(.page-hero .eyebrow) {
+    color: rgba(255, 255, 255, 0.82);
+  }
+
+  h1 {
+    color: var(--color-white);
+    margin: 20px 0;
+  }
+
+  .lede {
+    color: rgba(255, 255, 255, 0.78);
+    max-width: 820px;
+  }
+
+  .cohort-grid {
+    display: grid;
+    gap: 22px;
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+
+  @media (max-width: 840px) {
+    .cohort-grid {
+      grid-template-columns: 1fr;
+    }
+  }
+</style>

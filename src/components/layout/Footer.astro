@@ -1,0 +1,130 @@
+---
+import { DSAI_URL, LBS_URL } from '@utils/site';
+---
+
+<footer class="site-footer">
+  <div class="footer-inner">
+    <div class="footer-brand">
+      <a class="brand" href="/" aria-label="LBS AI Lab home">
+        <span class="brand-mark" aria-hidden="true"></span>
+        <span>
+          <strong>LBS AI Lab</strong>
+          <em>Data Science & AI Initiative</em>
+        </span>
+      </a>
+      <p>
+        LBS AI Lab is a hands-on AI venture lab for future operators and founders at
+        London Business School. It is part of the Data Science & AI Initiative.
+      </p>
+    </div>
+
+    <nav aria-label="Footer navigation" class="footer-links">
+      <a href="/cohorts/">Cohorts</a>
+      <a href="/teams/">Teams</a>
+      <a href="/mentors/">Mentors</a>
+      <a href="/apply/">Apply</a>
+      <a href="/contact/">Contact</a>
+    </nav>
+
+    <nav aria-label="Institution links" class="footer-links">
+      <a href={DSAI_URL} target="_blank" rel="noreferrer">Data Science & AI Initiative</a>
+      <a href={LBS_URL} target="_blank" rel="noreferrer">London Business School</a>
+    </nav>
+  </div>
+</footer>
+
+<style>
+  .site-footer {
+    background: var(--color-lbs-blue);
+    color: var(--color-white);
+  }
+
+  .footer-inner {
+    display: grid;
+    gap: clamp(32px, 6vw, 80px);
+    grid-template-columns: minmax(0, 1.5fr) minmax(160px, 0.6fr) minmax(220px, 0.8fr);
+    margin-inline: auto;
+    max-width: var(--container);
+    padding: clamp(52px, 8vw, 84px) var(--gutter);
+  }
+
+  .brand {
+    align-items: center;
+    display: inline-flex;
+    gap: 13px;
+    text-decoration: none;
+  }
+
+  .brand-mark {
+    background: transparent;
+    display: inline-block;
+    height: 34px;
+    position: relative;
+    width: 34px;
+  }
+
+  .brand-mark::before,
+  .brand-mark::after {
+    content: "";
+    display: block;
+    left: 0;
+    position: absolute;
+    top: 0;
+  }
+
+  .brand-mark::before {
+    background: var(--color-lbs-red);
+    height: 34px;
+    width: 6px;
+  }
+
+  .brand-mark::after {
+    background: var(--color-white);
+    height: 6px;
+    width: 34px;
+  }
+
+  .brand span {
+    display: grid;
+    gap: 4px;
+  }
+
+  .brand strong {
+    font-size: 1.18rem;
+  }
+
+  .brand em {
+    color: rgba(255, 255, 255, 0.74);
+    font-size: var(--step--1);
+    font-style: normal;
+    font-weight: 700;
+  }
+
+  .footer-brand p {
+    color: rgba(255, 255, 255, 0.74);
+    margin-top: 24px;
+    max-width: 560px;
+  }
+
+  .footer-links {
+    display: grid;
+    gap: 12px;
+    align-content: start;
+  }
+
+  .footer-links a {
+    color: rgba(255, 255, 255, 0.82);
+    font-weight: 720;
+    text-decoration: none;
+  }
+
+  .footer-links a:hover {
+    color: var(--color-white);
+  }
+
+  @media (max-width: 820px) {
+    .footer-inner {
+      grid-template-columns: 1fr;
+    }
+  }
+</style>

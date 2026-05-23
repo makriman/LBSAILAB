@@ -1,0 +1,222 @@
+[
+  {
+    "id": "yashwin-thakker",
+    "name": "Yashwin Thakker",
+    "role": "AI Lab participant",
+    "team": "Briefed",
+    "publicTeam": "Briefd",
+    "email": "ythakker.mba2027@london.edu",
+    "cohort": "cohort-01",
+    "showEmailPublicly": false
+  },
+  {
+    "id": "richa-aggarwal",
+    "name": "Richa Aggarwal",
+    "role": "AI Lab participant",
+    "team": "Briefed",
+    "publicTeam": "Briefd",
+    "email": "raggarwal.mba2027@london.edu",
+    "cohort": "cohort-01",
+    "showEmailPublicly": false
+  },
+  {
+    "id": "pritika-nayak",
+    "name": "Pritika Nayak",
+    "role": "AI Lab participant",
+    "team": "Campus Collective",
+    "publicTeam": "Cafe Smart",
+    "email": "pnayak.mba2027@london.edu",
+    "cohort": "cohort-01",
+    "showEmailPublicly": false
+  },
+  {
+    "id": "emma-wang",
+    "name": "Emma Wang",
+    "role": "AI Lab participant",
+    "team": "Campus Collective",
+    "publicTeam": "Cafe Smart",
+    "email": "ewang.mba2027@london.edu",
+    "cohort": "cohort-01",
+    "showEmailPublicly": false
+  },
+  {
+    "id": "caitlyn-espiritu",
+    "name": "Caitlyn Espiritu",
+    "role": "AI Lab participant",
+    "team": "Campus Collective",
+    "publicTeam": "Cafe Smart",
+    "email": "cespiritu.mba2027@london.edu",
+    "cohort": "cohort-01",
+    "showEmailPublicly": false
+  },
+  {
+    "id": "matt-bodsworth",
+    "name": "Matt Bodsworth",
+    "role": "AI Lab participant",
+    "team": "EMS++",
+    "publicTeam": "EMS++",
+    "email": "mbodsworth.mba2027@london.edu",
+    "cohort": "cohort-01",
+    "showEmailPublicly": false
+  },
+  {
+    "id": "pranav-bangalore-sathyachandan",
+    "name": "Pranav Bangalore Sathyachandan",
+    "role": "AI Lab participant",
+    "team": "EventOS",
+    "publicTeam": "EventOS",
+    "email": "pranavb.mam2026@london.edu",
+    "cohort": "cohort-01",
+    "showEmailPublicly": false
+  },
+  {
+    "id": "jash-damani",
+    "name": "Jash Damani",
+    "role": "AI Lab participant",
+    "team": "EventOS",
+    "publicTeam": "EventOS",
+    "email": "jdamani.mam2026@london.edu",
+    "cohort": "cohort-01",
+    "showEmailPublicly": false
+  },
+  {
+    "id": "eric-du",
+    "name": "Eric Du",
+    "role": "AI Lab participant",
+    "team": "EventOS",
+    "publicTeam": "EventOS",
+    "email": "edu.mam2026@london.edu",
+    "cohort": "cohort-01",
+    "showEmailPublicly": false
+  },
+  {
+    "id": "angela-chan",
+    "name": "Angela Chan",
+    "role": "AI Lab participant",
+    "team": "EventOS",
+    "publicTeam": "EventOS",
+    "email": "achan.mba2026@london.edu",
+    "cohort": "cohort-01",
+    "showEmailPublicly": false
+  },
+  {
+    "id": "nothando-ntombela",
+    "name": "Nothando Ntombela",
+    "role": "AI Lab participant",
+    "team": "FundEd",
+    "publicTeam": "FundEd",
+    "email": "nntombela.mba2027@london.edu",
+    "cohort": "cohort-01",
+    "showEmailPublicly": false
+  },
+  {
+    "id": "nasreen-begum",
+    "name": "Nasreen Begum",
+    "role": "AI Lab participant",
+    "team": "FundEd",
+    "publicTeam": "FundEd",
+    "email": "nbegum.mba2027@london.edu",
+    "cohort": "cohort-01",
+    "showEmailPublicly": false
+  },
+  {
+    "id": "misri-parikh",
+    "name": "Misri Parikh",
+    "role": "AI Lab participant",
+    "team": "FundEd",
+    "publicTeam": "FundEd",
+    "email": "misriparikh11@gmail.com",
+    "cohort": "cohort-01",
+    "showEmailPublicly": false
+  },
+  {
+    "id": "burcu-magemizoglu",
+    "name": "Burcu Magemizoglu",
+    "role": "AI Lab participant",
+    "team": "LBS Compass",
+    "publicTeam": "LBS Compass",
+    "email": "bmagemizoglu.mba2027@london.edu",
+    "cohort": "cohort-01",
+    "showEmailPublicly": false
+  },
+  {
+    "id": "ana-vitoria-aragao-andrade",
+    "name": "Ana Vitoria Aragao Andrade",
+    "role": "AI Lab participant",
+    "team": "LBS Compass",
+    "publicTeam": "LBS Compass",
+    "email": "anavitoriaa.mba2027@london.edu",
+    "cohort": "cohort-01",
+    "showEmailPublicly": false
+  },
+  {
+    "id": "rita-antunes-figueiredo-carvalho",
+    "name": "Rita Antunes Figueiredo Carvalho",
+    "role": "AI Lab participant",
+    "team": "RecruitSmart",
+    "publicTeam": "RecruitSmart LBS",
+    "email": "ritaa.mba2027@london.edu",
+    "cohort": "cohort-01",
+    "showEmailPublicly": false
+  },
+  {
+    "id": "lavanya-saberwal",
+    "name": "Lavanya Saberwal",
+    "role": "AI Lab participant",
+    "team": "RecruitSmart",
+    "publicTeam": "RecruitSmart LBS",
+    "email": "lsaberwal.mba2027@london.edu",
+    "cohort": "cohort-01",
+    "showEmailPublicly": false
+  },
+  {
+    "id": "jamie-aplin",
+    "name": "Jamie Aplin",
+    "role": "AI Lab participant",
+    "team": "RecruitSmart",
+    "publicTeam": "RecruitSmart LBS",
+    "email": "japlin.mba2027@london.edu",
+    "cohort": "cohort-01",
+    "showEmailPublicly": false
+  },
+  {
+    "id": "andreea-galusca",
+    "name": "Andreea Galusca",
+    "role": "AI Lab participant",
+    "team": "RecruitSmart",
+    "publicTeam": "RecruitSmart LBS",
+    "email": "agalusca.mam2026@london.edu",
+    "cohort": "cohort-01",
+    "showEmailPublicly": false
+  },
+  {
+    "id": "simon-scott",
+    "name": "Simon Scott",
+    "role": "AI Lab participant",
+    "team": "WayFinders",
+    "publicTeam": "The Wayfinders",
+    "email": "sscott.mifpt2025@london.edu",
+    "cohort": "cohort-01",
+    "showEmailPublicly": false
+  },
+  {
+    "id": "victoria-manning",
+    "name": "Victoria Manning",
+    "role": "AI Lab participant",
+    "team": "Zentra",
+    "publicTeam": "Zentra",
+    "email": "vmanning.mba2027@london.edu",
+    "cohort": "cohort-01",
+    "showEmailPublicly": false
+  },
+  {
+    "id": "leanne-chen",
+    "name": "Leanne Chen",
+    "role": "AI Lab participant",
+    "team": "Zentra",
+    "publicTeam": "Zentra",
+    "email": "leannec.mba2027@london.edu",
+    "cohort": "cohort-01",
+    "showEmailPublicly": false
+  }
+]

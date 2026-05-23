@@ -1,0 +1,20 @@
+---
+interface Props {
+  text: string;
+  light?: boolean;
+}
+
+const { text, light = false } = Astro.props;
+---
+
+<p class:list={['eyebrow', { 'eyebrow-light': light }]}>{text}</p>
+
+<style>
+  .eyebrow-light {
+    color: rgba(255, 255, 255, 0.82);
+  }
+
+  .eyebrow-light::before {
+    background: var(--color-lbs-red);
+  }
+</style>

@@ -1,0 +1,64 @@
+.container {
+  margin-inline: auto;
+  max-width: var(--container);
+  padding-inline: var(--gutter);
+  width: 100%;
+}
+
+.section {
+  padding-block: clamp(72px, 10vw, 132px);
+}
+
+.section-tight {
+  padding-block: clamp(48px, 7vw, 84px);
+}
+
+.section-blue {
+  background: var(--color-lbs-blue);
+  color: var(--color-white);
+}
+
+.section-cloud {
+  background: var(--color-cloud);
+}
+
+.section-warm {
+  background: var(--color-warm-white);
+}
+
+.grid {
+  display: grid;
+  gap: clamp(20px, 3vw, 32px);
+}
+
+.grid-2 {
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+}
+
+.grid-3 {
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+}
+
+.cluster {
+  align-items: center;
+  display: flex;
+  flex-wrap: wrap;
+  gap: 12px;
+}
+
+.visually-hidden {
+  clip: rect(0 0 0 0);
+  clip-path: inset(50%);
+  height: 1px;
+  overflow: hidden;
+  position: absolute;
+  white-space: nowrap;
+  width: 1px;
+}
+
+@media (max-width: 860px) {
+  .grid-2,
+  .grid-3 {
+    grid-template-columns: 1fr;
+  }
+}

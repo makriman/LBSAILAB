@@ -1,0 +1,45 @@
+---
+interface Props {
+  value: string;
+  label: string;
+  light?: boolean;
+}
+
+const { value, label, light = false } = Astro.props;
+---
+
+<div class:list={['stat', { light }]}>
+  <strong>{value}</strong>
+  <span>{label}</span>
+</div>
+
+<style>
+  .stat {
+    border-left: 2px solid var(--color-lbs-red);
+    display: grid;
+    gap: 7px;
+    padding-left: 18px;
+  }
+
+  .stat strong {
+    color: var(--color-lbs-blue);
+    font-family: var(--font-serif);
+    font-size: clamp(2.2rem, 5vw, 4.6rem);
+    line-height: 0.9;
+  }
+
+  .stat span {
+    color: var(--color-muted);
+    font-size: var(--step--1);
+    font-weight: 800;
+  }
+
+  .stat.light strong,
+  .stat.light span {
+    color: var(--color-white);
+  }
+
+  .stat.light span {
+    opacity: 0.72;
+  }
+</style>

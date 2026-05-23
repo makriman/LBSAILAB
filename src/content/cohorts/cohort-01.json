@@ -1,0 +1,23 @@
+{
+  "id": "cohort-01",
+  "slug": "cohort-01",
+  "name": "Cohort 01",
+  "season": "Spring 2026",
+  "startsAt": "2026-04-10",
+  "endsAt": "2026-06-12",
+  "status": "current",
+  "teamCount": 9,
+  "participantCount": 22,
+  "mentorCount": 4,
+  "teams": [
+    "recruitsmart-lbs",
+    "cafe-smart-campus-collective",
+    "ems-plus-plus",
+    "lbs-compass",
+    "funded",
+    "briefd",
+    "the-wayfinders",
+    "eventos",
+    "zentra"
+  ]
+}

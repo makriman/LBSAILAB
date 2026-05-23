@@ -1,0 +1,39 @@
+---
+import TeamCard from '@components/cards/TeamCard.astro';
+import type { TeamEntry } from '@utils/collections';
+
+interface Props {
+  teams: TeamEntry[];
+  featured?: boolean;
+}
+
+const { teams, featured = false } = Astro.props;
+---
+
+<div class:list={['team-grid', { featured }]}>
+  {teams.map((team) => <TeamCard team={team} featured={featured} />)}
+</div>
+
+<style>
+  .team-grid {
+    display: grid;
+    gap: 20px;
+    grid-template-columns: repeat(3, minmax(0, 1fr));
+  }
+
+  .team-grid.featured {
+    grid-template-columns: 1fr;
+  }
+
+  @media (max-width: 980px) {
+    .team-grid {
+      grid-template-columns: repeat(2, minmax(0, 1fr));
+    }
+  }
+
+  @media (max-width: 680px) {
+    .team-grid {
+      grid-template-columns: 1fr;
+    }
+  }
+</style>

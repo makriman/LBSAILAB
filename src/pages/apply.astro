@@ -1,0 +1,153 @@
+---
+import BaseLayout from '@layouts/BaseLayout.astro';
+import Button from '@components/atoms/Button.astro';
+---
+
+<BaseLayout
+  title="Apply"
+  description="Register interest for the September 2026 LBS AI Lab cohort and build real AI products with ambitious LBS students."
+>
+  <section class="page-hero">
+    <div class="container hero-grid">
+      <div>
+        <p class="eyebrow">Apply</p>
+        <h1>Build with the September 2026 cohort.</h1>
+        <p class="lede">
+          LBS AI Lab is for students who want hands-on experience building AI products and
+          leading AI transformation from the inside.
+        </p>
+        <Button href="/contact/" variant="red" size="lg">Register interest for September 2026</Button>
+      </div>
+      <aside>
+        <span>Cohort 02</span>
+        <strong>Starts September 2026</strong>
+        <p>Applications will open for LBS students ready to build, test, learn, and ship.</p>
+      </aside>
+    </div>
+  </section>
+
+  <section class="section">
+    <div class="container apply-grid">
+      <section>
+        <p class="eyebrow">Who this is for</p>
+        <h2>Students with product ideas, operator instincts, or founder ambition.</h2>
+        <ul>
+          <li>LBS students with a product idea.</li>
+          <li>Operators who see a workflow that can be transformed with AI.</li>
+          <li>Future founders looking for co-builders.</li>
+          <li>Students who want practical AI fluency beyond classroom learning.</li>
+        </ul>
+      </section>
+
+      <section>
+        <p class="eyebrow">What you will do</p>
+        <h2>Move from problem to prototype with mentor support.</h2>
+        <ul>
+          <li>Form or join a team.</li>
+          <li>Choose a real problem.</li>
+          <li>Prototype with AI tools.</li>
+          <li>Test with users.</li>
+          <li>Work with mentors.</li>
+          <li>Demo what you build.</li>
+        </ul>
+      </section>
+
+      <section>
+        <p class="eyebrow">What you do not need</p>
+        <h2>You do not need to be a professional software engineer.</h2>
+        <p>
+          You do need curiosity, discipline, and willingness to build. The Lab is
+          practical, team-based, and focused on real execution.
+        </p>
+      </section>
+    </div>
+  </section>
+</BaseLayout>
+
+<style>
+  .page-hero {
+    background: var(--color-lbs-blue);
+    color: var(--color-white);
+    padding-block: clamp(74px, 11vw, 132px);
+  }
+
+  .hero-grid {
+    align-items: end;
+    display: grid;
+    gap: clamp(34px, 6vw, 80px);
+    grid-template-columns: minmax(0, 1fr) minmax(280px, 0.42fr);
+  }
+
+  :global(.page-hero .eyebrow) {
+    color: rgba(255, 255, 255, 0.82);
+  }
+
+  h1 {
+    color: var(--color-white);
+    margin: 20px 0;
+  }
+
+  .lede {
+    color: rgba(255, 255, 255, 0.78);
+    margin-bottom: 30px;
+    max-width: 820px;
+  }
+
+  aside {
+    border: 1px solid rgba(255, 255, 255, 0.22);
+    padding: 28px;
+  }
+
+  aside span {
+    color: rgba(255, 255, 255, 0.65);
+    font-weight: 820;
+  }
+
+  aside strong {
+    display: block;
+    font-family: var(--font-serif);
+    font-size: var(--step-2);
+    line-height: 1;
+    margin: 14px 0;
+  }
+
+  aside p {
+    color: rgba(255, 255, 255, 0.72);
+  }
+
+  .apply-grid {
+    display: grid;
+    gap: 22px;
+    grid-template-columns: repeat(3, minmax(0, 1fr));
+  }
+
+  .apply-grid section {
+    border: 1px solid var(--color-border);
+    padding: clamp(24px, 4vw, 34px);
+  }
+
+  .apply-grid h2 {
+    color: var(--color-lbs-blue);
+    font-size: var(--step-2);
+    margin: 16px 0;
+  }
+
+  .apply-grid p:not(.eyebrow),
+  li {
+    color: var(--color-ink-soft);
+  }
+
+  ul {
+    display: grid;
+    gap: 10px;
+    margin: 0;
+    padding-left: 19px;
+  }
+
+  @media (max-width: 940px) {
+    .hero-grid,
+    .apply-grid {
+      grid-template-columns: 1fr;
+    }
+  }
+</style>

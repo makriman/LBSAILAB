@@ -1,0 +1,81 @@
+---
+import type { MentorEntry } from '@utils/collections';
+import { initials } from '@utils/collections';
+
+interface Props {
+  mentor: MentorEntry;
+}
+
+const { mentor } = Astro.props;
+---
+
+<article class="mentor-card">
+  <div class="avatar" aria-hidden="true">{initials(mentor.data.name)}</div>
+  <div>
+    <h3>{mentor.data.name}</h3>
+    <p>{mentor.data.mentorType}</p>
+    {
+      mentor.data.showEmailPublicly ? (
+        <a href={`mailto:${mentor.data.email}`}>Email mentor</a>
+      ) : (
+        <span>Contact via Lab</span>
+      )
+    }
+  </div>
+</article>
+
+<style>
+  .mentor-card {
+    align-items: start;
+    background: var(--color-white);
+    border: 1px solid var(--color-border);
+    display: grid;
+    gap: 18px;
+    grid-template-columns: 58px 1fr;
+    padding: 22px;
+  }
+
+  .avatar {
+    align-items: center;
+    background: var(--color-lbs-blue);
+    color: var(--color-white);
+    display: inline-flex;
+    font-weight: 900;
+    height: 58px;
+    justify-content: center;
+    position: relative;
+    width: 58px;
+  }
+
+  .avatar::after {
+    background: var(--color-lbs-red);
+    bottom: 0;
+    content: "";
+    height: 4px;
+    left: 0;
+    position: absolute;
+    width: 100%;
+  }
+
+  h3 {
+    color: var(--color-lbs-blue);
+    font-family: var(--font-sans);
+    font-size: var(--step-1);
+    line-height: 1.15;
+    margin: 0 0 6px;
+  }
+
+  p {
+    color: var(--color-ink-soft);
+    font-weight: 760;
+  }
+
+  a,
+  span {
+    color: var(--color-muted);
+    display: inline-block;
+    font-size: var(--step--1);
+    font-weight: 780;
+    margin-top: 12px;
+  }
+</style>

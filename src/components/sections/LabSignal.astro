@@ -1,0 +1,93 @@
+---
+const points = [
+  { x: 18, y: 70 },
+  { x: 32, y: 28 },
+  { x: 42, y: 52 },
+  { x: 54, y: 18 },
+  { x: 62, y: 74 },
+  { x: 70, y: 42 },
+  { x: 82, y: 24 },
+  { x: 88, y: 60 },
+  { x: 48, y: 82 },
+];
+---
+
+<figure class="lab-signal" aria-label="Cohort 01 signal map showing nine AI Lab teams">
+  <div class="panel-heading">
+    <span>Cohort 01</span>
+    <strong>Build map</strong>
+  </div>
+  <svg viewBox="0 0 100 100" role="img" aria-hidden="true">
+    <defs>
+      <pattern id="grid" width="10" height="10" patternUnits="userSpaceOnUse">
+        <path d="M 10 0 L 0 0 0 10" fill="none" stroke="rgba(20,23,93,.12)" stroke-width=".35" />
+      </pattern>
+    </defs>
+    <rect width="100" height="100" fill="url(#grid)" />
+    <polyline
+      points={points.map((point) => `${point.x},${point.y}`).join(' ')}
+      fill="none"
+      stroke="#14175d"
+      stroke-width="1.2"
+      opacity="0.72"
+    />
+    {
+      points.map((point, index) => (
+        <g>
+          <circle cx={point.x} cy={point.y} r="3.8" fill={index < 3 ? '#cd0d2f' : '#14175d'} />
+          <circle
+            cx={point.x}
+            cy={point.y}
+            r="7.2"
+            fill="none"
+            stroke={index < 3 ? '#cd0d2f' : '#14175d'}
+            stroke-width=".55"
+            opacity=".32"
+          />
+        </g>
+      ))
+    }
+  </svg>
+  <div class="panel-footer">
+    <span>9 teams</span>
+    <span>22 builders</span>
+    <span>4 mentors</span>
+  </div>
+</figure>
+
+<style>
+  .lab-signal {
+    background: var(--color-white);
+    border: 1px solid var(--color-border);
+    box-shadow: var(--shadow-card);
+    margin: 0;
+    padding: clamp(18px, 3vw, 28px);
+  }
+
+  .panel-heading,
+  .panel-footer {
+    align-items: center;
+    display: flex;
+    flex-wrap: wrap;
+    gap: 12px;
+    justify-content: space-between;
+  }
+
+  .panel-heading span,
+  .panel-footer span {
+    color: var(--color-muted);
+    font-size: var(--step--1);
+    font-weight: 820;
+  }
+
+  .panel-heading strong {
+    color: var(--color-lbs-blue);
+    font-size: var(--step-1);
+  }
+
+  svg {
+    aspect-ratio: 1 / 0.82;
+    margin-block: 22px;
+    width: 100%;
+  }
+</style>

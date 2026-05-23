@@ -1,0 +1,23 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 128 128" role="img" aria-labelledby="title desc">
+  <title id="title">LBS AI Lab favicon</title>
+  <desc id="desc">A deep blue LBS AI Lab monogram with red and white institutional accents.</desc>
+  <rect width="128" height="128" rx="22" fill="#14175d" />
+  <rect x="20" y="18" width="8" height="62" fill="#cd0d2f" />
+  <rect x="20" y="18" width="56" height="8" fill="#ffffff" />
+  <path
+    d="M92 25 78 58h17L80 103l34-53H96l14-25H92Z"
+    fill="#cd0d2f"
+    stroke="#f8f7f4"
+    stroke-linejoin="round"
+    stroke-width="4"
+  />
+  <text
+    x="36"
+    y="91"
+    fill="#ffffff"
+    font-family="Georgia, 'Times New Roman', serif"
+    font-size="48"
+    font-weight="700"
+    letter-spacing="-2"
+  >AI</text>
+</svg>

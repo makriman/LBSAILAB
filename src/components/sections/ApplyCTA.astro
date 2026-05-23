@@ -1,0 +1,65 @@
+---
+import Button from '@components/atoms/Button.astro';
+
+interface Props {
+  title?: string;
+  body?: string;
+  href?: string;
+  label?: string;
+}
+
+const {
+  title = 'The next cohort starts September 2026.',
+  body = 'Applications will open for LBS students who want to build real AI products, work in ambitious teams, and develop the hands-on fluency needed to lead AI transformation.',
+  href = '/apply/',
+  label = 'Register interest',
+} = Astro.props;
+---
+
+<section class="apply-cta section-tight">
+  <div class="container cta-inner">
+    <div>
+      <p class="eyebrow">Cohort 02</p>
+      <h2>{title}</h2>
+      <p>{body}</p>
+    </div>
+    <Button href={href} variant="red" size="lg">{label}</Button>
+  </div>
+</section>
+
+<style>
+  .apply-cta {
+    background: var(--color-lbs-blue);
+    color: var(--color-white);
+  }
+
+  .cta-inner {
+    align-items: center;
+    display: grid;
+    gap: 32px;
+    grid-template-columns: minmax(0, 1fr) auto;
+  }
+
+  :global(.apply-cta .eyebrow) {
+    color: rgba(255, 255, 255, 0.82);
+    margin-bottom: 18px;
+  }
+
+  h2 {
+    color: var(--color-white);
+    margin: 0;
+  }
+
+  p:not(.eyebrow) {
+    color: rgba(255, 255, 255, 0.78);
+    font-size: var(--step-1);
+    margin-top: 16px;
+    max-width: 760px;
+  }
+
+  @media (max-width: 780px) {
+    .cta-inner {
+      grid-template-columns: 1fr;
+    }
+  }
+</style>

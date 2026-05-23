@@ -1,0 +1,247 @@
+---
+import type { CohortEntry, MentorEntry, TeamEntry } from '@utils/collections';
+import { formatDateRange } from '@utils/dates';
+import Button from '@components/atoms/Button.astro';
+import Stat from '@components/atoms/Stat.astro';
+import TeamGrid from './TeamGrid.astro';
+import MentorGrid from './MentorGrid.astro';
+import ApplyCTA from './ApplyCTA.astro';
+
+interface Props {
+  cohort: CohortEntry;
+  teams: TeamEntry[];
+  mentors: MentorEntry[];
+}
+
+const { cohort, teams, mentors } = Astro.props;
+const isUpcoming = cohort.data.status === 'upcoming';
+const categories = [...new Set(teams.map((team) => team.data.category))];
+---
+
+<article class="cohort-detail">
+  <section class="cohort-hero">
+    <div class="container hero-grid">
+      <div>
+        <p class="eyebrow">{cohort.data.name} / {cohort.data.season}</p>
+        <h1>
+          {
+            isUpcoming
+              ? 'The next cohort starts September 2026.'
+              : 'The founding cohort of LBS AI Lab.'
+          }
+        </h1>
+        <p class="lede">
+          {
+            isUpcoming
+              ? 'Applications will open for LBS students who want to build AI products, prototype workflows, and develop hands-on AI fluency for leadership and transformation.'
+              : 'From 10 April to 12 June 2026, nine student teams are building AI products across LBS student life, career development, club operations, academic planning, funding discovery, and professional workflows.'
+          }
+        </p>
+        <div class="hero-actions">
+          <Button href={isUpcoming ? '/apply/' : '/teams/'} variant="red" size="lg">
+            {isUpcoming ? 'Register interest' : 'Explore teams'}
+          </Button>
+        </div>
+      </div>
+      <aside class="cohort-panel" aria-label="Cohort facts">
+        <p>{formatDateRange(cohort.data.startsAt, cohort.data.endsAt)}</p>
+        <div>
+          <Stat value={String(cohort.data.teamCount ?? 'TBC')} label="teams" light />
+          <Stat value={String(cohort.data.participantCount ?? 'TBC')} label="participants" light />
+          <Stat value={String(cohort.data.mentorCount ?? 'TBC')} label="mentors" light />
+        </div>
+      </aside>
+    </div>
+  </section>
+
+  {
+    isUpcoming ? (
+      <section class="section">
+        <div class="container upcoming-grid">
+          <section>
+            <p class="eyebrow">What students will build</p>
+            <h2>Real products for real workflows.</h2>
+            <p>
+              Teams will choose practical problems, prototype AI-enabled products, test
+              with users, and learn how intelligent systems change product development
+              and organisational work.
+            </p>
+          </section>
+          <section>
+            <p class="eyebrow">Who should apply</p>
+            <h2>Founder-level ambition, operator instincts, or a clear problem.</h2>
+            <p>
+              Apply if you are an LBS student with a problem you want to solve with AI.
+              You do not need to be a software engineer, but you should be willing to
+              build, test, learn, and ship.
+            </p>
+          </section>
+          <section>
+            <p class="eyebrow">Commitment</p>
+            <h2>A practical build cycle with mentor support.</h2>
+            <p>
+              Students form or join teams, work through product direction and technical
+              execution, and prepare to demo what they build.
+            </p>
+          </section>
+          <section>
+            <p class="eyebrow">Team formation</p>
+            <h2>Bring a product idea or join an ambitious team.</h2>
+            <p>
+              The Lab supports students with both clear venture ideas and operator-led
+              workflow opportunities.
+            </p>
+          </section>
+        </div>
+      </section>
+    ) : (
+      <>
+        <section class="section section-warm">
+          <div class="container">
+            <div class="section-top">
+              <div>
+                <p class="eyebrow">Team portfolio</p>
+                <h2>Nine teams building across the LBS experience.</h2>
+              </div>
+              <nav class="category-list" aria-label="Project categories">
+                {categories.map((category) => (
+                  <a href="#teams">{category}</a>
+                ))}
+              </nav>
+            </div>
+            <div id="teams">
+              <TeamGrid teams={teams} />
+            </div>
+          </div>
+        </section>
+
+        <section class="section">
+          <div class="container">
+            <div class="section-top">
+              <div>
+                <p class="eyebrow">Mentor layer</p>
+                <h2>Guidance for product direction and technical execution.</h2>
+              </div>
+            </div>
+            <MentorGrid mentors={mentors} />
+          </div>
+        </section>
+      </>
+    )
+  }
+
+  <ApplyCTA
+    title="Build in the next cohort."
+    body="The September 2026 cohort will bring together a new group of LBS students ready to build with AI."
+  />
+</article>
+
+<style>
+  .cohort-hero {
+    background: var(--color-lbs-blue);
+    color: var(--color-white);
+    padding-block: clamp(70px, 10vw, 126px);
+  }
+
+  .hero-grid {
+    align-items: end;
+    display: grid;
+    gap: clamp(34px, 6vw, 80px);
+    grid-template-columns: minmax(0, 1fr) minmax(300px, 0.46fr);
+  }
+
+  :global(.cohort-hero .eyebrow) {
+    color: rgba(255, 255, 255, 0.82);
+  }
+
+  h1 {
+    color: var(--color-white);
+    margin: 20px 0;
+  }
+
+  .lede {
+    color: rgba(255, 255, 255, 0.78);
+    max-width: 850px;
+  }
+
+  .hero-actions {
+    margin-top: 30px;
+  }
+
+  .cohort-panel {
+    border: 1px solid rgba(255, 255, 255, 0.22);
+    padding: clamp(22px, 3vw, 32px);
+  }
+
+  .cohort-panel > p {
+    border-bottom: 1px solid rgba(255, 255, 255, 0.18);
+    color: rgba(255, 255, 255, 0.78);
+    font-weight: 800;
+    margin-bottom: 22px;
+    padding-bottom: 18px;
+  }
+
+  .cohort-panel > div {
+    display: grid;
+    gap: 22px;
+  }
+
+  .section-top {
+    align-items: end;
+    display: grid;
+    gap: 26px;
+    grid-template-columns: minmax(0, 0.8fr) minmax(260px, 0.65fr);
+    margin-bottom: 32px;
+  }
+
+  .section-top h2 {
+    color: var(--color-lbs-blue);
+    margin: 16px 0 0;
+  }
+
+  .category-list {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 8px;
+  }
+
+  .category-list a {
+    background: var(--color-white);
+    border: 1px solid var(--color-border);
+    border-radius: var(--radius-button);
+    color: var(--color-lbs-blue);
+    font-size: 0.78rem;
+    font-weight: 800;
+    padding: 9px 12px;
+    text-decoration: none;
+  }
+
+  .upcoming-grid {
+    display: grid;
+    gap: 22px;
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+
+  .upcoming-grid section {
+    border: 1px solid var(--color-border);
+    padding: clamp(24px, 4vw, 38px);
+  }
+
+  .upcoming-grid h2 {
+    color: var(--color-lbs-blue);
+    font-size: var(--step-2);
+    margin: 16px 0;
+  }
+
+  .upcoming-grid p:not(.eyebrow) {
+    color: var(--color-ink-soft);
+  }
+
+  @media (max-width: 880px) {
+    .hero-grid,
+    .section-top,
+    .upcoming-grid {
+      grid-template-columns: 1fr;
+    }
+  }
+</style>

@@ -1,0 +1,66 @@
+---
+import Button from '@components/atoms/Button.astro';
+import { DSAI_URL } from '@utils/site';
+---
+
+<section class="dsai-block section">
+  <div class="container block-inner">
+    <div class="rule" aria-hidden="true"></div>
+    <div>
+      <p class="eyebrow">Institutional alignment</p>
+      <h2>Part of the Data Science & AI Initiative.</h2>
+      <p>
+        The Data Science & AI Initiative at LBS advances independent evidence, practical
+        playbooks, and responsible adoption frameworks for leaders navigating AI. LBS AI
+        Lab extends that mission into hands-on product building for students.
+      </p>
+      <Button href={DSAI_URL} variant="secondary">Visit the DSAI Initiative</Button>
+    </div>
+  </div>
+</section>
+
+<style>
+  .dsai-block {
+    background: var(--color-white);
+  }
+
+  .block-inner {
+    display: grid;
+    gap: clamp(24px, 5vw, 70px);
+    grid-template-columns: minmax(80px, 0.24fr) minmax(0, 1fr);
+  }
+
+  .rule {
+    background: linear-gradient(
+      to bottom,
+      var(--color-lbs-red) 0 22%,
+      var(--color-lbs-blue) 22% 100%
+    );
+    min-height: 320px;
+    width: 100%;
+  }
+
+  h2 {
+    color: var(--color-lbs-blue);
+    margin: 18px 0 18px;
+    max-width: 800px;
+  }
+
+  p:not(.eyebrow) {
+    color: var(--color-ink-soft);
+    font-size: var(--step-1);
+    margin-bottom: 28px;
+    max-width: 780px;
+  }
+
+  @media (max-width: 720px) {
+    .block-inner {
+      grid-template-columns: 1fr;
+    }
+
+    .rule {
+      height: 8px;
+      min-height: 8px;
+    }
+  }
+</style>

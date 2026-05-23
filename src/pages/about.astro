@@ -1,0 +1,155 @@
+---
+import BaseLayout from '@layouts/BaseLayout.astro';
+import SectionHeader from '@components/atoms/SectionHeader.astro';
+import DSAIBlock from '@components/sections/DSAIBlock.astro';
+---
+
+<BaseLayout
+  title="About LBS AI Lab"
+  description="LBS AI Lab helps future leaders understand AI transformation from the inside by building products, automating workflows, and testing ideas with real users."
+>
+  <section class="page-hero">
+    <div class="container">
+      <p class="eyebrow">About LBS AI Lab</p>
+      <h1>AI fluency through real product building.</h1>
+      <p class="lede">
+        The Lab exists to help future leaders understand AI transformation from the inside:
+        by building products, automating workflows, and testing ideas with real users.
+      </p>
+    </div>
+  </section>
+
+  <section class="section">
+    <div class="container editorial-grid">
+      <article>
+        <p class="eyebrow">Why now</p>
+        <h2>Conceptual AI literacy is no longer enough.</h2>
+        <p>
+          AI is changing how organisations make decisions, serve customers, operate teams,
+          and create new ventures. Leaders who only understand AI conceptually will be at
+          a disadvantage. The next generation of leaders needs practical fluency: the
+          ability to prototype, evaluate, and deploy AI-enabled systems responsibly.
+        </p>
+      </article>
+
+      <article>
+        <p class="eyebrow">What makes the Lab different</p>
+        <h2>Building is treated as a leadership capability.</h2>
+        <ul>
+          <li>It is hands-on.</li>
+          <li>It is venture-oriented.</li>
+          <li>It is student-led and institutionally aligned.</li>
+          <li>It focuses on business transformation, not AI hype.</li>
+          <li>It treats building as a way to understand leadership in an AI-native world.</li>
+        </ul>
+      </article>
+    </div>
+  </section>
+
+  <section class="section section-warm">
+    <div class="container">
+      <SectionHeader
+        eyebrow="How the Lab works"
+        title="A cohort-based build environment for ambitious LBS students."
+        body="Students form or join teams, choose real problems, build prototypes and products, and work with mentors on product, technical, and strategic decisions."
+      />
+      <div class="process-grid">
+        <article>
+          <span>01</span>
+          <h3>Form teams</h3>
+          <p>Students bring product ideas or join teams around promising workflow opportunities.</p>
+        </article>
+        <article>
+          <span>02</span>
+          <h3>Build prototypes</h3>
+          <p>Teams move from thesis to working product through practical AI tooling and user testing.</p>
+        </article>
+        <article>
+          <span>03</span>
+          <h3>Demo publicly</h3>
+          <p>Cohorts culminate in a showcase that gives student builders a credible public presence.</p>
+        </article>
+      </div>
+    </div>
+  </section>
+
+  <DSAIBlock />
+</BaseLayout>
+
+<style>
+  .page-hero {
+    background: var(--color-lbs-blue);
+    color: var(--color-white);
+    padding-block: clamp(74px, 11vw, 140px);
+  }
+
+  :global(.page-hero .eyebrow) {
+    color: rgba(255, 255, 255, 0.82);
+  }
+
+  h1 {
+    color: var(--color-white);
+    margin: 20px 0;
+    max-width: 900px;
+  }
+
+  .lede {
+    color: rgba(255, 255, 255, 0.78);
+    max-width: 780px;
+  }
+
+  .editorial-grid {
+    display: grid;
+    gap: clamp(36px, 6vw, 86px);
+    grid-template-columns: minmax(0, 1fr) minmax(0, 0.92fr);
+  }
+
+  article {
+    border-top: 3px solid var(--color-lbs-red);
+    padding-top: 24px;
+  }
+
+  article h2 {
+    color: var(--color-lbs-blue);
+    font-size: var(--step-2);
+    margin: 16px 0;
+  }
+
+  article p,
+  li {
+    color: var(--color-ink-soft);
+    font-size: var(--step-1);
+  }
+
+  ul {
+    display: grid;
+    gap: 12px;
+    margin: 0;
+    padding-left: 20px;
+  }
+
+  .process-grid {
+    display: grid;
+    gap: 20px;
+    grid-template-columns: repeat(3, minmax(0, 1fr));
+    margin-top: 34px;
+  }
+
+  .process-grid article {
+    background: var(--color-white);
+    border: 1px solid var(--color-border);
+    padding: clamp(24px, 4vw, 34px);
+  }
+
+  .process-grid span {
+    color: var(--color-lbs-red);
+    font-weight: 900;
+  }
+
+  @media (max-width: 860px) {
+    .editorial-grid,
+    .process-grid {
+      grid-template-columns: 1fr;
+    }
+  }
+</style>

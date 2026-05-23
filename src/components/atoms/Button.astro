@@ -1,0 +1,110 @@
+---
+interface Props {
+  href: string;
+  variant?: 'primary' | 'secondary' | 'ghost' | 'red';
+  size?: 'sm' | 'md' | 'lg';
+  external?: boolean;
+}
+
+const { href, variant = 'primary', size = 'md', external = href.startsWith('http') } = Astro.props;
+---
+
+<a
+  class:list={['button', `button-${variant}`, `button-${size}`]}
+  href={href}
+  target={external ? '_blank' : undefined}
+  rel={external ? 'noreferrer' : undefined}
+>
+  <span><slot /></span>
+  <span class="button-icon" aria-hidden="true">-></span>
+</a>
+
+<style>
+  .button {
+    align-items: center;
+    border: 1px solid transparent;
+    border-radius: var(--radius-button);
+    display: inline-flex;
+    font-weight: 800;
+    gap: 10px;
+    justify-content: center;
+    line-height: 1;
+    min-height: 44px;
+    text-decoration: none;
+    transition:
+      background-color 180ms ease,
+      border-color 180ms ease,
+      color 180ms ease,
+      transform 180ms ease;
+    white-space: nowrap;
+  }
+
+  .button:hover {
+    transform: translateY(-1px);
+  }
+
+  .button-sm {
+    font-size: 0.86rem;
+    padding: 12px 17px;
+  }
+
+  .button-md {
+    font-size: 0.95rem;
+    padding: 15px 22px;
+  }
+
+  .button-lg {
+    font-size: var(--step-0);
+    padding: 18px 26px;
+  }
+
+  .button-primary {
+    background: var(--color-lbs-blue);
+    color: var(--color-white);
+  }
+
+  .button-primary:hover {
+    background: var(--color-ink);
+  }
+
+  .button-secondary {
+    background: var(--color-white);
+    border-color: var(--color-border-strong);
+    color: var(--color-lbs-blue);
+  }
+
+  .button-secondary:hover {
+    border-color: var(--color-lbs-blue);
+  }
+
+  .button-ghost {
+    background: transparent;
+    border-color: rgba(255, 255, 255, 0.34);
+    color: var(--color-white);
+  }
+
+  .button-ghost:hover {
+    background: rgba(255, 255, 255, 0.1);
+    border-color: rgba(255, 255, 255, 0.72);
+  }
+
+  .button-red {
+    background: var(--color-lbs-red);
+    color: var(--color-white);
+  }
+
+  .button-red:hover {
+    background: #a90a27;
+  }
+
+  .button-icon {
+    font-weight: 900;
+    transform: translateY(-1px);
+  }
+
+  @media (max-width: 420px) {
+    .button {
+      width: 100%;
+    }
+  }
+</style>

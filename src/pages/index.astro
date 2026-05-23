@@ -1,0 +1,431 @@
+---
+import { getCollection } from 'astro:content';
+import BaseLayout from '@layouts/BaseLayout.astro';
+import Button from '@components/atoms/Button.astro';
+import SectionHeader from '@components/atoms/SectionHeader.astro';
+import Stat from '@components/atoms/Stat.astro';
+import LabSignal from '@components/sections/LabSignal.astro';
+import TeamGrid from '@components/sections/TeamGrid.astro';
+import MentorGrid from '@components/sections/MentorGrid.astro';
+import ApplyCTA from '@components/sections/ApplyCTA.astro';
+import DSAIBlock from '@components/sections/DSAIBlock.astro';
+import { LBS_URL, SITE_URL } from '@utils/site';
+import { sortTeamsByCohortList } from '@utils/collections';
+
+const [teams, cohorts, mentors] = await Promise.all([
+  getCollection('teams'),
+  getCollection('cohorts'),
+  getCollection('mentors'),
+]);
+
+const cohort01 = cohorts.find((cohort) => cohort.data.id === 'cohort-01');
+const cohortTeams = cohort01 ? sortTeamsByCohortList(teams, cohort01.data.teams) : teams;
+const featuredTeams = cohortTeams.filter((team) => team.data.featured);
+
+const jsonLd = {
+  '@context': 'https://schema.org',
+  '@type': 'EducationalOrganization',
+  name: 'LBS AI Lab',
+  parentOrganization: {
+    '@type': 'CollegeOrUniversity',
+    name: 'London Business School',
+    url: LBS_URL,
+  },
+  url: `${SITE_URL}/`,
+  description:
+    'A hands-on AI venture lab for future operators and founders at London Business School.',
+};
+---
+
+<BaseLayout
+  title="LBS AI Lab | The AI venture lab for future operators and founders"
+  description="LBS AI Lab helps London Business School students build AI products, automate workflows, and develop hands-on AI fluency through real cohort-based product creation."
+  jsonLd={jsonLd}
+>
+  <section class="home-hero">
+    <div class="container hero-grid">
+      <div class="hero-copy">
+        <p class="eyebrow">London Business School / Data Science & AI Initiative</p>
+        <h1>The AI venture lab for future operators and founders.</h1>
+        <p class="lede">
+          LBS AI Lab gives students hands-on experience building AI products,
+          automating workflows, and exploring how intelligent systems reshape business.
+        </p>
+        <div class="hero-actions">
+          <Button href="/cohorts/cohort-01/" size="lg">Explore Cohort 01</Button>
+          <Button href="/apply/" variant="secondary" size="lg">Apply for September 2026</Button>
+        </div>
+        <p class="hero-note">Built by LBS students. Backed by the Data Science & AI Initiative.</p>
+      </div>
+
+      <aside class="hero-panel" aria-label="Cohort 01 facts">
+        <div>
+          <span>Cohort 01</span>
+          <strong>10 April - 12 June 2026</strong>
+        </div>
+        <dl>
+          <div>
+            <dt>Teams</dt>
+            <dd>9</dd>
+          </div>
+          <div>
+            <dt>Builders</dt>
+            <dd>22</dd>
+          </div>
+          <div>
+            <dt>Mentors</dt>
+            <dd>4</dd>
+          </div>
+        </dl>
+      </aside>
+    </div>
+  </section>
+
+  <section class="section manifesto">
+    <div class="container manifesto-grid">
+      <div class="manifesto-rule" aria-hidden="true"></div>
+      <div>
+        <h2>We believe the future's most effective leaders will be builders.</h2>
+        <p>
+          As AI reshapes every industry, the ability to prototype products, automate
+          workflows, and work directly with intelligent systems becomes a strategic
+          advantage. LBS AI Lab gives students a hands-on environment to explore that
+          future through real products, real experiments, and real execution.
+        </p>
+      </div>
+    </div>
+  </section>
+
+  <section class="section section-cloud">
+    <div class="container proof-grid">
+      <SectionHeader
+        eyebrow="Cohort proof"
+        title="Real teams, real products, real student builders."
+        body="Cohort 01 brings together LBS students building AI products across careers, funding, events, onboarding, campus life, academic planning, and professional workflows."
+      />
+      <div class="stats-grid">
+        <Stat value="9" label="teams" />
+        <Stat value="22" label="participants" />
+        <Stat value="4" label="mentors" />
+        <Stat value="9" label="week build cycle" />
+        <Stat value="Sep 2026" label="next cohort" />
+      </div>
+    </div>
+  </section>
+
+  <section class="section what-we-do">
+    <div class="container">
+      <SectionHeader
+        eyebrow="What the Lab does"
+        title="AI fluency, developed through execution."
+        body="The Lab treats building as a leadership capability: the practical fluency to move from insight to product, workflow, and transformation."
+      />
+      <div class="pillar-grid">
+        <article>
+          <span>01</span>
+          <h3>Build</h3>
+          <p>Students move from idea to prototype through hands-on product creation.</p>
+        </article>
+        <article>
+          <span>02</span>
+          <h3>Experiment</h3>
+          <p>Teams test AI use cases against real student, organisational, and operational workflows.</p>
+        </article>
+        <article>
+          <span>03</span>
+          <h3>Transform</h3>
+          <p>The Lab helps future leaders understand AI transformation by building directly with the tools changing business.</p>
+        </article>
+      </div>
+    </div>
+  </section>
+
+  <section class="section section-warm cohort-showcase">
+    <div class="container showcase-grid">
+      <div>
+        <SectionHeader
+          eyebrow="Cohort 01"
+          title="Meet the founding cohort."
+          body="From job-search copilots to club operations platforms, Cohort 01 shows what happens when future leaders learn AI by building with it."
+        />
+        <Button href="/cohorts/cohort-01/" variant="secondary">View Cohort 01</Button>
+      </div>
+      <LabSignal />
+    </div>
+    <div class="container team-list">
+      <TeamGrid teams={cohortTeams} />
+    </div>
+  </section>
+
+  <section class="section featured">
+    <div class="container">
+      <SectionHeader
+        eyebrow="Featured builds"
+        title="A portfolio spanning student experience, operations, and venture potential."
+        body="RecruitSmart LBS, EventOS, and Zentra show the range of Cohort 01: career AI, organisational automation, and professional workflow transformation."
+      />
+      <TeamGrid teams={featuredTeams} featured />
+    </div>
+  </section>
+
+  <section class="section section-cloud">
+    <div class="container">
+      <SectionHeader
+        eyebrow="Mentor layer"
+        title="Guided by product and technical mentors."
+        body="Cohort teams are supported by mentors who help sharpen product direction, technical execution, and launch readiness."
+      />
+      <MentorGrid mentors={mentors} />
+    </div>
+  </section>
+
+  <ApplyCTA />
+
+  <DSAIBlock />
+</BaseLayout>
+
+<style>
+  .home-hero {
+    background:
+      linear-gradient(90deg, var(--color-warm-white) 0 64%, var(--color-lbs-blue) 64% 100%);
+    border-bottom: 1px solid var(--color-border);
+    overflow: hidden;
+    padding-block: clamp(36px, 6vw, 64px) clamp(16px, 3vw, 28px);
+  }
+
+  .hero-grid {
+    align-items: end;
+    display: grid;
+    gap: clamp(36px, 6vw, 84px);
+    grid-template-columns: minmax(0, 1.05fr) minmax(280px, 0.48fr);
+  }
+
+  .hero-copy h1 {
+    color: var(--color-lbs-blue);
+    font-size: clamp(2.9rem, 5.4vw, 4.7rem);
+    margin: 16px 0;
+    max-width: 880px;
+  }
+
+  .hero-copy .lede {
+    max-width: 690px;
+  }
+
+  .hero-actions {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 12px;
+    margin-top: 24px;
+  }
+
+  .hero-note {
+    color: var(--color-muted);
+    font-size: var(--step--1);
+    font-weight: 800;
+    margin-top: 20px;
+  }
+
+  .hero-panel {
+    background: var(--color-white);
+    border: 1px solid var(--color-border);
+    box-shadow: var(--shadow-card);
+    padding: clamp(20px, 3vw, 30px);
+  }
+
+  .hero-panel > div {
+    border-bottom: 1px solid var(--color-border);
+    display: grid;
+    gap: 8px;
+    padding-bottom: 22px;
+  }
+
+  .hero-panel span,
+  .hero-panel dt {
+    color: var(--color-muted);
+    font-size: var(--step--1);
+    font-weight: 820;
+  }
+
+  .hero-panel strong {
+    color: var(--color-lbs-blue);
+    font-size: var(--step-1);
+  }
+
+  .hero-panel dl {
+    display: grid;
+    gap: 18px;
+    grid-template-columns: repeat(3, minmax(0, 1fr));
+    margin: 24px 0 0;
+  }
+
+  .hero-panel dd {
+    color: var(--color-lbs-blue);
+    font-family: var(--font-serif);
+    font-size: var(--step-2);
+    font-weight: 700;
+    line-height: 1;
+    margin: 0;
+  }
+
+  .manifesto {
+    background: var(--color-white);
+  }
+
+  .manifesto-grid {
+    display: grid;
+    gap: clamp(24px, 5vw, 60px);
+    grid-template-columns: minmax(4px, 0.12fr) minmax(0, 1fr);
+  }
+
+  .manifesto-rule {
+    background: var(--color-lbs-red);
+    width: 4px;
+  }
+
+  .manifesto h2 {
+    color: var(--color-lbs-blue);
+    font-size: var(--step-3);
+    margin: 0 0 24px;
+    max-width: 920px;
+  }
+
+  .manifesto p {
+    color: var(--color-ink-soft);
+    font-size: var(--step-1);
+    max-width: 880px;
+  }
+
+  .proof-grid {
+    display: grid;
+    gap: clamp(36px, 6vw, 80px);
+    grid-template-columns: minmax(0, 0.7fr) minmax(0, 1fr);
+  }
+
+  .stats-grid {
+    display: grid;
+    gap: 24px;
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+
+  .pillar-grid {
+    display: grid;
+    gap: 20px;
+    grid-template-columns: repeat(3, minmax(0, 1fr));
+    margin-top: 36px;
+  }
+
+  .pillar-grid article {
+    border: 1px solid var(--color-border);
+    padding: clamp(24px, 4vw, 36px);
+  }
+
+  .pillar-grid span {
+    color: var(--color-lbs-red);
+    font-weight: 900;
+  }
+
+  .pillar-grid h3 {
+    color: var(--color-lbs-blue);
+    margin: 18px 0 12px;
+  }
+
+  .pillar-grid p {
+    color: var(--color-ink-soft);
+  }
+
+  .showcase-grid {
+    align-items: center;
+    display: grid;
+    gap: clamp(36px, 7vw, 90px);
+    grid-template-columns: minmax(0, 0.7fr) minmax(300px, 0.55fr);
+  }
+
+  .showcase-grid :global(.button) {
+    margin-top: 28px;
+  }
+
+  .team-list {
+    margin-top: 42px;
+  }
+
+  .featured :global(.section-header),
+  .section-cloud :global(.section-header) {
+    margin-bottom: 34px;
+  }
+
+  @media (max-width: 900px) {
+    .home-hero {
+      background: var(--color-warm-white);
+    }
+
+    .hero-grid,
+    .proof-grid,
+    .showcase-grid {
+      grid-template-columns: 1fr;
+    }
+
+    .pillar-grid {
+      grid-template-columns: 1fr;
+    }
+
+    .hero-panel dl {
+      grid-template-columns: 1fr;
+    }
+  }
+
+  @media (max-width: 640px) {
+    .stats-grid {
+      grid-template-columns: 1fr;
+    }
+
+    .home-hero {
+      padding-block: 24px 10px;
+    }
+
+    .hero-copy h1 {
+      font-size: clamp(2.22rem, 9vw, 2.45rem);
+      margin: 14px 0;
+    }
+
+    .hero-copy .lede {
+      font-size: 0.98rem;
+      line-height: 1.42;
+    }
+
+    .hero-actions {
+      gap: 10px;
+      margin-top: 20px;
+    }
+
+    .hero-note {
+      font-size: 0.76rem;
+      margin-top: 12px;
+    }
+
+    .hero-panel {
+      padding: 14px;
+    }
+
+    .hero-panel > div {
+      padding-bottom: 8px;
+    }
+
+    .hero-panel strong {
+      font-size: 0.92rem;
+    }
+
+    .hero-panel dl {
+      gap: 10px;
+      grid-template-columns: repeat(3, minmax(0, 1fr));
+      margin-top: 10px;
+    }
+
+    .hero-panel dt {
+      font-size: 0.72rem;
+    }
+
+    .hero-panel dd {
+      font-size: 1.48rem;
+    }
+  }
+</style>

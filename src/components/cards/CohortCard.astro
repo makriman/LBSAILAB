@@ -1,0 +1,121 @@
+---
+import type { CohortEntry } from '@utils/collections';
+import { formatDateRange } from '@utils/dates';
+
+interface Props {
+  cohort: CohortEntry;
+}
+
+const { cohort } = Astro.props;
+const statusLabel =
+  cohort.data.status === 'current'
+    ? 'Current / Founding cohort'
+    : cohort.data.status === 'upcoming'
+      ? 'Upcoming'
+      : 'Past';
+---
+
+<article class="cohort-card">
+  <div class="topline">
+    <span>{statusLabel}</span>
+    <span>{cohort.data.season}</span>
+  </div>
+  <h2>{cohort.data.name}</h2>
+  <p>{formatDateRange(cohort.data.startsAt, cohort.data.endsAt)}</p>
+  <dl>
+    <div>
+      <dt>Teams</dt>
+      <dd>{cohort.data.teamCount ?? 'TBC'}</dd>
+    </div>
+    <div>
+      <dt>Participants</dt>
+      <dd>{cohort.data.participantCount ?? 'TBC'}</dd>
+    </div>
+    <div>
+      <dt>Mentors</dt>
+      <dd>{cohort.data.mentorCount ?? 'TBC'}</dd>
+    </div>
+  </dl>
+  <a href={`/cohorts/${cohort.data.slug}/`}>
+    {cohort.data.status === 'upcoming' ? 'Register interest' : 'View cohort'}
+  </a>
+</article>
+
+<style>
+  .cohort-card {
+    background: var(--color-white);
+    border: 1px solid var(--color-border-strong);
+    display: grid;
+    gap: 24px;
+    padding: clamp(24px, 4vw, 38px);
+  }
+
+  .topline {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 10px;
+    justify-content: space-between;
+  }
+
+  .topline span {
+    color: var(--color-muted);
+    font-size: var(--step--1);
+    font-weight: 820;
+  }
+
+  .topline span:first-child {
+    color: var(--color-lbs-red);
+  }
+
+  h2 {
+    color: var(--color-lbs-blue);
+    font-size: clamp(2.6rem, 8vw, 5.6rem);
+    margin: 0;
+  }
+
+  p {
+    color: var(--color-ink-soft);
+    font-size: var(--step-1);
+  }
+
+  dl {
+    border-block: 1px solid var(--color-border);
+    display: grid;
+    gap: 0;
+    grid-template-columns: repeat(3, 1fr);
+    margin: 0;
+    padding-block: 18px;
+  }
+
+  dt {
+    color: var(--color-muted);
+    font-size: 0.78rem;
+    font-weight: 800;
+  }
+
+  dd {
+    color: var(--color-lbs-blue);
+    font-family: var(--font-serif);
+    font-size: var(--step-2);
+    font-weight: 700;
+    margin: 2px 0 0;
+  }
+
+  a {
+    color: var(--color-lbs-blue);
+    font-weight: 860;
+    text-decoration: none;
+  }
+
+  a::after {
+    color: var(--color-lbs-red);
+    content: " ->";
+  }
+
+  @media (max-width: 560px) {
+    dl {
+      grid-template-columns: 1fr;
+      row-gap: 12px;
+    }
+  }
+</style>
