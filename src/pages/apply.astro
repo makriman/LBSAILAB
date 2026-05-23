@@ -1,8 +1,6 @@
 ---
 import BaseLayout from "@layouts/BaseLayout.astro";
 import Button from "@components/atoms/Button.astro";
-
-const registerInterestEmail = "rlokanathan.mba2027@london.edu";
 ---
 
 <BaseLayout
@@ -50,12 +48,7 @@ const registerInterestEmail = "rlokanathan.mba2027@london.edu";
         </p>
       </div>
 
-      <form
-        class="interest-form"
-        action={`mailto:${registerInterestEmail}?subject=LBS%20AI%20Lab%20September%202026%20interest`}
-        method="post"
-        enctype="text/plain"
-      >
+      <form class="interest-form" data-application-form>
         <label>
           <span>Name</span>
           <input name="name" autocomplete="name" required />
@@ -82,10 +75,47 @@ const registerInterestEmail = "rlokanathan.mba2027@london.edu";
         </label>
         <label>
           <span>What would you like to build?</span>
-          <textarea name="build_interest" rows="4"></textarea>
+          <textarea name="build_interest" rows="4" maxlength="900" required
+          ></textarea>
         </label>
+        <label class="consent-field">
+          <input name="public_consent" type="checkbox" value="yes" required />
+          <span>
+            Show my name, course, and idea on this page so other LBS builders
+            can contact me about working together.
+          </span>
+        </label>
+        <label class="bot-field" aria-hidden="true">
+          <span>Website</span>
+          <input name="website" tabindex="-1" autocomplete="off" />
+        </label>
+        <p class="form-status" data-form-status role="status"></p>
         <button type="submit">Submit interest</button>
       </form>
+    </div>
+  </section>
+
+  <section class="section submissions-section" id="submissions">
+    <div class="container submissions-grid">
+      <div>
+        <p class="eyebrow">Find co-builders</p>
+        <h2>See who is looking for people to build with.</h2>
+        <p>
+          Students who opt in can share their name, course, and build idea here.
+          Use the contact button to start a conversation about working together.
+        </p>
+      </div>
+
+      <div class="submissions-panel">
+        <div class="submissions-top">
+          <strong>September 2026 submissions</strong>
+          <button type="button" data-load-submissions>View submissions</button>
+        </div>
+        <p class="submissions-status" data-submissions-status>
+          Submissions load from the connected Google Sheet.
+        </p>
+        <div class="submission-list" data-submission-list hidden></div>
+      </div>
     </div>
   </section>
 
@@ -130,6 +160,151 @@ const registerInterestEmail = "rlokanathan.mba2027@london.edu";
     </div>
   </section>
 </BaseLayout>
+
+<script is:inline>
+  const form = document.querySelector("[data-application-form]");
+  const formStatus = document.querySelector("[data-form-status]");
+  const loadButton = document.querySelector("[data-load-submissions]");
+  const submissionsStatus = document.querySelector("[data-submissions-status]");
+  const submissionsList = document.querySelector("[data-submission-list]");
+
+  const setText = (node, text) => {
+    if (node) {
+      node.textContent = text;
+    }
+  };
+
+  const contactHref = (application) => {
+    const subject = `LBS AI Lab: exploring your ${application.course} build idea`;
+    const body = `Hi ${application.name.split(" ")[0]},\n\nI saw your LBS AI Lab submission about "${application.idea}". Would you be open to chatting about working together?\n\n`;
+    return `mailto:${application.email}?subject=${encodeURIComponent(subject)}&body=${encodeURIComponent(body)}`;
+  };
+
+  const renderSubmissions = (applications) => {
+    if (!submissionsList) return;
+
+    submissionsList.innerHTML = "";
+
+    if (!applications.length) {
+      submissionsList.hidden = true;
+      setText(
+        submissionsStatus,
+        "No public submissions yet. Be the first to share a build idea.",
+      );
+      return;
+    }
+
+    for (const application of applications) {
+      const card = document.createElement("article");
+      card.className = "submission-card";
+
+      const heading = document.createElement("div");
+      const name = document.createElement("strong");
+      name.textContent = application.name;
+      const course = document.createElement("span");
+      course.textContent = application.course;
+      heading.append(name, course);
+
+      const idea = document.createElement("p");
+      idea.textContent = application.idea;
+
+      const contact = document.createElement("a");
+      contact.href = contactHref(application);
+      contact.textContent = "Contact to build together";
+
+      card.append(heading, idea, contact);
+      submissionsList.append(card);
+    }
+
+    submissionsList.hidden = false;
+    setText(
+      submissionsStatus,
+      `${applications.length} public submission${applications.length === 1 ? "" : "s"} found.`,
+    );
+  };
+
+  const loadSubmissions = async () => {
+    if (!submissionsList) return;
+
+    setText(submissionsStatus, "Loading submissions...");
+    loadButton?.setAttribute("disabled", "true");
+
+    try {
+      const response = await fetch("/api/applications", {
+        headers: { Accept: "application/json" },
+      });
+      const data = response.headers
+        .get("Content-Type")
+        ?.includes("application/json")
+        ? await response.json()
+        : {};
+
+      if (!response.ok) {
+        throw new Error(data.error || "Submissions are not available yet.");
+      }
+
+      renderSubmissions(data.applications || []);
+    } catch (error) {
+      submissionsList.hidden = true;
+      setText(
+        submissionsStatus,
+        error instanceof Error
+          ? error.message
+          : "Submissions are not available yet.",
+      );
+    } finally {
+      loadButton?.removeAttribute("disabled");
+    }
+  };
+
+  loadButton?.addEventListener("click", loadSubmissions);
+
+  form?.addEventListener("submit", async (event) => {
+    event.preventDefault();
+
+    const submitButton = form.querySelector('button[type="submit"]');
+    const payload = Object.fromEntries(new FormData(form).entries());
+
+    setText(formStatus, "Submitting...");
+    submitButton?.setAttribute("disabled", "true");
+
+    try {
+      const response = await fetch("/api/applications", {
+        method: "POST",
+        headers: {
+          Accept: "application/json",
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify(payload),
+      });
+      const data = response.headers
+        .get("Content-Type")
+        ?.includes("application/json")
+        ? await response.json()
+        : {};
+
+      if (!response.ok) {
+        throw new Error(data.error || "Submission failed.");
+      }
+
+      form.reset();
+      setText(
+        formStatus,
+        "Submitted. Your idea will appear below once the sheet refreshes.",
+      );
+      await loadSubmissions();
+    } catch (error) {
+      setText(
+        formStatus,
+        error instanceof Error
+          ? error.message
+          : "Submission failed. Please try again.",
+      );
+    } finally {
+      submitButton?.removeAttribute("disabled");
+    }
+  });
+</script>
 
 <style>
   .page-hero {
@@ -265,6 +440,37 @@ const registerInterestEmail = "rlokanathan.mba2027@london.edu";
     font-weight: 820;
   }
 
+  .consent-field {
+    align-items: start;
+    display: grid;
+    gap: 12px;
+    grid-template-columns: 20px 1fr;
+  }
+
+  .consent-field input {
+    margin-top: 3px;
+    min-height: 20px;
+    padding: 0;
+    width: 20px;
+  }
+
+  .consent-field span {
+    color: var(--color-ink-soft);
+    font-size: 0.9rem;
+    font-weight: 760;
+    line-height: 1.45;
+  }
+
+  .bot-field {
+    clip: rect(0 0 0 0);
+    clip-path: inset(50%);
+    height: 1px;
+    overflow: hidden;
+    position: absolute;
+    white-space: nowrap;
+    width: 1px;
+  }
+
   input,
   textarea {
     background: var(--color-white);
@@ -292,10 +498,126 @@ const registerInterestEmail = "rlokanathan.mba2027@london.edu";
     padding: 14px 22px;
   }
 
+  button:disabled {
+    cursor: wait;
+    opacity: 0.66;
+  }
+
+  .form-status {
+    color: var(--color-ink-soft);
+    font-size: var(--step--1);
+    font-weight: 760;
+    min-height: 1.4em;
+  }
+
+  .submissions-section {
+    background: var(--color-white);
+  }
+
+  .submissions-grid {
+    align-items: start;
+    display: grid;
+    gap: clamp(28px, 5vw, 70px);
+    grid-template-columns: minmax(0, 0.58fr) minmax(320px, 0.72fr);
+  }
+
+  .submissions-grid h2 {
+    color: var(--color-lbs-blue);
+    margin: 16px 0;
+  }
+
+  .submissions-grid p:not(.eyebrow) {
+    color: var(--color-ink-soft);
+    font-size: var(--step-1);
+  }
+
+  .submissions-panel {
+    background: var(--color-warm-white);
+    border: 1px solid var(--color-border);
+    display: grid;
+    gap: 18px;
+    padding: clamp(20px, 3vw, 30px);
+  }
+
+  .submissions-top {
+    align-items: center;
+    display: flex;
+    flex-wrap: wrap;
+    gap: 14px;
+    justify-content: space-between;
+  }
+
+  .submissions-top strong {
+    color: var(--color-lbs-blue);
+    font-size: var(--step-1);
+  }
+
+  .submissions-top button {
+    background: var(--color-lbs-blue);
+    min-height: 44px;
+    padding: 12px 18px;
+  }
+
+  .submissions-status {
+    color: var(--color-muted);
+    font-size: var(--step--1) !important;
+    font-weight: 760;
+  }
+
+  .submission-list {
+    display: grid;
+    gap: 14px;
+  }
+
+  .submission-card {
+    background: var(--color-white);
+    border: 1px solid var(--color-border);
+    display: grid;
+    gap: 12px;
+    padding: 18px;
+  }
+
+  .submission-card div {
+    align-items: baseline;
+    display: flex;
+    flex-wrap: wrap;
+    gap: 8px 12px;
+  }
+
+  .submission-card strong {
+    color: var(--color-lbs-blue);
+    font-size: var(--step-1);
+    line-height: 1.15;
+  }
+
+  .submission-card span {
+    color: var(--color-lbs-red);
+    font-size: var(--step--1);
+    font-weight: 820;
+  }
+
+  .submission-card p {
+    color: var(--color-ink-soft);
+    font-size: var(--step-0) !important;
+  }
+
+  .submission-card a {
+    color: var(--color-lbs-blue);
+    font-size: var(--step--1);
+    font-weight: 860;
+    text-decoration: none;
+  }
+
+  .submission-card a::after {
+    color: var(--color-lbs-red);
+    content: " ->";
+  }
+
   @media (max-width: 940px) {
     .hero-grid,
     .apply-grid,
-    .form-grid {
+    .form-grid,
+    .submissions-grid {
       grid-template-columns: 1fr;
     }
 
