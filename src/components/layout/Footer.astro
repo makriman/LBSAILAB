@@ -53,7 +53,7 @@ const legalLinks = [
     href: `${LBS_URL}about/london-business-school/policies-and-legislation`,
     label: "Policies",
   },
-  { href: `${LBS_URL}sitemap`, label: "Sitemap" },
+  { href: "/sitemap-index.xml", label: "Sitemap" },
 ];
 
 const year = new Date().getFullYear();
@@ -111,7 +111,11 @@ const year = new Date().getFullYear();
       <nav aria-label="Legal links">
         {
           legalLinks.map((link) => (
-            <a href={link.href} target="_blank" rel="noreferrer">
+            <a
+              href={link.href}
+              target={link.href.startsWith("http") ? "_blank" : undefined}
+              rel={link.href.startsWith("http") ? "noreferrer" : undefined}
+            >
               {link.label}
             </a>
           ))
