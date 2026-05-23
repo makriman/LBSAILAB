@@ -4,6 +4,9 @@
     "role": "Mentor",
     "name": "Ramakrishnan Lokanathan",
     "mentorType": "Technical Mentor",
+    "focus": "Agentic engineering, prototype architecture, and build velocity.",
+    "image": "/mentors/ramakrishnan-lokanathan.jpg",
+    "linkedinUrl": "https://www.linkedin.com/in/makriman",
     "email": "rlokanathan.mba2027@london.edu",
     "cohort": "cohort-01",
     "showEmailPublicly": true
@@ -13,15 +16,21 @@
     "role": "Mentor",
     "name": "Akshay Nagpal",
     "mentorType": "Technical Mentor",
+    "focus": "Technical reviews, implementation choices, and AI product shipping.",
+    "image": "/mentors/akshay-nagpal.jpg",
+    "linkedinUrl": "https://www.linkedin.com/in/akiii/",
     "email": "akshaynagpal1995@gmail.com",
     "cohort": "cohort-01",
     "showEmailPublicly": true
   },
   {
-    "id": "zahra-mogadasi",
+    "id": "zara-mogadasi",
     "role": "Mentor",
-    "name": "Zahra Mogadasi",
+    "name": "Zara Mogadasi",
     "mentorType": "Product Mentor",
+    "focus": "Product discovery, user feedback loops, and clearer positioning.",
+    "image": "/mentors/zara-mogadasi.jpg",
+    "linkedinUrl": "https://www.linkedin.com/in/zaramogadasi/",
     "email": "zmogadasi.mba2025@london.edu",
     "cohort": "cohort-01",
     "showEmailPublicly": true
@@ -31,6 +40,9 @@
     "role": "Mentor",
     "name": "Rhea Bisaria",
     "mentorType": "Product Mentor",
+    "focus": "Product strategy, customer insight, and launch readiness.",
+    "image": "/mentors/rhea-bisaria.png",
+    "linkedinUrl": "https://www.linkedin.com/in/rheabisaria/",
     "email": "rbisaria.mba2027@london.edu",
     "cohort": "cohort-01",
     "showEmailPublicly": true

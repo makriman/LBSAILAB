@@ -3,9 +3,7 @@ import { getCollection } from "astro:content";
 import BaseLayout from "@layouts/BaseLayout.astro";
 import Button from "@components/atoms/Button.astro";
 import SectionHeader from "@components/atoms/SectionHeader.astro";
-import Stat from "@components/atoms/Stat.astro";
 import GoogleDeepMindLogo from "@components/brand/GoogleDeepMindLogo.astro";
-import LabSignal from "@components/sections/LabSignal.astro";
 import TeamGrid from "@components/sections/TeamGrid.astro";
 import MentorGrid from "@components/sections/MentorGrid.astro";
 import ApplyCTA from "@components/sections/ApplyCTA.astro";
@@ -113,19 +111,30 @@ const jsonLd = {
     </div>
   </section>
 
-  <section class="section section-cloud">
-    <div class="container proof-grid">
+  <section class="section section-cloud proof-section">
+    <div class="container proof-strip">
       <SectionHeader
         eyebrow="Cohort proof"
         title="Real teams, real products, real LBS users."
-        body="Cohort 01 brings together LBS students building for career workflows, funding discovery, events, onboarding, campus life, academic planning, and professional work. Each team has a natural test audience across the School."
+        body="Cohort 01 is already testing the Lab model: choose an LBS workflow, build quickly, and learn from people who can actually use the product."
       />
-      <div class="stats-grid">
-        <Stat value="9" label="teams" />
-        <Stat value="22" label="participants" />
-        <Stat value="4" label="mentors" />
-        <Stat value="9" label="week build cycle" />
-        <Stat value="Sep 2026" label="next cohort" />
+      <div class="proof-stats" aria-label="Cohort 01 metrics">
+        <div>
+          <strong>9</strong>
+          <span>teams</span>
+        </div>
+        <div>
+          <strong>22</strong>
+          <span>builders</span>
+        </div>
+        <div>
+          <strong>4</strong>
+          <span>mentors</span>
+        </div>
+        <div>
+          <strong>9 weeks</strong>
+          <span>build, test, iterate</span>
+        </div>
       </div>
     </div>
   </section>
@@ -167,7 +176,7 @@ const jsonLd = {
   </section>
 
   <section class="section section-warm cohort-showcase">
-    <div class="container showcase-grid">
+    <div class="container showcase-intro">
       <div>
         <SectionHeader
           eyebrow="Cohort 01"
@@ -178,7 +187,27 @@ const jsonLd = {
           >View Cohort 01</Button
         >
       </div>
-      <LabSignal />
+      <div class="showcase-note">
+        <p>
+          The useful signal is not a category map. It is whether a team can put
+          a working product in front of a clear LBS audience and learn from the
+          response.
+        </p>
+        <ul>
+          <li>
+            <strong>Start with a real workflow.</strong> Recruiting, events, learning,
+            funding, campus operations, or professional work.
+          </li>
+          <li>
+            <strong>Find the first users.</strong> Students, clubs, alumni, founders,
+            operators, and staff who feel the problem now.
+          </li>
+          <li>
+            <strong>Use feedback as the curriculum.</strong> Ship, watch, listen,
+            and improve the product in the open.
+          </li>
+        </ul>
+      </div>
     </div>
     <div class="container team-list">
       <TeamGrid teams={cohortTeams} />
@@ -196,7 +225,7 @@ const jsonLd = {
     </div>
   </section>
 
-  <section class="section section-cloud">
+  <section class="section section-cloud mentor-section">
     <div class="container">
       <SectionHeader
         eyebrow="Mentor layer"
@@ -338,16 +367,59 @@ const jsonLd = {
     max-width: 880px;
   }
 
-  .proof-grid {
-    display: grid;
-    gap: clamp(36px, 6vw, 80px);
-    grid-template-columns: minmax(0, 0.7fr) minmax(0, 1fr);
+  .proof-section {
+    padding-block: clamp(28px, 4vw, 44px);
   }
 
-  .stats-grid {
+  .proof-strip {
+    align-items: center;
     display: grid;
-    gap: 24px;
-    grid-template-columns: repeat(2, minmax(0, 1fr));
+    gap: clamp(24px, 5vw, 56px);
+    grid-template-columns: minmax(0, 0.86fr) minmax(420px, 1fr);
+  }
+
+  .proof-strip :global(.section-header) {
+    gap: 10px;
+  }
+
+  .proof-strip :global(.section-header h2) {
+    font-size: var(--step-2);
+  }
+
+  .proof-strip :global(.section-header p) {
+    font-size: var(--step-0);
+    max-width: 680px;
+  }
+
+  .proof-stats {
+    border-block: 1px solid var(--color-border);
+    display: grid;
+    grid-template-columns: repeat(4, minmax(0, 1fr));
+  }
+
+  .proof-stats div {
+    border-left: 1px solid var(--color-border);
+    display: grid;
+    gap: 7px;
+    padding: 14px 16px;
+  }
+
+  .proof-stats div:first-child {
+    border-left: 0;
+  }
+
+  .proof-stats strong {
+    color: var(--color-lbs-blue);
+    font-family: var(--font-serif);
+    font-size: clamp(1.9rem, 3vw, 3rem);
+    line-height: 0.95;
+  }
+
+  .proof-stats span {
+    color: var(--color-muted);
+    font-size: var(--step--1);
+    font-weight: 820;
+    line-height: 1.15;
   }
 
   .pillar-grid {
@@ -376,15 +448,45 @@ const jsonLd = {
     color: var(--color-ink-soft);
   }
 
-  .showcase-grid {
-    align-items: center;
+  .showcase-intro {
+    align-items: start;
     display: grid;
-    gap: clamp(36px, 7vw, 90px);
-    grid-template-columns: minmax(0, 0.7fr) minmax(300px, 0.55fr);
+    gap: clamp(28px, 6vw, 72px);
+    grid-template-columns: minmax(0, 0.8fr) minmax(320px, 0.68fr);
   }
 
-  .showcase-grid :global(.button) {
+  .showcase-intro :global(.button) {
     margin-top: 28px;
+  }
+
+  .showcase-note {
+    border-left: 4px solid var(--color-lbs-red);
+    padding-left: clamp(20px, 3vw, 30px);
+  }
+
+  .showcase-note p {
+    color: var(--color-lbs-blue);
+    font-size: var(--step-1);
+    font-weight: 760;
+    line-height: 1.32;
+    margin: 0 0 20px;
+  }
+
+  .showcase-note ul {
+    display: grid;
+    gap: 12px;
+    list-style: none;
+    margin: 0;
+    padding: 0;
+  }
+
+  .showcase-note li {
+    color: var(--color-ink-soft);
+    line-height: 1.42;
+  }
+
+  .showcase-note strong {
+    color: var(--color-lbs-blue);
   }
 
   .team-list {
@@ -392,7 +494,7 @@ const jsonLd = {
   }
 
   .featured :global(.section-header),
-  .section-cloud :global(.section-header) {
+  .mentor-section :global(.section-header) {
     margin-bottom: 34px;
   }
 
@@ -402,8 +504,8 @@ const jsonLd = {
     }
 
     .hero-grid,
-    .proof-grid,
-    .showcase-grid {
+    .proof-strip,
+    .showcase-intro {
       grid-template-columns: 1fr;
     }
 
@@ -413,8 +515,16 @@ const jsonLd = {
   }
 
   @media (max-width: 640px) {
-    .stats-grid {
-      grid-template-columns: 1fr;
+    .proof-stats {
+      grid-template-columns: repeat(2, minmax(0, 1fr));
+    }
+
+    .proof-stats div:nth-child(odd) {
+      border-left: 0;
+    }
+
+    .proof-stats div:nth-child(n + 3) {
+      border-top: 1px solid var(--color-border);
     }
 
     .home-hero {

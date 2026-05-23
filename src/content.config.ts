@@ -10,6 +10,9 @@ const peopleSchema = z.object({
   team: z.string().optional(),
   publicTeam: z.string().optional(),
   mentorType: z.string().optional(),
+  focus: z.string().optional(),
+  image: z.string().optional(),
+  linkedinUrl: z.url().optional(),
   cohort: z.string().optional(),
   showEmailPublicly: z.boolean().default(false),
 });

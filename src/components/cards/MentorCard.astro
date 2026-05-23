@@ -10,45 +10,111 @@ const { mentor } = Astro.props;
 ---
 
 <article class="mentor-card">
-  <div class="avatar" aria-hidden="true">{initials(mentor.data.name)}</div>
-  <div>
+  {
+    mentor.data.linkedinUrl ? (
+      <a
+        class="photo-link"
+        href={mentor.data.linkedinUrl}
+        aria-label={`Open ${mentor.data.name} on LinkedIn`}
+        target="_blank"
+        rel="noreferrer"
+      >
+        {mentor.data.image ? (
+          <img
+            src={mentor.data.image}
+            alt={mentor.data.name}
+            loading="lazy"
+            decoding="async"
+          />
+        ) : (
+          <span class="avatar" aria-hidden="true">
+            {initials(mentor.data.name)}
+          </span>
+        )}
+      </a>
+    ) : (
+      <div class="photo-link">
+        {mentor.data.image ? (
+          <img
+            src={mentor.data.image}
+            alt={mentor.data.name}
+            loading="lazy"
+            decoding="async"
+          />
+        ) : (
+          <span class="avatar" aria-hidden="true">
+            {initials(mentor.data.name)}
+          </span>
+        )}
+      </div>
+    )
+  }
+  <div class="mentor-body">
+    <p class="mentor-type">{mentor.data.mentorType}</p>
     <h3>{mentor.data.name}</h3>
-    <p>{mentor.data.mentorType}</p>
-    <a href={`mailto:${mentor.data.email}`}>{mentor.data.email}</a>
+    {mentor.data.focus && <p class="mentor-focus">{mentor.data.focus}</p>}
+    <div class="mentor-links">
+      {
+        mentor.data.linkedinUrl && (
+          <a
+            class="linkedin-link"
+            href={mentor.data.linkedinUrl}
+            target="_blank"
+            rel="noreferrer"
+          >
+            LinkedIn
+          </a>
+        )
+      }
+      {
+        mentor.data.showEmailPublicly && (
+          <a class="email-link" href={`mailto:${mentor.data.email}`}>
+            Email
+          </a>
+        )
+      }
+    </div>
   </div>
 </article>
 
 <style>
   .mentor-card {
-    align-items: start;
     background: var(--color-white);
     border: 1px solid var(--color-border);
     display: grid;
-    gap: 18px;
-    grid-template-columns: 58px 1fr;
-    padding: 22px;
+    min-height: 100%;
+  }
+
+  .photo-link {
+    background: var(--color-cloud);
+    border-bottom: 1px solid var(--color-border);
+    display: block;
+    overflow: hidden;
+    text-decoration: none;
+  }
+
+  img,
+  .avatar {
+    aspect-ratio: 1 / 1;
+    height: auto;
+    object-fit: cover;
+    width: 100%;
   }
 
   .avatar {
     align-items: center;
     background: var(--color-lbs-blue);
     color: var(--color-white);
-    display: inline-flex;
+    display: flex;
+    font-size: var(--step-2);
     font-weight: 900;
-    height: 58px;
     justify-content: center;
-    position: relative;
-    width: 58px;
   }
 
-  .avatar::after {
-    background: var(--color-lbs-red);
-    bottom: 0;
-    content: "";
-    height: 4px;
-    left: 0;
-    position: absolute;
-    width: 100%;
+  .mentor-body {
+    display: grid;
+    gap: 12px;
+    padding: 18px;
   }
 
   h3 {
@@ -56,33 +122,63 @@ const { mentor } = Astro.props;
     font-family: var(--font-sans);
     font-size: var(--step-1);
     line-height: 1.15;
-    margin: 0 0 6px;
+    margin: 0;
   }
 
-  p {
+  .mentor-type {
+    color: var(--color-lbs-red);
+    font-size: 0.78rem;
+    font-weight: 900;
+    letter-spacing: 0.04em;
+    margin: 0;
+    text-transform: uppercase;
+  }
+
+  .mentor-focus {
     color: var(--color-ink-soft);
-    font-weight: 760;
+    font-size: 0.95rem;
+    line-height: 1.42;
+    margin: 0;
   }
 
-  a,
-  span {
-    color: var(--color-muted);
-    display: inline-block;
+  .mentor-links {
+    align-items: center;
+    display: flex;
+    flex-wrap: wrap;
+    gap: 10px;
+    margin-top: 4px;
+  }
+
+  .linkedin-link,
+  .email-link {
+    align-items: center;
+    display: inline-flex;
     font-size: var(--step--1);
-    font-weight: 780;
-    margin-top: 12px;
-    overflow-wrap: anywhere;
+    font-weight: 850;
+    min-height: 38px;
+    padding: 9px 13px;
+    text-decoration: none;
+  }
+
+  .linkedin-link {
+    background: var(--color-lbs-blue);
+    border-radius: var(--radius-button);
+    color: var(--color-white);
+  }
+
+  .linkedin-link:hover {
+    background: var(--color-lbs-red);
+  }
+
+  .email-link {
+    color: var(--color-lbs-blue);
+    text-decoration: underline;
+    text-decoration-color: rgba(205, 13, 47, 0.36);
   }
 
   @media (max-width: 420px) {
-    .mentor-card {
-      grid-template-columns: 48px 1fr;
-      padding: 18px;
-    }
-
-    .avatar {
-      height: 48px;
-      width: 48px;
+    .mentor-body {
+      padding: 16px;
     }
   }
 </style>
