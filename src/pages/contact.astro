@@ -23,10 +23,10 @@ import { DSAI_URL } from "@utils/site";
     <div class="container contact-grid">
       <article>
         <p class="eyebrow">General inquiries</p>
-        <h2>Use a confirmed Lab or DSAI contact before publishing.</h2>
+        <h2>Reach the Data Science & AI Initiative.</h2>
         <p>
-          A public lab email has not been confirmed in the project brief. This
-          page is ready for the approved contact route once it is available.
+          For general questions, use the DSAI Initiative contact route while the
+          dedicated AI Lab inbox is being set up.
         </p>
         <Button href={DSAI_URL} variant="secondary"
           >Visit the DSAI Initiative</Button
@@ -61,7 +61,7 @@ import { DSAI_URL } from "@utils/site";
   .page-hero {
     background: var(--color-lbs-blue);
     color: var(--color-white);
-    padding-block: clamp(74px, 11vw, 132px);
+    padding-block: clamp(52px, 7vw, 92px);
   }
 
   :global(.page-hero .eyebrow) {
@@ -88,6 +88,7 @@ import { DSAI_URL } from "@utils/site";
     border: 1px solid var(--color-border);
     display: grid;
     gap: 18px;
+    grid-template-rows: auto minmax(5.2rem, auto) 1fr auto;
     padding: clamp(24px, 4vw, 34px);
   }
 
@@ -104,6 +105,10 @@ import { DSAI_URL } from "@utils/site";
   @media (max-width: 920px) {
     .contact-grid {
       grid-template-columns: 1fr;
+    }
+
+    article {
+      grid-template-rows: auto;
     }
   }
 </style>

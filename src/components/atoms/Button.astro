@@ -1,19 +1,24 @@
 ---
 interface Props {
   href: string;
-  variant?: 'primary' | 'secondary' | 'ghost' | 'red';
-  size?: 'sm' | 'md' | 'lg';
+  variant?: "primary" | "secondary" | "ghost" | "red";
+  size?: "sm" | "md" | "lg";
   external?: boolean;
 }
 
-const { href, variant = 'primary', size = 'md', external = href.startsWith('http') } = Astro.props;
+const {
+  href,
+  variant = "primary",
+  size = "md",
+  external = href.startsWith("http"),
+} = Astro.props;
 ---
 
 <a
-  class:list={['button', `button-${variant}`, `button-${size}`]}
+  class:list={["button", `button-${variant}`, `button-${size}`]}
   href={href}
-  target={external ? '_blank' : undefined}
-  rel={external ? 'noreferrer' : undefined}
+  target={external ? "_blank" : undefined}
+  rel={external ? "noreferrer" : undefined}
 >
   <span><slot /></span>
   <span class="button-icon" aria-hidden="true">-></span>
@@ -29,6 +34,7 @@ const { href, variant = 'primary', size = 'md', external = href.startsWith('http
     gap: 10px;
     justify-content: center;
     line-height: 1;
+    max-width: 100%;
     min-height: 44px;
     text-decoration: none;
     transition:
@@ -99,12 +105,20 @@ const { href, variant = 'primary', size = 'md', external = href.startsWith('http
 
   .button-icon {
     font-weight: 900;
+    flex: 0 0 auto;
     transform: translateY(-1px);
   }
 
   @media (max-width: 420px) {
     .button {
+      line-height: 1.15;
+      white-space: normal;
       width: 100%;
+    }
+
+    .button > span:first-child {
+      min-width: 0;
+      text-align: center;
     }
   }
 </style>

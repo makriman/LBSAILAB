@@ -108,7 +108,7 @@ import DSAIBlock from "@components/sections/DSAIBlock.astro";
   .page-hero {
     background: var(--color-lbs-blue);
     color: var(--color-white);
-    padding-block: clamp(74px, 11vw, 140px);
+    padding-block: clamp(52px, 7vw, 92px);
   }
 
   :global(.page-hero .eyebrow) {
@@ -166,6 +166,9 @@ import DSAIBlock from "@components/sections/DSAIBlock.astro";
   .process-grid article {
     background: var(--color-white);
     border: 1px solid var(--color-border);
+    display: grid;
+    gap: 12px;
+    grid-template-rows: auto minmax(3.1rem, auto) 1fr;
     padding: clamp(24px, 4vw, 34px);
   }
 
@@ -178,6 +181,10 @@ import DSAIBlock from "@components/sections/DSAIBlock.astro";
     .editorial-grid,
     .process-grid {
       grid-template-columns: 1fr;
+    }
+
+    .process-grid article {
+      grid-template-rows: auto;
     }
   }
 </style>

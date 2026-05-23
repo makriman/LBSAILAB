@@ -1,6 +1,6 @@
 ---
-import type { MentorEntry } from '@utils/collections';
-import { initials } from '@utils/collections';
+import type { MentorEntry } from "@utils/collections";
+import { initials } from "@utils/collections";
 
 interface Props {
   mentor: MentorEntry;
@@ -71,5 +71,18 @@ const { mentor } = Astro.props;
     font-size: var(--step--1);
     font-weight: 780;
     margin-top: 12px;
+    overflow-wrap: anywhere;
+  }
+
+  @media (max-width: 420px) {
+    .mentor-card {
+      grid-template-columns: 48px 1fr;
+      padding: 18px;
+    }
+
+    .avatar {
+      height: 48px;
+      width: 48px;
+    }
   }
 </style>

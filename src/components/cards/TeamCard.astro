@@ -1,5 +1,5 @@
 ---
-import type { TeamEntry } from '@utils/collections';
+import type { TeamEntry } from "@utils/collections";
 
 interface Props {
   team: TeamEntry;
@@ -10,7 +10,7 @@ const { team, featured = false } = Astro.props;
 const builderNames = team.data.members.map((member) => member.name);
 ---
 
-<article class:list={['team-card', { featured }]}>
+<article class:list={["team-card", { featured }]}>
   <div class="meta">
     <span>{team.data.cohortLabel}</span>
   </div>
@@ -43,6 +43,8 @@ const builderNames = team.data.members.map((member) => member.name);
     box-shadow: 0 0 0 rgba(20, 23, 93, 0);
     display: grid;
     gap: clamp(24px, 3vw, 34px);
+    grid-template-rows: auto 1fr auto;
+    height: 100%;
     min-height: 280px;
     padding: clamp(22px, 3vw, 30px);
     transition:
@@ -82,12 +84,14 @@ const builderNames = team.data.members.map((member) => member.name);
 
   h3 {
     color: var(--color-lbs-blue);
-    font-size: clamp(1.8rem, 3vw, 3rem);
+    font-size: clamp(1.65rem, 2.25vw, 2.45rem);
     margin: 0;
+    overflow-wrap: anywhere;
   }
 
   p {
     color: var(--color-ink-soft);
+    line-height: 1.45;
   }
 
   .builders {
@@ -140,6 +144,13 @@ const builderNames = team.data.members.map((member) => member.name);
   @media (max-width: 760px) {
     .team-card.featured {
       grid-template-columns: 1fr;
+    }
+  }
+
+  @media (max-width: 520px) {
+    .team-card {
+      gap: 18px;
+      min-height: auto;
     }
   }
 </style>

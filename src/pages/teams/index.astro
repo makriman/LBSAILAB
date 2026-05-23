@@ -62,7 +62,7 @@ const jsonLd = {
   .page-hero {
     background: var(--color-lbs-blue);
     color: var(--color-white);
-    padding-block: clamp(74px, 11vw, 132px);
+    padding-block: clamp(52px, 7vw, 92px);
   }
 
   :global(.page-hero .eyebrow) {
@@ -106,6 +106,12 @@ const jsonLd = {
     margin: 0 6px 8px 0;
     padding: 8px 11px;
     text-decoration: none;
+  }
+
+  @media (max-width: 520px) {
+    .directory-bar {
+      padding: 16px;
+    }
   }
 
   @media (max-width: 760px) {

@@ -13,11 +13,10 @@ const registerInterestEmail = "rlokanathan.mba2027@london.edu";
     <div class="container hero-grid">
       <div>
         <p class="eyebrow">Apply</p>
-        <h1>Learn the build loop in the September 2026 cohort.</h1>
+        <h1>Build with AI. Learn from real users.</h1>
         <p class="lede">
-          LBS AI Lab is for students who want to use AI-assisted tools to build
-          quickly, test with real users, and learn how products improve through
-          feedback.
+          The September 2026 cohort is for LBS students who want to prototype
+          fast, test with students and alumni, and improve from feedback.
         </p>
         <Button
           href="#register-interest"
@@ -30,11 +29,12 @@ const registerInterestEmail = "rlokanathan.mba2027@london.edu";
       </div>
       <aside>
         <span>Cohort 02</span>
-        <strong>Starts September 2026</strong>
-        <p>
-          Applications will open for LBS students ready to build, test, learn,
-          iterate, and ship.
-        </p>
+        <strong>September 2026</strong>
+        <ul>
+          <li>Build with AI-assisted tools</li>
+          <li>Test with real LBS users</li>
+          <li>Iterate with mentor support</li>
+        </ul>
       </aside>
     </div>
   </section>
@@ -135,14 +135,18 @@ const registerInterestEmail = "rlokanathan.mba2027@london.edu";
   .page-hero {
     background: var(--color-lbs-blue);
     color: var(--color-white);
-    padding-block: clamp(74px, 11vw, 132px);
+    padding-block: clamp(52px, 7vw, 92px);
   }
 
   .hero-grid {
-    align-items: end;
+    align-items: center;
     display: grid;
     gap: clamp(34px, 6vw, 80px);
     grid-template-columns: minmax(0, 1fr) minmax(280px, 0.42fr);
+  }
+
+  .hero-grid > * {
+    min-width: 0;
   }
 
   :global(.page-hero .eyebrow) {
@@ -178,8 +182,19 @@ const registerInterestEmail = "rlokanathan.mba2027@london.edu";
     margin: 14px 0;
   }
 
-  aside p {
+  aside ul {
+    display: grid;
+    gap: 10px;
+    list-style: none;
+    margin: 20px 0 0;
+    padding: 0;
+  }
+
+  aside li {
+    border-top: 1px solid rgba(255, 255, 255, 0.16);
     color: rgba(255, 255, 255, 0.72);
+    font-weight: 760;
+    padding-top: 10px;
   }
 
   .apply-grid {
@@ -190,6 +205,9 @@ const registerInterestEmail = "rlokanathan.mba2027@london.edu";
 
   .apply-grid section {
     border: 1px solid var(--color-border);
+    display: grid;
+    gap: 14px;
+    grid-template-rows: auto minmax(5.8rem, auto) 1fr;
     padding: clamp(24px, 4vw, 34px);
   }
 
@@ -204,7 +222,7 @@ const registerInterestEmail = "rlokanathan.mba2027@london.edu";
     color: var(--color-ink-soft);
   }
 
-  ul {
+  .apply-grid ul {
     display: grid;
     gap: 10px;
     margin: 0;
@@ -279,6 +297,20 @@ const registerInterestEmail = "rlokanathan.mba2027@london.edu";
     .apply-grid,
     .form-grid {
       grid-template-columns: 1fr;
+    }
+
+    .apply-grid section {
+      grid-template-rows: auto;
+    }
+  }
+
+  @media (max-width: 520px) {
+    .page-hero {
+      padding-block: 42px 48px;
+    }
+
+    aside {
+      padding: 20px;
     }
   }
 </style>

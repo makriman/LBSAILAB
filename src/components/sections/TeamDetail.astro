@@ -18,13 +18,6 @@ const { team, relatedTeams } = Astro.props;
         <p class="eyebrow">Cohort 01 project</p>
         <h1>{team.data.displayName}</h1>
         <p class="lede">{team.data.tagline}</p>
-        <div class="team-partner">
-          <GoogleDeepMindLogo
-            tone="light"
-            compact
-            label="Cohort 01 in partnership with"
-          />
-        </div>
         <div class="hero-actions">
           {
             team.data.productUrl && (
@@ -36,18 +29,25 @@ const { team, relatedTeams } = Astro.props;
         </div>
       </div>
       <aside class="meta-panel" aria-label="Project metadata">
+        <div class="meta-partner">
+          <GoogleDeepMindLogo
+            tone="light"
+            compact
+            label="Cohort 01 in partnership with"
+          />
+        </div>
         <dl>
           <div>
             <dt>Cohort</dt>
             <dd>{team.data.cohortLabel}</dd>
           </div>
           <div>
-            <dt>Status</dt>
-            <dd>{team.data.status}</dd>
+            <dt>Problem area</dt>
+            <dd>{team.data.category}</dd>
           </div>
           <div>
-            <dt>Partner cohort</dt>
-            <dd>Google DeepMind</dd>
+            <dt>Status</dt>
+            <dd>{team.data.status}</dd>
           </div>
         </dl>
       </aside>
@@ -59,11 +59,11 @@ const { team, relatedTeams } = Astro.props;
       <div class="profile-main">
         <section>
           <p class="eyebrow">The problem</p>
-          <h2>A real LBS workflow, treated as a product opportunity.</h2>
+          <h2>{team.data.category}</h2>
           <p>
-            The team is focused on a practical student, operator, or
-            professional workflow where AI can reduce friction, reach real
-            users, and help people make better decisions faster.
+            The team starts from a practical LBS workflow with a reachable user
+            audience, then uses the cohort to test the product, learn from
+            feedback, and keep improving.
           </p>
         </section>
 
@@ -126,14 +126,18 @@ const { team, relatedTeams } = Astro.props;
   .team-hero {
     background: var(--color-lbs-blue);
     color: var(--color-white);
-    padding-block: clamp(70px, 10vw, 128px);
+    padding-block: clamp(52px, 7vw, 92px);
   }
 
   .hero-inner {
-    align-items: end;
+    align-items: center;
     display: grid;
     gap: clamp(36px, 6vw, 80px);
     grid-template-columns: minmax(0, 1.15fr) minmax(280px, 0.55fr);
+  }
+
+  .hero-inner > * {
+    min-width: 0;
   }
 
   :global(.team-hero .eyebrow) {
@@ -157,19 +161,23 @@ const { team, relatedTeams } = Astro.props;
     margin-top: 30px;
   }
 
-  .team-partner {
-    margin-top: 22px;
-  }
-
   .meta-panel {
     background: rgba(255, 255, 255, 0.08);
     border: 1px solid rgba(255, 255, 255, 0.2);
+    display: grid;
+    gap: 20px;
     padding: 26px;
+  }
+
+  .meta-partner {
+    border-bottom: 1px solid rgba(255, 255, 255, 0.16);
+    padding-bottom: 18px;
   }
 
   dl {
     display: grid;
-    gap: 20px;
+    gap: 18px;
+    grid-template-columns: repeat(2, minmax(0, 1fr));
     margin: 0;
   }
 
@@ -183,6 +191,7 @@ const { team, relatedTeams } = Astro.props;
     color: var(--color-white);
     font-weight: 760;
     margin: 5px 0 0;
+    overflow-wrap: anywhere;
   }
 
   .profile-grid {
@@ -265,6 +274,7 @@ const { team, relatedTeams } = Astro.props;
   .member-card a {
     font-size: var(--step--1);
     font-weight: 820;
+    overflow-wrap: anywhere;
   }
 
   .related h2 {
@@ -309,6 +319,26 @@ const { team, relatedTeams } = Astro.props;
     }
 
     .related-list {
+      grid-template-columns: 1fr;
+    }
+  }
+
+  @media (max-width: 520px) {
+    .team-hero {
+      padding-block: 42px 46px;
+    }
+
+    .hero-actions {
+      margin-top: 22px;
+    }
+
+    .meta-panel {
+      gap: 16px;
+      padding: 18px;
+    }
+
+    dl {
+      gap: 14px;
       grid-template-columns: 1fr;
     }
   }

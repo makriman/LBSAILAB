@@ -39,14 +39,14 @@ const hasGoogleDeepMindPartner = cohort.data.partnerName === "Google DeepMind";
           {
             isUpcoming
               ? "Build, test, and iterate with real users."
-              : "Cohort 01, in partnership with Google DeepMind."
+              : "Nine LBS teams building with real users."
           }
         </h1>
         <p class="lede">
           {
             isUpcoming
               ? "Applications will open for LBS students who want to learn agentic building, prototype AI products, test with real users, and improve from feedback."
-              : "From 10 April to 12 June 2026, nine student teams are building AI products for LBS student life, career development, club operations, academic planning, funding discovery, and professional workflows."
+              : "Cohort 01 is delivered in partnership with Google DeepMind. From 10 April to 12 June 2026, teams are building for LBS student life, careers, clubs, academic planning, funding discovery, and professional work."
           }
         </p>
         <div class="hero-actions">
@@ -167,14 +167,18 @@ const hasGoogleDeepMindPartner = cohort.data.partnerName === "Google DeepMind";
   .cohort-hero {
     background: var(--color-lbs-blue);
     color: var(--color-white);
-    padding-block: clamp(70px, 10vw, 126px);
+    padding-block: clamp(52px, 7vw, 92px);
   }
 
   .hero-grid {
-    align-items: end;
+    align-items: center;
     display: grid;
     gap: clamp(34px, 6vw, 80px);
     grid-template-columns: minmax(0, 1fr) minmax(300px, 0.46fr);
+  }
+
+  .hero-grid > * {
+    min-width: 0;
   }
 
   :global(.cohort-hero .eyebrow) {
@@ -215,6 +219,15 @@ const hasGoogleDeepMindPartner = cohort.data.partnerName === "Google DeepMind";
   .cohort-panel > div {
     display: grid;
     gap: 22px;
+    grid-template-columns: repeat(3, minmax(78px, 1fr));
+  }
+
+  .cohort-panel :global(.stat) {
+    padding-left: 14px;
+  }
+
+  .cohort-panel :global(.stat strong) {
+    font-size: clamp(2rem, 3vw, 3.15rem);
   }
 
   .section-top {
@@ -238,6 +251,9 @@ const hasGoogleDeepMindPartner = cohort.data.partnerName === "Google DeepMind";
 
   .upcoming-grid section {
     border: 1px solid var(--color-border);
+    display: grid;
+    gap: 14px;
+    grid-template-rows: auto minmax(5.4rem, auto) 1fr;
     padding: clamp(24px, 4vw, 38px);
   }
 
@@ -256,6 +272,40 @@ const hasGoogleDeepMindPartner = cohort.data.partnerName === "Google DeepMind";
     .section-top,
     .upcoming-grid {
       grid-template-columns: 1fr;
+    }
+
+    .upcoming-grid section {
+      grid-template-rows: auto;
+    }
+  }
+
+  @media (max-width: 520px) {
+    .cohort-hero {
+      padding-block: 42px 48px;
+    }
+
+    .hero-partner {
+      margin-top: 14px;
+    }
+
+    .hero-actions {
+      margin-top: 22px;
+    }
+
+    .cohort-panel > div {
+      gap: 14px;
+    }
+
+    .cohort-panel :global(.stat) {
+      padding-left: 10px;
+    }
+
+    .cohort-panel :global(.stat strong) {
+      font-size: 1.85rem;
+    }
+
+    .cohort-panel :global(.stat span) {
+      font-size: 0.72rem;
     }
   }
 </style>
