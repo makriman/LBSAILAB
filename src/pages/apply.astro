@@ -180,6 +180,13 @@ import Button from "@components/atoms/Button.astro";
     return `mailto:${application.email}?subject=${encodeURIComponent(subject)}&body=${encodeURIComponent(body)}`;
   };
 
+  const tableCell = (label, text) => {
+    const cell = document.createElement("td");
+    cell.dataset.label = label;
+    cell.textContent = text;
+    return cell;
+  };
+
   const renderSubmissions = (applications) => {
     if (!submissionsList) return;
 
@@ -194,27 +201,54 @@ import Button from "@components/atoms/Button.astro";
       return;
     }
 
+    const wrapper = document.createElement("div");
+    wrapper.className = "submissions-table-scroll";
+
+    const table = document.createElement("table");
+    table.className = "submissions-table";
+
+    const thead = document.createElement("thead");
+    const headerRow = document.createElement("tr");
+
+    for (const label of ["Name", "Course", "Idea", "Action"]) {
+      const header = document.createElement("th");
+      header.scope = "col";
+      header.textContent = label;
+      headerRow.append(header);
+    }
+
+    thead.append(headerRow);
+
+    const tbody = document.createElement("tbody");
+
     for (const application of applications) {
-      const card = document.createElement("article");
-      card.className = "submission-card";
+      const row = document.createElement("tr");
 
-      const heading = document.createElement("div");
-      const name = document.createElement("strong");
-      name.textContent = application.name;
-      const course = document.createElement("span");
-      course.textContent = application.course;
-      heading.append(name, course);
+      const name = tableCell("Name", application.name);
+      name.className = "submission-name";
 
-      const idea = document.createElement("p");
-      idea.textContent = application.idea;
+      const course = tableCell("Course", application.course);
+      course.className = "submission-course";
+
+      const idea = tableCell("Idea", application.idea);
+      idea.className = "submission-idea";
+
+      const action = document.createElement("td");
+      action.dataset.label = "Action";
 
       const contact = document.createElement("a");
       contact.href = contactHref(application);
-      contact.textContent = "Contact to build together";
+      contact.className = "connect-button";
+      contact.textContent = "Connect to build together";
 
-      card.append(heading, idea, contact);
-      submissionsList.append(card);
+      action.append(contact);
+      row.append(name, course, idea, action);
+      tbody.append(row);
     }
+
+    table.append(thead, tbody);
+    wrapper.append(table);
+    submissionsList.append(wrapper);
 
     submissionsList.hidden = false;
     setText(
@@ -517,13 +551,17 @@ import Button from "@components/atoms/Button.astro";
   .submissions-grid {
     align-items: start;
     display: grid;
-    gap: clamp(28px, 5vw, 70px);
-    grid-template-columns: minmax(0, 0.58fr) minmax(320px, 0.72fr);
+    gap: clamp(24px, 4vw, 42px);
+    grid-template-columns: 1fr;
   }
 
   .submissions-grid h2 {
     color: var(--color-lbs-blue);
     margin: 16px 0;
+  }
+
+  .submissions-grid > div:first-child {
+    max-width: 820px;
   }
 
   .submissions-grid p:not(.eyebrow) {
@@ -565,52 +603,96 @@ import Button from "@components/atoms/Button.astro";
   }
 
   .submission-list {
-    display: grid;
-    gap: 14px;
+    overflow: hidden;
   }
 
-  .submission-card {
+  :global(.submissions-table-scroll) {
     background: var(--color-white);
     border: 1px solid var(--color-border);
-    display: grid;
-    gap: 12px;
-    padding: 18px;
+    overflow-x: auto;
   }
 
-  .submission-card div {
-    align-items: baseline;
-    display: flex;
-    flex-wrap: wrap;
-    gap: 8px 12px;
+  :global(.submissions-table) {
+    border-collapse: collapse;
+    color: var(--color-ink);
+    min-width: 720px;
+    table-layout: fixed;
+    width: 100%;
   }
 
-  .submission-card strong {
-    color: var(--color-lbs-blue);
-    font-size: var(--step-1);
-    line-height: 1.15;
+  :global(.submissions-table th),
+  :global(.submissions-table td) {
+    border-bottom: 1px solid var(--color-border);
+    padding: 16px 18px;
+    text-align: left;
+    vertical-align: top;
   }
 
-  .submission-card span {
-    color: var(--color-lbs-red);
+  :global(.submissions-table th) {
+    background: var(--color-lbs-blue);
+    color: var(--color-white);
     font-size: var(--step--1);
+    font-weight: 820;
+    letter-spacing: 0;
+  }
+
+  :global(.submissions-table td) {
+    color: var(--color-ink-soft);
+    font-size: 0.98rem;
+    line-height: 1.42;
+  }
+
+  :global(.submissions-table tbody tr:last-child td) {
+    border-bottom: 0;
+  }
+
+  :global(.submissions-table th:nth-child(1)),
+  :global(.submissions-table td:nth-child(1)) {
+    width: 22%;
+  }
+
+  :global(.submissions-table th:nth-child(2)),
+  :global(.submissions-table td:nth-child(2)) {
+    width: 15%;
+  }
+
+  :global(.submissions-table th:nth-child(4)),
+  :global(.submissions-table td:nth-child(4)) {
+    width: 24%;
+  }
+
+  :global(.submission-name) {
+    color: var(--color-lbs-blue) !important;
+    font-weight: 850;
+  }
+
+  :global(.submission-course) {
+    color: var(--color-lbs-red) !important;
     font-weight: 820;
   }
 
-  .submission-card p {
-    color: var(--color-ink-soft);
-    font-size: var(--step-0) !important;
+  :global(.submission-idea) {
+    overflow-wrap: anywhere;
   }
 
-  .submission-card a {
-    color: var(--color-lbs-blue);
-    font-size: var(--step--1);
-    font-weight: 860;
+  :global(.connect-button) {
+    align-items: center;
+    background: var(--color-lbs-blue);
+    border-radius: var(--radius-button);
+    color: var(--color-white);
+    display: inline-flex;
+    font-size: 0.88rem;
+    font-weight: 850;
+    justify-content: center;
+    line-height: 1.1;
+    min-height: 42px;
+    padding: 10px 14px;
     text-decoration: none;
+    width: 100%;
   }
 
-  .submission-card a::after {
-    color: var(--color-lbs-red);
-    content: " ->";
+  :global(.connect-button:hover) {
+    background: var(--color-lbs-red);
   }
 
   @media (max-width: 940px) {
@@ -633,6 +715,62 @@ import Button from "@components/atoms/Button.astro";
 
     aside {
       padding: 20px;
+    }
+
+    :global(.submissions-table-scroll) {
+      border: 0;
+      overflow: visible;
+    }
+
+    :global(.submissions-table) {
+      min-width: 0;
+    }
+
+    :global(.submissions-table thead) {
+      display: none;
+    }
+
+    :global(.submissions-table),
+    :global(.submissions-table tbody),
+    :global(.submissions-table tr),
+    :global(.submissions-table td) {
+      display: block;
+      width: 100%;
+    }
+
+    :global(.submissions-table tr) {
+      background: var(--color-white);
+      border: 1px solid var(--color-border);
+      margin-bottom: 12px;
+      padding: 14px;
+    }
+
+    :global(.submissions-table tr:last-child) {
+      margin-bottom: 0;
+    }
+
+    :global(.submissions-table td) {
+      border: 0;
+      display: grid;
+      gap: 6px;
+      padding: 8px 0;
+    }
+
+    :global(.submissions-table td:nth-child(n)) {
+      width: 100%;
+    }
+
+    :global(.submissions-table td::before) {
+      color: var(--color-muted);
+      content: attr(data-label);
+      font-size: 0.76rem;
+      font-weight: 820;
+      text-transform: uppercase;
+    }
+
+    :global(.connect-button) {
+      margin-top: 4px;
+      width: 100%;
     }
   }
 </style>
