@@ -28,6 +28,7 @@ const GITHUB_API = "https://api.github.com";
 const INSERT_MARKER = "<!-- APPLICATIONS:START -->";
 const END_MARKER = "<!-- APPLICATIONS:END -->";
 const APPLICATION_RE = /<!-- application:(.*?) -->/gs;
+const APPLICATIONS_CACHE_KEY_VERSION = "2026-05-23-clear-test-entries";
 const APPLICATIONS_CACHE_TTL_SECONDS = 60 * 60 * 24;
 
 const jsonHeaders = {
@@ -326,6 +327,7 @@ function applicationsCacheRequest(env: Env): Request {
   url.searchParams.set("branch", config.branch);
   url.searchParams.set("path", config.path);
   url.searchParams.set("repo", config.repo);
+  url.searchParams.set("version", APPLICATIONS_CACHE_KEY_VERSION);
 
   return new Request(url.toString());
 }
