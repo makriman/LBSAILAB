@@ -1,5 +1,17 @@
 const SHEET_NAME = "Submissions";
 
+function configureApplicationToken(token) {
+  if (!token || typeof token !== "string") {
+    throw new Error("Token is required.");
+  }
+
+  PropertiesService.getScriptProperties().setProperty(
+    "APPS_SCRIPT_TOKEN",
+    token,
+  );
+  return "APPS_SCRIPT_TOKEN configured.";
+}
+
 function doGet(event) {
   if (!isAuthorized_(event)) {
     return json_({ ok: false, error: "Unauthorized" });
@@ -9,6 +21,10 @@ function doGet(event) {
 }
 
 function doPost(event) {
+  if (isInitialConfigureRequest_(event)) {
+    return configureInitialToken_(event);
+  }
+
   if (!isAuthorized_(event)) {
     return json_({ ok: false, error: "Unauthorized" });
   }
@@ -22,6 +38,31 @@ function doPost(event) {
     return json_({
       ok: false,
       error: error && error.message ? error.message : "Submission failed.",
+    });
+  }
+}
+
+function isInitialConfigureRequest_(event) {
+  const existingToken =
+    PropertiesService.getScriptProperties().getProperty("APPS_SCRIPT_TOKEN");
+  return (
+    !existingToken &&
+    event &&
+    event.parameter &&
+    event.parameter.action === "configure"
+  );
+}
+
+function configureInitialToken_(event) {
+  try {
+    const payload = JSON.parse(event.postData.contents || "{}");
+    configureApplicationToken(payload.token);
+    return json_({ ok: true });
+  } catch (error) {
+    return json_({
+      ok: false,
+      error:
+        error && error.message ? error.message : "Token configuration failed.",
     });
   }
 }
