@@ -2,8 +2,10 @@ interface Env {
   ASSETS: {
     fetch(request: Request): Promise<Response>;
   };
-  APPS_SCRIPT_TOKEN?: string;
-  APPS_SCRIPT_URL?: string;
+  GITHUB_BRANCH?: string;
+  GITHUB_REPO?: string;
+  GITHUB_SUBMISSIONS_PATH?: string;
+  GITHUB_TOKEN?: string;
 }
 
 interface ApplicationSubmission {
@@ -13,6 +15,19 @@ interface ApplicationSubmission {
   idea: string;
   consent: boolean;
 }
+
+interface GitHubFile {
+  content: string;
+  sha?: string;
+}
+
+const DEFAULT_BRANCH = "main";
+const DEFAULT_REPO = "makriman/LBSAILAB";
+const DEFAULT_SUBMISSIONS_PATH = "data/application-submissions.md";
+const GITHUB_API = "https://api.github.com";
+const INSERT_MARKER = "<!-- APPLICATIONS:START -->";
+const END_MARKER = "<!-- APPLICATIONS:END -->";
+const APPLICATION_RE = /<!-- application:(.*?) -->/gs;
 
 const jsonHeaders = {
   "Content-Type": "application/json; charset=utf-8",
@@ -43,8 +58,15 @@ async function handleCreateApplication(
   request: Request,
   env: Env,
 ): Promise<Response> {
-  const setupError = validateAppsScriptSetup(env);
-  if (setupError) return setupError;
+  if (!env.GITHUB_TOKEN) {
+    return json(
+      {
+        error:
+          "Applications are not configured yet. Add GITHUB_TOKEN to the Worker environment.",
+      },
+      503,
+    );
+  }
 
   let body: Record<string, unknown>;
   try {
@@ -63,7 +85,7 @@ async function handleCreateApplication(
   }
 
   try {
-    await callAppsScript(env, "create", submission);
+    await appendSubmission(env, submission);
     return json({ ok: true }, 201);
   } catch (error) {
     return json({ error: errorMessage(error) }, 502);
@@ -71,60 +93,137 @@ async function handleCreateApplication(
 }
 
 async function handleListApplications(env: Env): Promise<Response> {
-  const setupError = validateAppsScriptSetup(env);
-  if (setupError) return setupError;
-
   try {
-    const data = await callAppsScript(env, "list");
-    return json({ applications: data.applications || [] }, 200);
+    const file = await readSubmissionsFile(env, false);
+    return json({ applications: parseApplications(file.content) }, 200);
   } catch (error) {
-    return json({ error: errorMessage(error) }, 502);
+    return json({ error: errorMessage(error), applications: [] }, 200);
   }
 }
 
-async function callAppsScript(
+async function appendSubmission(
   env: Env,
-  action: "create" | "list",
-  payload?: ApplicationSubmission,
-): Promise<{ applications?: unknown[] }> {
-  const url = new URL(env.APPS_SCRIPT_URL || "");
-  url.searchParams.set("token", env.APPS_SCRIPT_TOKEN || "");
-  url.searchParams.set("action", action);
+  submission: ApplicationSubmission,
+): Promise<void> {
+  for (let attempt = 0; attempt < 2; attempt += 1) {
+    const file = await readSubmissionsFile(env, true);
+    const nextContent = insertSubmission(file.content, submission);
+    const response = await putSubmissionsFile(env, nextContent, file.sha);
 
-  const response = await fetch(url.toString(), {
-    method: action === "create" ? "POST" : "GET",
-    headers:
-      action === "create"
-        ? {
-            "Content-Type": "text/plain;charset=utf-8",
-          }
-        : undefined,
-    body:
-      action === "create"
-        ? JSON.stringify({
-            name: payload?.name,
-            email: payload?.email,
-            course: payload?.course,
-            idea: payload?.idea,
-            publicConsent: payload?.consent ? "yes" : "no",
-            source: "apply-page",
-          })
-        : undefined,
-  });
+    if (response.ok) return;
 
-  const data = (await response.json().catch(() => ({}))) as {
-    ok?: boolean;
-    error?: string;
-    applications?: unknown[];
-  };
+    if (response.status !== 409 || attempt === 1) {
+      throw new Error(await githubError(response));
+    }
+  }
+}
 
-  if (!response.ok || data.ok === false) {
-    throw new Error(
-      data.error || `Applications endpoint failed with ${response.status}.`,
-    );
+async function readSubmissionsFile(
+  env: Env,
+  useAuth: boolean,
+): Promise<GitHubFile> {
+  const config = githubConfig(env);
+  const response = await fetch(
+    `${GITHUB_API}/repos/${config.repo}/contents/${config.path}?ref=${config.branch}`,
+    {
+      headers: githubHeaders(env, useAuth),
+    },
+  );
+
+  if (response.status === 404) {
+    return { content: initialSubmissionsFile() };
   }
 
-  return data;
+  if (!response.ok) {
+    throw new Error(await githubError(response));
+  }
+
+  const data = (await response.json()) as { content?: string; sha?: string };
+  const content = data.content ? decodeBase64(data.content) : "";
+
+  return {
+    content: content || initialSubmissionsFile(),
+    sha: data.sha,
+  };
+}
+
+async function putSubmissionsFile(
+  env: Env,
+  content: string,
+  sha?: string,
+): Promise<Response> {
+  const config = githubConfig(env);
+  return fetch(`${GITHUB_API}/repos/${config.repo}/contents/${config.path}`, {
+    method: "PUT",
+    headers: githubHeaders(env, true),
+    body: JSON.stringify({
+      branch: config.branch,
+      content: encodeBase64(content),
+      message: "Add AI Lab application submission",
+      sha,
+    }),
+  });
+}
+
+function insertSubmission(
+  content: string,
+  submission: ApplicationSubmission,
+): string {
+  const safeSubmission = {
+    submittedAt: new Date().toISOString(),
+    name: submission.name,
+    email: submission.email,
+    course: submission.course,
+    idea: submission.idea,
+  };
+  const block = [
+    `<!-- application:${JSON.stringify(safeSubmission)} -->`,
+    `### ${escapeMarkdown(submission.name)} - ${escapeMarkdown(
+      submission.course,
+    )}`,
+    "",
+    escapeMarkdown(submission.idea),
+    "",
+    `[Contact ${escapeMarkdown(
+      submission.name,
+    )}](mailto:${submission.email}?subject=${encodeURIComponent(
+      `LBS AI Lab: exploring your ${submission.course} build idea`,
+    )})`,
+    "",
+  ].join("\n");
+
+  const base = content.includes(INSERT_MARKER)
+    ? content
+    : initialSubmissionsFile();
+
+  return base.replace(INSERT_MARKER, `${INSERT_MARKER}\n\n${block}`);
+}
+
+function parseApplications(content: string): unknown[] {
+  return [...content.matchAll(APPLICATION_RE)]
+    .map((match) => {
+      try {
+        return JSON.parse(match[1]) as {
+          submittedAt?: string;
+          name?: string;
+          email?: string;
+          course?: string;
+          idea?: string;
+        };
+      } catch {
+        return null;
+      }
+    })
+    .filter((item): item is Record<string, string> =>
+      Boolean(
+        item &&
+        item.name &&
+        item.email &&
+        item.course &&
+        item.idea &&
+        /^[^@\s]+@london\.edu$/.test(item.email),
+      ),
+    );
 }
 
 function validateSubmission(
@@ -152,18 +251,73 @@ function validateSubmission(
   return { name, email, course, idea, consent };
 }
 
-function validateAppsScriptSetup(env: Env): Response | null {
-  if (env.APPS_SCRIPT_URL && env.APPS_SCRIPT_TOKEN) {
-    return null;
+function githubConfig(env: Env): {
+  branch: string;
+  path: string;
+  repo: string;
+} {
+  return {
+    branch: env.GITHUB_BRANCH || DEFAULT_BRANCH,
+    path: env.GITHUB_SUBMISSIONS_PATH || DEFAULT_SUBMISSIONS_PATH,
+    repo: env.GITHUB_REPO || DEFAULT_REPO,
+  };
+}
+
+function githubHeaders(env: Env, useAuth: boolean): HeadersInit {
+  const headers: Record<string, string> = {
+    Accept: "application/vnd.github+json",
+    "User-Agent": "lbs-ai-lab-worker",
+    "X-GitHub-Api-Version": "2022-11-28",
+  };
+
+  if (useAuth && env.GITHUB_TOKEN) {
+    headers.Authorization = `Bearer ${env.GITHUB_TOKEN}`;
   }
 
-  return json(
-    {
-      error:
-        "Applications are not configured yet. Add APPS_SCRIPT_URL and APPS_SCRIPT_TOKEN to the Worker environment.",
-    },
-    503,
-  );
+  return headers;
+}
+
+function initialSubmissionsFile(): string {
+  return [
+    "# LBS AI Lab Application Submissions",
+    "",
+    "Public submissions from students who opted in on the Apply page.",
+    "",
+    INSERT_MARKER,
+    "",
+    END_MARKER,
+    "",
+  ].join("\n");
+}
+
+function escapeMarkdown(value: string): string {
+  return value.replace(/[\\[\]`*_{}()#+.!|-]/g, "\\$&");
+}
+
+async function githubError(response: Response): Promise<string> {
+  try {
+    const data = (await response.json()) as { message?: string };
+    return data.message || `GitHub request failed with ${response.status}.`;
+  } catch {
+    return `GitHub request failed with ${response.status}.`;
+  }
+}
+
+function decodeBase64(value: string): string {
+  const binary = atob(value.replace(/\s/g, ""));
+  const bytes = Uint8Array.from(binary, (char) => char.charCodeAt(0));
+  return new TextDecoder().decode(bytes);
+}
+
+function encodeBase64(value: string): string {
+  const bytes = new TextEncoder().encode(value);
+  let binary = "";
+
+  for (const byte of bytes) {
+    binary += String.fromCharCode(byte);
+  }
+
+  return btoa(binary);
 }
 
 function asString(value: unknown): string {

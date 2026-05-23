@@ -112,7 +112,7 @@ import Button from "@components/atoms/Button.astro";
           <button type="button" data-load-submissions>View submissions</button>
         </div>
         <p class="submissions-status" data-submissions-status>
-          Submissions load from the connected Google Sheet.
+          Submissions load from the public GitHub submissions file.
         </p>
         <div class="submission-list" data-submission-list hidden></div>
       </div>
@@ -290,7 +290,7 @@ import Button from "@components/atoms/Button.astro";
       form.reset();
       setText(
         formStatus,
-        "Submitted. Your idea will appear below once the sheet refreshes.",
+        "Submitted. Your idea will appear below once the public log updates.",
       );
       await loadSubmissions();
     } catch (error) {

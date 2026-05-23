@@ -46,62 +46,38 @@ If the Cloudflare project uses a Wrangler deploy command, use:
 The `wrangler.jsonc` file points Wrangler at the generated `dist/` assets.
 It also deploys `src/worker.ts`, which powers the secure application form API.
 
-## Application Form / Google Sheets
+## Application Form / GitHub Markdown
 
-The Apply page submits to `/api/applications`. The browser never talks to
-Google directly. A Cloudflare Worker proxies to a Google Apps Script web app
-attached to the submissions Sheet, so no Google Cloud project or service account
-is required.
+The Apply page submits to `/api/applications`. The Cloudflare Worker writes each
+public opt-in submission to a Markdown file in this open GitHub repo, then reads
+the same file back for the public submissions board.
 
-The current submissions Sheet is:
-
-```text
-https://docs.google.com/spreadsheets/d/18lPwCDSqAzJmeki2uEp_N15OAS9gqvbUXoDquWgo7Zk/edit
-```
-
-The Apps Script will create a tab named `Submissions` if it does not already
-exist. The header row is:
+The submissions file is:
 
 ```text
-submitted_at | name | email | course | idea | public_consent | source
+data/application-submissions.md
 ```
 
-### Apps Script Setup
-
-Generate a shared token:
+Required Worker secret:
 
 ```sh
-openssl rand -hex 32
+npx wrangler secret put GITHUB_TOKEN
 ```
 
-Use the CLI route:
+A fine-grained GitHub token is enough. Scope it to this repository and grant
+`Contents: Read and write`. The Worker uses GitHub's Contents API to update the
+Markdown file on `main`.
+
+Optional Worker variables:
 
 ```sh
-npx @google/clasp login
-cd apps-script/lbs-ai-lab-applications
-npx @google/clasp create --type sheets --title "LBS AI Lab Applications API" --parentId 18lPwCDSqAzJmeki2uEp_N15OAS9gqvbUXoDquWgo7Zk
-npx @google/clasp push
-npx @google/clasp open
+npx wrangler secret put GITHUB_REPO
+npx wrangler secret put GITHUB_BRANCH
+npx wrangler secret put GITHUB_SUBMISSIONS_PATH
 ```
 
-In the opened Apps Script project:
-
-1. Go to Project Settings.
-2. Add Script Property `APPS_SCRIPT_TOKEN` with the generated token.
-3. Deploy as a Web app.
-4. Execute as: `Me`.
-5. Who has access: `Anyone`.
-6. Copy the Web app URL.
-
-Then configure Cloudflare Worker secrets:
-
-```sh
-npx wrangler secret put APPS_SCRIPT_URL
-npx wrangler secret put APPS_SCRIPT_TOKEN
-```
-
-Use the same token in Apps Script and Cloudflare. The Apps Script URL is not
-called from the browser directly; it is only called by the Worker.
+Defaults are `makriman/LBSAILAB`, `main`, and
+`data/application-submissions.md`.
 
 Static headers, redirects, robots, sitemap, and Open Graph metadata are included.
 
