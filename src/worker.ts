@@ -28,7 +28,7 @@ const GITHUB_API = "https://api.github.com";
 const INSERT_MARKER = "<!-- APPLICATIONS:START -->";
 const END_MARKER = "<!-- APPLICATIONS:END -->";
 const APPLICATION_RE = /<!-- application:(.*?) -->/gs;
-const APPLICATIONS_CACHE_TTL_SECONDS = 300;
+const APPLICATIONS_CACHE_TTL_SECONDS = 60 * 60 * 24;
 
 const jsonHeaders = {
   "Content-Type": "application/json; charset=utf-8",
