@@ -39,6 +39,12 @@ Use these deployment settings:
 - Build output directory: `dist`
 - Node version: `20` or `22`
 
+If the Cloudflare project uses a Wrangler deploy command, use:
+
+- Deploy command: `npx wrangler versions upload`
+
+The `wrangler.jsonc` file points Wrangler at the generated `dist/` assets.
+
 Static headers, redirects, robots, sitemap, and Open Graph metadata are included.
 
 ## Content
