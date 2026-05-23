@@ -1,20 +1,25 @@
 ---
-import { getCollection } from 'astro:content';
-import BaseLayout from '@layouts/BaseLayout.astro';
-import TeamGrid from '@components/sections/TeamGrid.astro';
-import { sortTeamsByCohortList } from '@utils/collections';
-import { SITE_URL } from '@utils/site';
+import { getCollection } from "astro:content";
+import BaseLayout from "@layouts/BaseLayout.astro";
+import TeamGrid from "@components/sections/TeamGrid.astro";
+import { sortTeamsByCohortList } from "@utils/collections";
+import { SITE_URL } from "@utils/site";
 
-const [teams, cohorts] = await Promise.all([getCollection('teams'), getCollection('cohorts')]);
-const cohort01 = cohorts.find((cohort) => cohort.data.id === 'cohort-01');
-const sortedTeams = cohort01 ? sortTeamsByCohortList(teams, cohort01.data.teams) : teams;
+const [teams, cohorts] = await Promise.all([
+  getCollection("teams"),
+  getCollection("cohorts"),
+]);
+const cohort01 = cohorts.find((cohort) => cohort.data.id === "cohort-01");
+const sortedTeams = cohort01
+  ? sortTeamsByCohortList(teams, cohort01.data.teams)
+  : teams;
 
 const jsonLd = {
-  '@context': 'https://schema.org',
-  '@type': 'ItemList',
-  name: 'LBS AI Lab teams',
+  "@context": "https://schema.org",
+  "@type": "ItemList",
+  name: "LBS AI Lab teams",
   itemListElement: sortedTeams.map((team, index) => ({
-    '@type': 'ListItem',
+    "@type": "ListItem",
     position: index + 1,
     url: `${SITE_URL}/teams/${team.data.slug}/`,
     name: team.data.displayName,
@@ -24,16 +29,16 @@ const jsonLd = {
 
 <BaseLayout
   title="Teams"
-  description="Explore AI products created by LBS AI Lab student teams across cohorts, from internal LBS tools to venture-scale prototypes."
+  description="Explore AI products created by LBS AI Lab student teams for real LBS use cases, from internal tools to venture-scale prototypes."
   jsonLd={jsonLd}
 >
   <section class="page-hero">
     <div class="container">
       <p class="eyebrow">Teams</p>
-      <h1>Products built by LBS AI Lab teams.</h1>
+      <h1>Products built for real LBS use cases.</h1>
       <p class="lede">
-        Explore AI products created by students across cohorts, from internal LBS tools to
-        venture-scale prototypes.
+        Explore AI products created by students across cohorts, from internal
+        LBS tools to venture-scale prototypes with real audiences to learn from.
       </p>
     </div>
   </section>
@@ -43,7 +48,7 @@ const jsonLd = {
       <div class="directory-bar">
         <div>
           <strong>Cohort</strong>
-          <a href="#teams">Cohort 01</a>
+          <a href="#teams">Cohort 01 / Google DeepMind partner cohort</a>
         </div>
       </div>
       <div id="teams">

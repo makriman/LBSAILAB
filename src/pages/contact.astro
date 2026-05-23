@@ -1,20 +1,20 @@
 ---
-import BaseLayout from '@layouts/BaseLayout.astro';
-import Button from '@components/atoms/Button.astro';
-import { DSAI_URL } from '@utils/site';
+import BaseLayout from "@layouts/BaseLayout.astro";
+import Button from "@components/atoms/Button.astro";
+import { DSAI_URL } from "@utils/site";
 ---
 
 <BaseLayout
   title="Contact"
-  description="Contact LBS AI Lab for questions about cohorts, mentoring, partnerships, or student-built AI products."
+  description="Contact LBS AI Lab for questions about cohorts, mentoring, partnerships, user testing, or student-built AI products."
 >
   <section class="page-hero">
     <div class="container">
       <p class="eyebrow">Contact</p>
       <h1>Contact LBS AI Lab.</h1>
       <p class="lede">
-        For questions about cohorts, mentoring, partnerships, or student-built AI
-        products, contact the LBS AI Lab team.
+        For questions about cohorts, mentoring, partnerships, user testing, or
+        student-built AI products, contact the LBS AI Lab team.
       </p>
     </div>
   </section>
@@ -25,18 +25,20 @@ import { DSAI_URL } from '@utils/site';
         <p class="eyebrow">General inquiries</p>
         <h2>Use a confirmed Lab or DSAI contact before publishing.</h2>
         <p>
-          A public lab email has not been confirmed in the project brief. This page is
-          ready for the approved contact route once it is available.
+          A public lab email has not been confirmed in the project brief. This
+          page is ready for the approved contact route once it is available.
         </p>
-        <Button href={DSAI_URL} variant="secondary">Visit the DSAI Initiative</Button>
+        <Button href={DSAI_URL} variant="secondary"
+          >Visit the DSAI Initiative</Button
+        >
       </article>
 
       <article>
         <p class="eyebrow">Team inquiries</p>
         <h2>Use team pages for product-specific introductions.</h2>
         <p>
-          Team pages list each builder and public email address for direct product
-          questions.
+          Team pages list each builder and public email address for direct
+          product questions, feedback, and testing interest.
         </p>
         <Button href="/teams/" variant="secondary">View teams</Button>
       </article>
@@ -45,8 +47,9 @@ import { DSAI_URL } from '@utils/site';
         <p class="eyebrow">Mentoring</p>
         <h2>Help student teams sharpen product direction and execution.</h2>
         <p>
-          Alumni, operators, founders, and technical builders can register interest in
-          supporting future cohorts.
+          Alumni, operators, founders, and technical builders can register
+          interest in supporting future cohorts as teams build, test, and
+          iterate.
         </p>
         <Button href="/apply/" variant="secondary">Register interest</Button>
       </article>

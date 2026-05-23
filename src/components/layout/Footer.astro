@@ -1,5 +1,5 @@
 ---
-import { DSAI_URL, LBS_URL } from '@utils/site';
+import { DSAI_URL, GOOGLE_DEEPMIND_URL, LBS_URL } from "@utils/site";
 ---
 
 <footer class="site-footer">
@@ -13,8 +13,9 @@ import { DSAI_URL, LBS_URL } from '@utils/site';
         </span>
       </a>
       <p>
-        LBS AI Lab is a hands-on AI venture lab for future operators and founders at
-        London Business School. It is part of the Data Science & AI Initiative.
+        LBS AI Lab helps students learn to build AI products, test with real LBS
+        users, and iterate from feedback. Cohort 01 is delivered in partnership
+        with Google DeepMind.
       </p>
     </div>
 
@@ -27,8 +28,15 @@ import { DSAI_URL, LBS_URL } from '@utils/site';
     </nav>
 
     <nav aria-label="Institution links" class="footer-links">
-      <a href={DSAI_URL} target="_blank" rel="noreferrer">Data Science & AI Initiative</a>
-      <a href={LBS_URL} target="_blank" rel="noreferrer">London Business School</a>
+      <a href={DSAI_URL} target="_blank" rel="noreferrer"
+        >Data Science & AI Initiative</a
+      >
+      <a href={GOOGLE_DEEPMIND_URL} target="_blank" rel="noreferrer"
+        >Google DeepMind</a
+      >
+      <a href={LBS_URL} target="_blank" rel="noreferrer"
+        >London Business School</a
+      >
     </nav>
   </div>
 </footer>
@@ -42,7 +50,10 @@ import { DSAI_URL, LBS_URL } from '@utils/site';
   .footer-inner {
     display: grid;
     gap: clamp(32px, 6vw, 80px);
-    grid-template-columns: minmax(0, 1.5fr) minmax(160px, 0.6fr) minmax(220px, 0.8fr);
+    grid-template-columns: minmax(0, 1.5fr) minmax(160px, 0.6fr) minmax(
+        220px,
+        0.8fr
+      );
     margin-inline: auto;
     max-width: var(--container);
     padding: clamp(52px, 8vw, 84px) var(--gutter);

@@ -1,15 +1,74 @@
-<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1200 630" role="img" aria-labelledby="title desc">
+<svg
+  xmlns="http://www.w3.org/2000/svg"
+  viewBox="0 0 1200 630"
+  role="img"
+  aria-labelledby="title desc"
+>
   <title id="title">LBS AI Lab</title>
-  <desc id="desc">The AI venture lab for future operators and founders.</desc>
-  <rect width="1200" height="630" fill="#f8f7f4"/>
-  <rect x="0" y="0" width="470" height="630" fill="#14175d"/>
-  <rect x="90" y="94" width="12" height="92" fill="#cd0d2f"/>
-  <rect x="90" y="94" width="92" height="12" fill="#ffffff"/>
-  <text x="90" y="258" fill="#ffffff" font-family="Georgia, serif" font-size="76" font-weight="700">LBS AI Lab</text>
-  <text x="90" y="318" fill="rgba(255,255,255,.78)" font-family="Arial, sans-serif" font-size="28" font-weight="700">Data Science &amp; AI Initiative</text>
-  <text x="555" y="220" fill="#14175d" font-family="Georgia, serif" font-size="72" font-weight="700">The AI venture lab</text>
-  <text x="555" y="298" fill="#14175d" font-family="Georgia, serif" font-size="72" font-weight="700">for future operators</text>
-  <text x="555" y="376" fill="#14175d" font-family="Georgia, serif" font-size="72" font-weight="700">and founders.</text>
-  <line x1="555" y1="438" x2="825" y2="438" stroke="#cd0d2f" stroke-width="8"/>
-  <text x="555" y="500" fill="#3e4278" font-family="Arial, sans-serif" font-size="30" font-weight="700">9 teams - 22 builders - 4 mentors</text>
+  <desc id="desc">Learn to build AI products with real users.</desc>
+  <rect width="1200" height="630" fill="#f8f7f4" />
+  <rect x="0" y="0" width="470" height="630" fill="#14175d" />
+  <rect x="90" y="94" width="12" height="92" fill="#cd0d2f" />
+  <rect x="90" y="94" width="92" height="12" fill="#ffffff" />
+  <text
+    x="90"
+    y="258"
+    fill="#ffffff"
+    font-family="Georgia, serif"
+    font-size="76"
+    font-weight="700"
+  >
+    LBS AI Lab
+  </text>
+  <text
+    x="90"
+    y="318"
+    fill="rgba(255,255,255,.78)"
+    font-family="Arial, sans-serif"
+    font-size="28"
+    font-weight="700"
+  >
+    Data Science &amp; AI Initiative
+  </text>
+  <text
+    x="555"
+    y="220"
+    fill="#14175d"
+    font-family="Georgia, serif"
+    font-size="72"
+    font-weight="700"
+  >
+    Learn to build
+  </text>
+  <text
+    x="555"
+    y="298"
+    fill="#14175d"
+    font-family="Georgia, serif"
+    font-size="72"
+    font-weight="700"
+  >
+    AI products with
+  </text>
+  <text
+    x="555"
+    y="376"
+    fill="#14175d"
+    font-family="Georgia, serif"
+    font-size="72"
+    font-weight="700"
+  >
+    real users.
+  </text>
+  <line x1="555" y1="438" x2="825" y2="438" stroke="#cd0d2f" stroke-width="8" />
+  <text
+    x="555"
+    y="500"
+    fill="#3e4278"
+    font-family="Arial, sans-serif"
+    font-size="30"
+    font-weight="700"
+  >
+    Cohort 01 with Google DeepMind
+  </text>
 </svg>

@@ -1,21 +1,22 @@
 ---
-import { getCollection } from 'astro:content';
-import BaseLayout from '@layouts/BaseLayout.astro';
-import MentorGrid from '@components/sections/MentorGrid.astro';
-const mentors = await getCollection('mentors');
+import { getCollection } from "astro:content";
+import BaseLayout from "@layouts/BaseLayout.astro";
+import MentorGrid from "@components/sections/MentorGrid.astro";
+const mentors = await getCollection("mentors");
 ---
 
 <BaseLayout
   title="Mentors"
-  description="Meet the product and technical mentors supporting LBS AI Lab teams as they move from idea to prototype."
+  description="Meet the product and technical mentors supporting LBS AI Lab teams as they build, test with users, and iterate."
 >
   <section class="page-hero">
     <div class="container">
       <p class="eyebrow">Mentors</p>
-      <h1>Mentors helping teams build with focus.</h1>
+      <h1>Mentors helping teams build, test, and improve.</h1>
       <p class="lede">
-        Product and technical mentors support teams as they move from idea to prototype
-        and from prototype to launch-ready product.
+        Product and technical mentors support teams as they move from idea to
+        prototype, from prototype to user feedback, and from feedback to a
+        stronger product.
       </p>
     </div>
   </section>

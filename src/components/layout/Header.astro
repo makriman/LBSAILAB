@@ -1,13 +1,13 @@
 ---
-import Button from '@components/atoms/Button.astro';
-import { DSAI_URL } from '@utils/site';
+import Button from "@components/atoms/Button.astro";
+import { DSAI_URL } from "@utils/site";
 
 const navItems = [
-  { href: '/about/', label: 'About' },
-  { href: '/cohorts/', label: 'Cohorts' },
-  { href: '/teams/', label: 'Teams' },
-  { href: '/mentors/', label: 'Mentors' },
-  { href: '/apply/', label: 'Apply' },
+  { href: "/about/", label: "About" },
+  { href: "/cohorts/", label: "Cohorts" },
+  { href: "/teams/", label: "Teams" },
+  { href: "/mentors/", label: "Mentors" },
+  { href: "/apply/", label: "Apply" },
 ];
 
 const currentPath = Astro.url.pathname;
@@ -19,7 +19,7 @@ const currentPath = Astro.url.pathname;
       <span class="brand-mark" aria-hidden="true"></span>
       <span class="brand-text">
         <strong>LBS AI Lab</strong>
-        <span>Data Science & AI Initiative</span>
+        <span>Build. Test. Iterate.</span>
       </span>
     </a>
 
@@ -35,15 +35,25 @@ const currentPath = Astro.url.pathname;
       <span class="menu-line menu-line-bottom" aria-hidden="true"></span>
     </button>
 
-    <nav class="primary-nav" id="primary-navigation" aria-label="Primary navigation" data-primary-nav>
+    <nav
+      class="primary-nav"
+      id="primary-navigation"
+      aria-label="Primary navigation"
+      data-primary-nav
+    >
       <ul>
         {
           navItems.map((item) => {
             const isCurrent =
-              item.href === '/' ? currentPath === '/' : currentPath.startsWith(item.href);
+              item.href === "/"
+                ? currentPath === "/"
+                : currentPath.startsWith(item.href);
             return (
               <li>
-                <a href={item.href} aria-current={isCurrent ? 'page' : undefined}>
+                <a
+                  href={item.href}
+                  aria-current={isCurrent ? "page" : undefined}
+                >
                   {item.label}
                 </a>
               </li>
@@ -54,22 +64,24 @@ const currentPath = Astro.url.pathname;
       <a class="dsai-link" href={DSAI_URL} target="_blank" rel="noreferrer">
         DSAI Initiative
       </a>
-      <Button href="/apply/" variant="primary" size="sm">Apply for September 2026</Button>
+      <Button href="/apply/" variant="primary" size="sm"
+        >Register for September 2026</Button
+      >
     </nav>
   </div>
 </header>
 
 <script is:inline>
-  const header = document.querySelector('[data-site-header]');
-  const toggle = document.querySelector('[data-menu-toggle]');
-  const nav = document.querySelector('[data-primary-nav]');
+  const header = document.querySelector("[data-site-header]");
+  const toggle = document.querySelector("[data-menu-toggle]");
+  const nav = document.querySelector("[data-primary-nav]");
 
-  toggle?.addEventListener('click', () => {
-    const isOpen = toggle.getAttribute('aria-expanded') === 'true';
-    toggle.setAttribute('aria-expanded', String(!isOpen));
-    nav?.toggleAttribute('data-open', !isOpen);
-    document.body.classList.toggle('menu-open', !isOpen);
-    header?.toggleAttribute('data-open', !isOpen);
+  toggle?.addEventListener("click", () => {
+    const isOpen = toggle.getAttribute("aria-expanded") === "true";
+    toggle.setAttribute("aria-expanded", String(!isOpen));
+    nav?.toggleAttribute("data-open", !isOpen);
+    document.body.classList.toggle("menu-open", !isOpen);
+    header?.toggleAttribute("data-open", !isOpen);
   });
 </script>
 

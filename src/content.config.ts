@@ -60,6 +60,8 @@ const cohorts = defineCollection({
     teamCount: z.number().nullable().optional(),
     participantCount: z.number().nullable().optional(),
     mentorCount: z.number().nullable().optional(),
+    partnerName: z.string().optional(),
+    partnerUrl: z.url().optional(),
     teams: z.array(z.string()).default([]),
   }),
 });

@@ -1,20 +1,21 @@
 ---
-import BaseLayout from '@layouts/BaseLayout.astro';
-import SectionHeader from '@components/atoms/SectionHeader.astro';
-import DSAIBlock from '@components/sections/DSAIBlock.astro';
+import BaseLayout from "@layouts/BaseLayout.astro";
+import SectionHeader from "@components/atoms/SectionHeader.astro";
+import DSAIBlock from "@components/sections/DSAIBlock.astro";
 ---
 
 <BaseLayout
   title="About LBS AI Lab"
-  description="LBS AI Lab helps future leaders understand AI transformation from the inside by building products, automating workflows, and testing ideas with real users."
+  description="LBS AI Lab teaches London Business School students to build AI products, test with real users, and iterate from feedback."
 >
   <section class="page-hero">
     <div class="container">
       <p class="eyebrow">About LBS AI Lab</p>
-      <h1>AI fluency through real product building.</h1>
+      <h1>The Lab teaches the full build loop.</h1>
       <p class="lede">
-        The Lab exists to help future leaders understand AI transformation from the inside:
-        by building products, automating workflows, and testing ideas with real users.
+        Students learn how to build quickly with AI-assisted tools, put products
+        in front of real LBS users, and improve based on what those users
+        actually do and say.
       </p>
     </div>
   </section>
@@ -23,24 +24,34 @@ import DSAIBlock from '@components/sections/DSAIBlock.astro';
     <div class="container editorial-grid">
       <article>
         <p class="eyebrow">Why now</p>
-        <h2>Conceptual AI literacy is no longer enough.</h2>
+        <h2>Building has become easier. Learning from users has not.</h2>
         <p>
-          AI is changing how organisations make decisions, serve customers, operate teams,
-          and create new ventures. Leaders who only understand AI conceptually will be at
-          a disadvantage. The next generation of leaders needs practical fluency: the
-          ability to prototype, evaluate, and deploy AI-enabled systems responsibly.
+          Agentic engineering, AI-assisted coding, and modern automation tools
+          have made it dramatically easier to create software. The new
+          bottleneck is not only technical execution. It is getting real users,
+          learning from their feedback, and improving the product until it
+          solves a problem that matters.
         </p>
       </article>
 
       <article>
         <p class="eyebrow">What makes the Lab different</p>
-        <h2>Building is treated as a leadership capability.</h2>
+        <h2>The audience is built into the model.</h2>
         <ul>
-          <li>It is hands-on.</li>
-          <li>It is venture-oriented.</li>
-          <li>It is student-led and institutionally aligned.</li>
-          <li>It focuses on business transformation, not AI hype.</li>
-          <li>It treats building as a way to understand leadership in an AI-native world.</li>
+          <li>Every project is built for an LBS use case.</li>
+          <li>
+            Teams can test with the 2,000-student LBS community and alumni
+            network.
+          </li>
+          <li>Students learn the new build stack through hands-on sessions.</li>
+          <li>
+            Mentors and partners help teams sharpen product and technical
+            decisions.
+          </li>
+          <li>
+            The goal is not a demo alone. It is learning how to build something
+            people want.
+          </li>
         </ul>
       </article>
     </div>
@@ -50,24 +61,41 @@ import DSAIBlock from '@components/sections/DSAIBlock.astro';
     <div class="container">
       <SectionHeader
         eyebrow="How the Lab works"
-        title="A cohort-based build environment for ambitious LBS students."
-        body="Students form or join teams, choose real problems, build prototypes and products, and work with mentors on product, technical, and strategic decisions."
+        title="A cohort-based build environment with a real feedback loop."
+        body="Students form or join teams, choose LBS problems, build prototypes with modern AI tools, test with real users, and iterate with mentor support."
       />
       <div class="process-grid">
         <article>
           <span>01</span>
-          <h3>Form teams</h3>
-          <p>Students bring product ideas or join teams around promising workflow opportunities.</p>
+          <h3>Choose an LBS use case</h3>
+          <p>
+            Teams start from practical student, alumni, operator, or campus
+            workflows.
+          </p>
         </article>
         <article>
           <span>02</span>
-          <h3>Build prototypes</h3>
-          <p>Teams move from thesis to working product through practical AI tooling and user testing.</p>
+          <h3>Build with AI tools</h3>
+          <p>
+            Sessions teach students how to use agentic engineering to move from
+            thesis to working product.
+          </p>
         </article>
         <article>
           <span>03</span>
-          <h3>Demo publicly</h3>
-          <p>Cohorts culminate in a showcase that gives student builders a credible public presence.</p>
+          <h3>Test with real users</h3>
+          <p>
+            Teams put prototypes in front of LBS students and alumni to learn
+            from real behaviour.
+          </p>
+        </article>
+        <article>
+          <span>04</span>
+          <h3>Iterate and demo</h3>
+          <p>
+            Cohorts culminate in a showcase after teams have improved through
+            feedback.
+          </p>
         </article>
       </div>
     </div>
@@ -131,7 +159,7 @@ import DSAIBlock from '@components/sections/DSAIBlock.astro';
   .process-grid {
     display: grid;
     gap: 20px;
-    grid-template-columns: repeat(3, minmax(0, 1fr));
+    grid-template-columns: repeat(4, minmax(0, 1fr));
     margin-top: 34px;
   }
 

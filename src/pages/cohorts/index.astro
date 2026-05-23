@@ -1,24 +1,25 @@
 ---
-import { getCollection } from 'astro:content';
-import BaseLayout from '@layouts/BaseLayout.astro';
-import CohortCard from '@components/cards/CohortCard.astro';
+import { getCollection } from "astro:content";
+import BaseLayout from "@layouts/BaseLayout.astro";
+import CohortCard from "@components/cards/CohortCard.astro";
 
-const cohorts = (await getCollection('cohorts')).sort((a, b) =>
+const cohorts = (await getCollection("cohorts")).sort((a, b) =>
   a.data.startsAt < b.data.startsAt ? 1 : -1,
 );
 ---
 
 <BaseLayout
   title="Cohorts"
-  description="Explore LBS AI Lab cohorts of AI-native builders, including the founding Spring 2026 cohort and the upcoming September 2026 cohort."
+  description="Explore LBS AI Lab cohorts where students learn to build AI products, test with real users, and iterate from feedback."
 >
   <section class="page-hero">
     <div class="container">
       <p class="eyebrow">Cohorts</p>
-      <h1>Cohorts of AI-native builders.</h1>
+      <h1>Cohorts built around real users.</h1>
       <p class="lede">
-        Each cohort brings together LBS students building practical AI products across
-        careers, learning, operations, campus life, funding, and venture opportunities.
+        Each cohort brings together LBS students building practical AI products
+        for LBS use cases, with a clear path to user testing, feedback, and
+        iteration.
       </p>
     </div>
   </section>

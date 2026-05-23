@@ -1,6 +1,7 @@
 ---
-import type { TeamEntry } from '@utils/collections';
-import Button from '@components/atoms/Button.astro';
+import type { TeamEntry } from "@utils/collections";
+import Button from "@components/atoms/Button.astro";
+import GoogleDeepMindLogo from "@components/brand/GoogleDeepMindLogo.astro";
 
 interface Props {
   team: TeamEntry;
@@ -17,6 +18,13 @@ const { team, relatedTeams } = Astro.props;
         <p class="eyebrow">Cohort 01 project</p>
         <h1>{team.data.displayName}</h1>
         <p class="lede">{team.data.tagline}</p>
+        <div class="team-partner">
+          <GoogleDeepMindLogo
+            tone="light"
+            compact
+            label="Cohort 01 in partnership with"
+          />
+        </div>
         <div class="hero-actions">
           {
             team.data.productUrl && (
@@ -37,6 +45,10 @@ const { team, relatedTeams } = Astro.props;
             <dt>Status</dt>
             <dd>{team.data.status}</dd>
           </div>
+          <div>
+            <dt>Partner cohort</dt>
+            <dd>Google DeepMind</dd>
+          </div>
         </dl>
       </aside>
     </div>
@@ -47,10 +59,11 @@ const { team, relatedTeams } = Astro.props;
       <div class="profile-main">
         <section>
           <p class="eyebrow">The problem</p>
-          <h2>A real workflow, treated as a product opportunity.</h2>
+          <h2>A real LBS workflow, treated as a product opportunity.</h2>
           <p>
-            The team is focused on a practical student, operator, or professional workflow
-            where AI can reduce friction and help people make better decisions faster.
+            The team is focused on a practical student, operator, or
+            professional workflow where AI can reduce friction, reach real
+            users, and help people make better decisions faster.
           </p>
         </section>
 
@@ -64,8 +77,8 @@ const { team, relatedTeams } = Astro.props;
           <p class="eyebrow">Cohort context</p>
           <h2>Built inside the founding cohort.</h2>
           <p>
-            This project is part of Cohort 01, the founding LBS AI Lab batch running from
-            10 April to 12 June 2026.
+            This project is part of Cohort 01, delivered in partnership with
+            Google DeepMind and running from 10 April to 12 June 2026.
           </p>
         </section>
       </div>
@@ -142,6 +155,10 @@ const { team, relatedTeams } = Astro.props;
     flex-wrap: wrap;
     gap: 12px;
     margin-top: 30px;
+  }
+
+  .team-partner {
+    margin-top: 22px;
   }
 
   .meta-panel {

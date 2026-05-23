@@ -1,61 +1,77 @@
 ---
-import { getCollection } from 'astro:content';
-import BaseLayout from '@layouts/BaseLayout.astro';
-import Button from '@components/atoms/Button.astro';
-import SectionHeader from '@components/atoms/SectionHeader.astro';
-import Stat from '@components/atoms/Stat.astro';
-import LabSignal from '@components/sections/LabSignal.astro';
-import TeamGrid from '@components/sections/TeamGrid.astro';
-import MentorGrid from '@components/sections/MentorGrid.astro';
-import ApplyCTA from '@components/sections/ApplyCTA.astro';
-import DSAIBlock from '@components/sections/DSAIBlock.astro';
-import { LBS_URL, SITE_URL } from '@utils/site';
-import { sortTeamsByCohortList } from '@utils/collections';
+import { getCollection } from "astro:content";
+import BaseLayout from "@layouts/BaseLayout.astro";
+import Button from "@components/atoms/Button.astro";
+import SectionHeader from "@components/atoms/SectionHeader.astro";
+import Stat from "@components/atoms/Stat.astro";
+import GoogleDeepMindLogo from "@components/brand/GoogleDeepMindLogo.astro";
+import LabSignal from "@components/sections/LabSignal.astro";
+import TeamGrid from "@components/sections/TeamGrid.astro";
+import MentorGrid from "@components/sections/MentorGrid.astro";
+import ApplyCTA from "@components/sections/ApplyCTA.astro";
+import DSAIBlock from "@components/sections/DSAIBlock.astro";
+import { LBS_URL, SITE_URL } from "@utils/site";
+import { sortTeamsByCohortList } from "@utils/collections";
 
 const [teams, cohorts, mentors] = await Promise.all([
-  getCollection('teams'),
-  getCollection('cohorts'),
-  getCollection('mentors'),
+  getCollection("teams"),
+  getCollection("cohorts"),
+  getCollection("mentors"),
 ]);
 
-const cohort01 = cohorts.find((cohort) => cohort.data.id === 'cohort-01');
-const cohortTeams = cohort01 ? sortTeamsByCohortList(teams, cohort01.data.teams) : teams;
+const cohort01 = cohorts.find((cohort) => cohort.data.id === "cohort-01");
+const cohortTeams = cohort01
+  ? sortTeamsByCohortList(teams, cohort01.data.teams)
+  : teams;
 const featuredTeams = cohortTeams.filter((team) => team.data.featured);
 
 const jsonLd = {
-  '@context': 'https://schema.org',
-  '@type': 'EducationalOrganization',
-  name: 'LBS AI Lab',
+  "@context": "https://schema.org",
+  "@type": "EducationalOrganization",
+  name: "LBS AI Lab",
   parentOrganization: {
-    '@type': 'CollegeOrUniversity',
-    name: 'London Business School',
+    "@type": "CollegeOrUniversity",
+    name: "London Business School",
     url: LBS_URL,
   },
   url: `${SITE_URL}/`,
   description:
-    'A hands-on AI venture lab for future operators and founders at London Business School.',
+    "A hands-on AI lab where London Business School students learn to build AI products, test them with real users, and iterate from feedback.",
 };
 ---
 
 <BaseLayout
-  title="LBS AI Lab | The AI venture lab for future operators and founders"
-  description="LBS AI Lab helps London Business School students build AI products, automate workflows, and develop hands-on AI fluency through real cohort-based product creation."
+  title="LBS AI Lab | Learn to build AI products with real users"
+  description="LBS AI Lab helps London Business School students learn agentic building, test AI products with real LBS users, and iterate from feedback."
   jsonLd={jsonLd}
 >
   <section class="home-hero">
     <div class="container hero-grid">
       <div class="hero-copy">
-        <p class="eyebrow">London Business School / Data Science & AI Initiative</p>
-        <h1>The AI venture lab for future operators and founders.</h1>
+        <p class="eyebrow">
+          London Business School / Data Science & AI Initiative
+        </p>
+        <h1>Learn to build AI products people actually use.</h1>
         <p class="lede">
-          LBS AI Lab gives students hands-on experience building AI products,
-          automating workflows, and exploring how intelligent systems reshape business.
+          Agentic engineering has made building faster, cheaper, and available
+          to more people. LBS AI Lab teaches students the harder loop: choose a
+          real LBS use case, build quickly, test with real users, and improve
+          from feedback.
         </p>
         <div class="hero-actions">
-          <Button href="/cohorts/cohort-01/" size="lg">Explore Cohort 01</Button>
-          <Button href="/apply/" variant="secondary" size="lg">Apply for September 2026</Button>
+          <Button href="/cohorts/cohort-01/" size="lg">Explore Cohort 01</Button
+          >
+          <Button href="/apply/" variant="secondary" size="lg"
+            >Apply for September 2026</Button
+          >
         </div>
-        <p class="hero-note">Built by LBS students. Backed by the Data Science & AI Initiative.</p>
+        <div class="hero-partner">
+          <GoogleDeepMindLogo label="Cohort 01 in partnership with" />
+        </div>
+        <p class="hero-note">
+          Every project is built for an LBS use case, with a practical route to
+          student and alumni feedback.
+        </p>
       </div>
 
       <aside class="hero-panel" aria-label="Cohort 01 facts">
@@ -85,12 +101,13 @@ const jsonLd = {
     <div class="container manifesto-grid">
       <div class="manifesto-rule" aria-hidden="true"></div>
       <div>
-        <h2>We believe the future's most effective leaders will be builders.</h2>
+        <h2>When building gets easier, users become the hard part.</h2>
         <p>
-          As AI reshapes every industry, the ability to prototype products, automate
-          workflows, and work directly with intelligent systems becomes a strategic
-          advantage. LBS AI Lab gives students a hands-on environment to explore that
-          future through real products, real experiments, and real execution.
+          AI-assisted coding and agentic engineering have compressed the
+          distance from idea to prototype. The real technical challenge is
+          learning with users: finding the right problem, getting feedback
+          early, and iterating toward something people want. The Lab gives
+          builders a ready audience inside the LBS community.
         </p>
       </div>
     </div>
@@ -100,8 +117,8 @@ const jsonLd = {
     <div class="container proof-grid">
       <SectionHeader
         eyebrow="Cohort proof"
-        title="Real teams, real products, real student builders."
-        body="Cohort 01 brings together LBS students building AI products across careers, funding, events, onboarding, campus life, academic planning, and professional workflows."
+        title="Real teams, real products, real LBS users."
+        body="Cohort 01 brings together LBS students building for career workflows, funding discovery, events, onboarding, campus life, academic planning, and professional work. Each team has a natural test audience across the School."
       />
       <div class="stats-grid">
         <Stat value="9" label="teams" />
@@ -117,24 +134,33 @@ const jsonLd = {
     <div class="container">
       <SectionHeader
         eyebrow="What the Lab does"
-        title="AI fluency, developed through execution."
-        body="The Lab treats building as a leadership capability: the practical fluency to move from insight to product, workflow, and transformation."
+        title="Build fast. Test with users. Iterate toward demand."
+        body="The Lab teaches the full build loop for the agentic engineering era: use AI tools to move quickly, then learn from real users until the product improves."
       />
       <div class="pillar-grid">
         <article>
           <span>01</span>
-          <h3>Build</h3>
-          <p>Students move from idea to prototype through hands-on product creation.</p>
+          <h3>Learn to build</h3>
+          <p>
+            Students use AI-assisted coding, automation, and product thinking to
+            move from idea to prototype.
+          </p>
         </article>
         <article>
           <span>02</span>
-          <h3>Experiment</h3>
-          <p>Teams test AI use cases against real student, organisational, and operational workflows.</p>
+          <h3>Reach real users</h3>
+          <p>
+            Every project is anchored in an LBS use case, giving teams a path to
+            test with students and alumni.
+          </p>
         </article>
         <article>
           <span>03</span>
-          <h3>Transform</h3>
-          <p>The Lab helps future leaders understand AI transformation by building directly with the tools changing business.</p>
+          <h3>Improve from feedback</h3>
+          <p>
+            Teams learn to run the product loop: observe usage, listen
+            carefully, adjust, and ship again.
+          </p>
         </article>
       </div>
     </div>
@@ -146,9 +172,11 @@ const jsonLd = {
         <SectionHeader
           eyebrow="Cohort 01"
           title="Meet the founding cohort."
-          body="From job-search copilots to club operations platforms, Cohort 01 shows what happens when future leaders learn AI by building with it."
+          body="Cohort 01 is delivered in partnership with Google DeepMind. From job-search copilots to club operations platforms, teams are learning AI by building for real LBS workflows."
         />
-        <Button href="/cohorts/cohort-01/" variant="secondary">View Cohort 01</Button>
+        <Button href="/cohorts/cohort-01/" variant="secondary"
+          >View Cohort 01</Button
+        >
       </div>
       <LabSignal />
     </div>
@@ -161,8 +189,8 @@ const jsonLd = {
     <div class="container">
       <SectionHeader
         eyebrow="Featured builds"
-        title="A portfolio spanning student experience, operations, and venture potential."
-        body="RecruitSmart LBS, EventOS, and Zentra show the range of Cohort 01: career AI, organisational automation, and professional workflow transformation."
+        title="LBS use cases that can meet real users quickly."
+        body="RecruitSmart LBS, EventOS, and Zentra show the range of Cohort 01: career AI, organisational automation, and professional workflow tools with clear audiences to test with."
       />
       <TeamGrid teams={featuredTeams} featured />
     </div>
@@ -173,7 +201,7 @@ const jsonLd = {
       <SectionHeader
         eyebrow="Mentor layer"
         title="Guided by product and technical mentors."
-        body="Cohort teams are supported by mentors who help sharpen product direction, technical execution, and launch readiness."
+        body="Cohort teams are supported through build sessions, product reviews, technical mentoring, and feedback cycles that prepare them to put working products in front of users."
       />
       <MentorGrid mentors={mentors} />
     </div>
@@ -186,8 +214,11 @@ const jsonLd = {
 
 <style>
   .home-hero {
-    background:
-      linear-gradient(90deg, var(--color-warm-white) 0 64%, var(--color-lbs-blue) 64% 100%);
+    background: linear-gradient(
+      90deg,
+      var(--color-warm-white) 0 64%,
+      var(--color-lbs-blue) 64% 100%
+    );
     border-bottom: 1px solid var(--color-border);
     overflow: hidden;
     padding-block: clamp(36px, 6vw, 64px) clamp(16px, 3vw, 28px);
@@ -216,6 +247,10 @@ const jsonLd = {
     flex-wrap: wrap;
     gap: 12px;
     margin-top: 24px;
+  }
+
+  .hero-partner {
+    margin-top: 22px;
   }
 
   .hero-note {

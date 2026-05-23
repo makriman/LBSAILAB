@@ -9,6 +9,8 @@
   "teamCount": 9,
   "participantCount": 22,
   "mentorCount": 4,
+  "partnerName": "Google DeepMind",
+  "partnerUrl": "https://deepmind.google/",
   "teams": [
     "recruitsmart-lbs",
     "cafe-smart-campus-collective",

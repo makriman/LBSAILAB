@@ -1,31 +1,40 @@
 ---
-import BaseLayout from '@layouts/BaseLayout.astro';
-import Button from '@components/atoms/Button.astro';
+import BaseLayout from "@layouts/BaseLayout.astro";
+import Button from "@components/atoms/Button.astro";
 
-const registerInterestEmail = 'rlokanathan.mba2027@london.edu';
+const registerInterestEmail = "rlokanathan.mba2027@london.edu";
 ---
 
 <BaseLayout
   title="Apply"
-  description="Register interest for the September 2026 LBS AI Lab cohort and build real AI products with ambitious LBS students."
+  description="Register interest for the September 2026 LBS AI Lab cohort and learn to build AI products with real LBS users."
 >
   <section class="page-hero">
     <div class="container hero-grid">
       <div>
         <p class="eyebrow">Apply</p>
-        <h1>Build with the September 2026 cohort.</h1>
+        <h1>Learn the build loop in the September 2026 cohort.</h1>
         <p class="lede">
-          LBS AI Lab is for students who want hands-on experience building AI products and
-          leading AI transformation from the inside.
+          LBS AI Lab is for students who want to use AI-assisted tools to build
+          quickly, test with real users, and learn how products improve through
+          feedback.
         </p>
-        <Button href="#register-interest" variant="red" size="lg" external={false}>
+        <Button
+          href="#register-interest"
+          variant="red"
+          size="lg"
+          external={false}
+        >
           Register interest for September 2026
         </Button>
       </div>
       <aside>
         <span>Cohort 02</span>
         <strong>Starts September 2026</strong>
-        <p>Applications will open for LBS students ready to build, test, learn, and ship.</p>
+        <p>
+          Applications will open for LBS students ready to build, test, learn,
+          iterate, and ship.
+        </p>
       </aside>
     </div>
   </section>
@@ -36,8 +45,8 @@ const registerInterestEmail = 'rlokanathan.mba2027@london.edu';
         <p class="eyebrow">Register interest</p>
         <h2>Tell us who you are.</h2>
         <p>
-          Share your LBS details for the September 2026 cohort list. The Lab team will use
-          this to follow up when applications open.
+          Share your LBS details for the September 2026 cohort list. The Lab
+          team will follow up when applications open and sessions are announced.
         </p>
       </div>
 
@@ -57,14 +66,19 @@ const registerInterestEmail = 'rlokanathan.mba2027@london.edu';
             name="lbs_email"
             type="email"
             autocomplete="email"
-            pattern={'^[^@\\s]+@london\\.edu$'}
+            pattern={"^[^@\\s]+@london\\.edu$"}
             placeholder="name.program@london.edu"
             required
           />
         </label>
         <label>
           <span>Course name</span>
-          <input name="course_name" autocomplete="organization-title" placeholder="MBA, MiF, MAM..." required />
+          <input
+            name="course_name"
+            autocomplete="organization-title"
+            placeholder="MBA, MiF, MAM..."
+            required
+          />
         </label>
         <label>
           <span>What would you like to build?</span>
@@ -79,23 +93,26 @@ const registerInterestEmail = 'rlokanathan.mba2027@london.edu';
     <div class="container apply-grid">
       <section>
         <p class="eyebrow">Who this is for</p>
-        <h2>Students with product ideas, operator instincts, or founder ambition.</h2>
+        <h2>Students who want to learn how to build something people want.</h2>
         <ul>
           <li>LBS students with a product idea.</li>
-          <li>Operators who see a workflow that can be transformed with AI.</li>
-          <li>Future founders looking for co-builders.</li>
-          <li>Students who want practical AI fluency beyond classroom learning.</li>
+          <li>Operators who see a workflow that can be made better with AI.</li>
+          <li>Future founders looking for co-builders and early users.</li>
+          <li>
+            Students who want practical AI fluency beyond classroom learning.
+          </li>
         </ul>
       </section>
 
       <section>
         <p class="eyebrow">What you will do</p>
-        <h2>Move from problem to prototype with mentor support.</h2>
+        <h2>Move from problem to prototype to user feedback.</h2>
         <ul>
           <li>Form or join a team.</li>
-          <li>Choose a real problem.</li>
-          <li>Prototype with AI tools.</li>
-          <li>Test with users.</li>
+          <li>Choose a real LBS use case.</li>
+          <li>Prototype with AI-assisted tools.</li>
+          <li>Test with LBS students and alumni.</li>
+          <li>Improve based on feedback.</li>
           <li>Work with mentors.</li>
           <li>Demo what you build.</li>
         </ul>
@@ -105,8 +122,9 @@ const registerInterestEmail = 'rlokanathan.mba2027@london.edu';
         <p class="eyebrow">What you do not need</p>
         <h2>You do not need to be a professional software engineer.</h2>
         <p>
-          You do need curiosity, discipline, and willingness to build. The Lab is
-          practical, team-based, and focused on real execution.
+          You do need curiosity, discipline, and willingness to learn by
+          shipping. The Lab is practical, team-based, and focused on the real
+          product loop.
         </p>
       </section>
     </div>

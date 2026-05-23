@@ -1,11 +1,12 @@
 ---
-import type { CohortEntry, MentorEntry, TeamEntry } from '@utils/collections';
-import { formatDateRange } from '@utils/dates';
-import Button from '@components/atoms/Button.astro';
-import Stat from '@components/atoms/Stat.astro';
-import TeamGrid from './TeamGrid.astro';
-import MentorGrid from './MentorGrid.astro';
-import ApplyCTA from './ApplyCTA.astro';
+import type { CohortEntry, MentorEntry, TeamEntry } from "@utils/collections";
+import { formatDateRange } from "@utils/dates";
+import Button from "@components/atoms/Button.astro";
+import Stat from "@components/atoms/Stat.astro";
+import GoogleDeepMindLogo from "@components/brand/GoogleDeepMindLogo.astro";
+import TeamGrid from "./TeamGrid.astro";
+import MentorGrid from "./MentorGrid.astro";
+import ApplyCTA from "./ApplyCTA.astro";
 
 interface Props {
   cohort: CohortEntry;
@@ -14,7 +15,8 @@ interface Props {
 }
 
 const { cohort, teams, mentors } = Astro.props;
-const isUpcoming = cohort.data.status === 'upcoming';
+const isUpcoming = cohort.data.status === "upcoming";
+const hasGoogleDeepMindPartner = cohort.data.partnerName === "Google DeepMind";
 ---
 
 <article class="cohort-detail">
@@ -22,32 +24,59 @@ const isUpcoming = cohort.data.status === 'upcoming';
     <div class="container hero-grid">
       <div>
         <p class="eyebrow">{cohort.data.name} / {cohort.data.season}</p>
+        {
+          hasGoogleDeepMindPartner && (
+            <div class="hero-partner">
+              <GoogleDeepMindLogo
+                tone="light"
+                compact
+                label="Delivered in partnership with"
+              />
+            </div>
+          )
+        }
         <h1>
           {
             isUpcoming
-              ? 'The next cohort starts September 2026.'
-              : 'The founding cohort of LBS AI Lab.'
+              ? "Build, test, and iterate with real users."
+              : "Cohort 01, in partnership with Google DeepMind."
           }
         </h1>
         <p class="lede">
           {
             isUpcoming
-              ? 'Applications will open for LBS students who want to build AI products, prototype workflows, and develop hands-on AI fluency for leadership and transformation.'
-              : 'From 10 April to 12 June 2026, nine student teams are building AI products across LBS student life, career development, club operations, academic planning, funding discovery, and professional workflows.'
+              ? "Applications will open for LBS students who want to learn agentic building, prototype AI products, test with real users, and improve from feedback."
+              : "From 10 April to 12 June 2026, nine student teams are building AI products for LBS student life, career development, club operations, academic planning, funding discovery, and professional workflows."
           }
         </p>
         <div class="hero-actions">
-          <Button href={isUpcoming ? '/apply/' : '/teams/'} variant="red" size="lg">
-            {isUpcoming ? 'Register interest' : 'Explore teams'}
+          <Button
+            href={isUpcoming ? "/apply/" : "/teams/"}
+            variant="red"
+            size="lg"
+          >
+            {isUpcoming ? "Register interest" : "Explore teams"}
           </Button>
         </div>
       </div>
       <aside class="cohort-panel" aria-label="Cohort facts">
         <p>{formatDateRange(cohort.data.startsAt, cohort.data.endsAt)}</p>
         <div>
-          <Stat value={String(cohort.data.teamCount ?? 'TBC')} label="teams" light />
-          <Stat value={String(cohort.data.participantCount ?? 'TBC')} label="participants" light />
-          <Stat value={String(cohort.data.mentorCount ?? 'TBC')} label="mentors" light />
+          <Stat
+            value={String(cohort.data.teamCount ?? "TBC")}
+            label="teams"
+            light
+          />
+          <Stat
+            value={String(cohort.data.participantCount ?? "TBC")}
+            label="participants"
+            light
+          />
+          <Stat
+            value={String(cohort.data.mentorCount ?? "TBC")}
+            label="mentors"
+            light
+          />
         </div>
       </aside>
     </div>
@@ -59,36 +88,37 @@ const isUpcoming = cohort.data.status === 'upcoming';
         <div class="container upcoming-grid">
           <section>
             <p class="eyebrow">What students will build</p>
-            <h2>Real products for real workflows.</h2>
+            <h2>Real products for real LBS workflows.</h2>
             <p>
-              Teams will choose practical problems, prototype AI-enabled products, test
-              with users, and learn how intelligent systems change product development
-              and organisational work.
+              Teams will choose practical problems, prototype AI-enabled
+              products, test with LBS users, and learn how intelligent systems
+              change product development and organisational work.
             </p>
           </section>
           <section>
             <p class="eyebrow">Who should apply</p>
-            <h2>Founder-level ambition, operator instincts, or a clear problem.</h2>
+            <h2>Builder curiosity, community insight, or a clear problem.</h2>
             <p>
-              Apply if you are an LBS student with a problem you want to solve with AI.
-              You do not need to be a software engineer, but you should be willing to
-              build, test, learn, and ship.
+              Apply if you are an LBS student with a problem you want to solve
+              with AI. You do not need to be a software engineer, but you should
+              be willing to build, test, learn from feedback, and ship.
             </p>
           </section>
           <section>
             <p class="eyebrow">Commitment</p>
             <h2>A practical build cycle with mentor support.</h2>
             <p>
-              Students form or join teams, work through product direction and technical
-              execution, and prepare to demo what they build.
+              Students form or join teams, work through product direction and
+              technical execution, test with users, and prepare to demo what
+              they build.
             </p>
           </section>
           <section>
             <p class="eyebrow">Team formation</p>
             <h2>Bring a product idea or join an ambitious team.</h2>
             <p>
-              The Lab supports students with both clear venture ideas and operator-led
-              workflow opportunities.
+              The Lab supports students with both clear product ideas and
+              operator-led workflow opportunities grounded in LBS use cases.
             </p>
           </section>
         </div>
@@ -100,7 +130,7 @@ const isUpcoming = cohort.data.status === 'upcoming';
             <div class="section-top">
               <div>
                 <p class="eyebrow">Team portfolio</p>
-                <h2>Nine teams building across the LBS experience.</h2>
+                <h2>Nine teams building for real LBS use cases.</h2>
               </div>
             </div>
             <div id="teams">
@@ -114,7 +144,10 @@ const isUpcoming = cohort.data.status === 'upcoming';
             <div class="section-top">
               <div>
                 <p class="eyebrow">Mentor layer</p>
-                <h2>Guidance for product direction and technical execution.</h2>
+                <h2>
+                  Guidance for product direction, technical execution, and user
+                  feedback.
+                </h2>
               </div>
             </div>
             <MentorGrid mentors={mentors} />
@@ -126,7 +159,7 @@ const isUpcoming = cohort.data.status === 'upcoming';
 
   <ApplyCTA
     title="Build in the next cohort."
-    body="The September 2026 cohort will bring together a new group of LBS students ready to build with AI."
+    body="The September 2026 cohort will bring together a new group of LBS students ready to build with AI, test with real users, and iterate from feedback."
   />
 </article>
 
@@ -160,6 +193,10 @@ const isUpcoming = cohort.data.status === 'upcoming';
 
   .hero-actions {
     margin-top: 30px;
+  }
+
+  .hero-partner {
+    margin-top: 18px;
   }
 
   .cohort-panel {

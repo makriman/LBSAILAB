@@ -1,18 +1,20 @@
 ---
-import type { CohortEntry } from '@utils/collections';
-import { formatDateRange } from '@utils/dates';
+import type { CohortEntry } from "@utils/collections";
+import { formatDateRange } from "@utils/dates";
+import GoogleDeepMindLogo from "@components/brand/GoogleDeepMindLogo.astro";
 
 interface Props {
   cohort: CohortEntry;
 }
 
 const { cohort } = Astro.props;
+const hasGoogleDeepMindPartner = cohort.data.partnerName === "Google DeepMind";
 const statusLabel =
-  cohort.data.status === 'current'
-    ? 'Current / Founding cohort'
-    : cohort.data.status === 'upcoming'
-      ? 'Upcoming'
-      : 'Past';
+  cohort.data.status === "current"
+    ? "Current / Founding cohort"
+    : cohort.data.status === "upcoming"
+      ? "Upcoming"
+      : "Past";
 ---
 
 <article class="cohort-card">
@@ -21,23 +23,28 @@ const statusLabel =
     <span>{cohort.data.season}</span>
   </div>
   <h2>{cohort.data.name}</h2>
+  {
+    hasGoogleDeepMindPartner && (
+      <GoogleDeepMindLogo label="In partnership with" compact />
+    )
+  }
   <p>{formatDateRange(cohort.data.startsAt, cohort.data.endsAt)}</p>
   <dl>
     <div>
       <dt>Teams</dt>
-      <dd>{cohort.data.teamCount ?? 'TBC'}</dd>
+      <dd>{cohort.data.teamCount ?? "TBC"}</dd>
     </div>
     <div>
       <dt>Participants</dt>
-      <dd>{cohort.data.participantCount ?? 'TBC'}</dd>
+      <dd>{cohort.data.participantCount ?? "TBC"}</dd>
     </div>
     <div>
       <dt>Mentors</dt>
-      <dd>{cohort.data.mentorCount ?? 'TBC'}</dd>
+      <dd>{cohort.data.mentorCount ?? "TBC"}</dd>
     </div>
   </dl>
   <a href={`/cohorts/${cohort.data.slug}/`}>
-    {cohort.data.status === 'upcoming' ? 'Register interest' : 'View cohort'}
+    {cohort.data.status === "upcoming" ? "Register interest" : "View cohort"}
   </a>
 </article>
 

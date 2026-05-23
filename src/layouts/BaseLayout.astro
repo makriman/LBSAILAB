@@ -1,9 +1,9 @@
 ---
-import Header from '@components/layout/Header.astro';
-import Footer from '@components/layout/Footer.astro';
-import SkipLink from '@components/layout/SkipLink.astro';
-import '@styles/global.css';
-import { defaultDescription, SITE_NAME, SITE_URL } from '@utils/site';
+import Header from "@components/layout/Header.astro";
+import Footer from "@components/layout/Footer.astro";
+import SkipLink from "@components/layout/SkipLink.astro";
+import "@styles/global.css";
+import { defaultDescription, SITE_NAME, SITE_URL } from "@utils/site";
 
 interface Props {
   title?: string;
@@ -14,14 +14,17 @@ interface Props {
 }
 
 const {
-  title = `${SITE_NAME} | The AI venture lab for future operators and founders`,
+  title = `${SITE_NAME} | Learn to build AI products with real users`,
   description = defaultDescription,
-  image = '/og-default.svg',
+  image = "/og-default.svg",
   noindex = false,
   jsonLd,
 } = Astro.props;
 
-const canonical = new URL(Astro.url.pathname, Astro.site ?? SITE_URL).toString();
+const canonical = new URL(
+  Astro.url.pathname,
+  Astro.site ?? SITE_URL,
+).toString();
 const ogImage = new URL(image, Astro.site ?? SITE_URL).toString();
 const pageTitle = title.includes(SITE_NAME) ? title : `${title} | ${SITE_NAME}`;
 const jsonLdItems = Array.isArray(jsonLd) ? jsonLd : jsonLd ? [jsonLd] : [];
@@ -51,7 +54,11 @@ const jsonLdItems = Array.isArray(jsonLd) ? jsonLd : jsonLd ? [jsonLd] : [];
     <meta name="twitter:image" content={ogImage} />
     {
       jsonLdItems.map((item) => (
-        <script is:inline type="application/ld+json" set:html={JSON.stringify(item)} />
+        <script
+          is:inline
+          type="application/ld+json"
+          set:html={JSON.stringify(item)}
+        />
       ))
     }
   </head>

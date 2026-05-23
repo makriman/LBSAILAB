@@ -1,8 +1,8 @@
 # LBS AI Lab
 
-Static Astro website for LBS AI Lab, the AI venture lab for future operators and founders at London Business School.
+Static Astro website for LBS AI Lab, where London Business School students learn to build AI products, test with real users, and iterate from feedback.
 
-The site is built as a fast, content-driven institutional platform for the Data Science & AI Initiative, with cohort, team, mentor, and application pages generated from Astro Content Collections.
+The site is built as a fast, content-driven institutional platform for the Data Science & AI Initiative, with cohort, team, mentor, and application pages generated from Astro Content Collections. Cohort 01 is presented in partnership with Google DeepMind.
 
 ## Stack
 
