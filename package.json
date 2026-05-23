@@ -8,13 +8,16 @@
   "scripts": {
     "dev": "astro dev",
     "build": "astro check && astro build",
-    "preview": "astro preview",
+    "preview": "npm run build && wrangler dev",
     "check": "astro check",
     "format": "prettier --write .",
     "format:check": "prettier --check .",
-    "astro": "astro"
+    "astro": "astro",
+    "generate-types": "wrangler types",
+    "deploy": "npm run build && wrangler deploy"
   },
   "dependencies": {
+    "@astrojs/cloudflare": "^13.5.4",
     "@astrojs/sitemap": "^3.7.2",
     "@fontsource-variable/inter": "^5.2.8",
     "@fontsource/source-serif-4": "^5.2.9",
@@ -26,6 +29,10 @@
     "prettier": "^3.8.3",
     "prettier-plugin-astro": "^0.14.1",
     "rollup": "npm:@rollup/wasm-node@^4.60.4",
-    "typescript": "^6.0.3"
+    "typescript": "^6.0.3",
+    "wrangler": "^4.94.0"
+  },
+  "overrides": {
+    "vite": "^7"
   }
 }
