@@ -234,7 +234,7 @@ import Button from "@components/atoms/Button.astro";
       idea.className = "submission-idea";
 
       const action = document.createElement("td");
-      action.dataset.label = "Action";
+      action.className = "submission-action";
 
       const contact = document.createElement("a");
       contact.href = contactHref(application);
@@ -766,6 +766,10 @@ import Button from "@components/atoms/Button.astro";
       font-size: 0.76rem;
       font-weight: 820;
       text-transform: uppercase;
+    }
+
+    :global(.submission-action::before) {
+      content: none;
     }
 
     :global(.connect-button) {

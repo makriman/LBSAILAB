@@ -13,6 +13,10 @@ const {
   compact = false,
 } = Astro.props;
 const ariaLabel = label ? `${label} Google DeepMind` : "Google DeepMind";
+const logoSrc =
+  tone === "light"
+    ? "/google-deepmind-logo-white.png"
+    : "/google-deepmind-logo-blue.png";
 ---
 
 <a
@@ -24,7 +28,7 @@ const ariaLabel = label ? `${label} Google DeepMind` : "Google DeepMind";
 >
   {label && <span class="label">{label}</span>}
   <span class="mark">
-    <img src="/deepmind-new-logo.svg" alt="DeepMind" loading="eager" />
+    <img src={logoSrc} alt="Google DeepMind" loading="eager" />
   </span>
 </a>
 
@@ -53,17 +57,18 @@ const ariaLabel = label ? `${label} Google DeepMind` : "Google DeepMind";
   }
 
   .light .mark {
-    background: rgba(255, 255, 255, 0.94);
-    border: 1px solid rgba(255, 255, 255, 0.28);
-    padding: 8px 10px;
+    background: transparent;
+    border: 0;
+    padding: 0;
   }
 
   img {
+    display: block;
     height: auto;
-    width: clamp(150px, 17vw, 198px);
+    width: clamp(210px, 22vw, 292px);
   }
 
   .compact img {
-    width: clamp(130px, 13vw, 168px);
+    width: clamp(190px, 18vw, 260px);
   }
 </style>
