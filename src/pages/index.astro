@@ -53,10 +53,9 @@ const jsonLd = {
         </p>
         <h1>Learn to build AI products people actually use.</h1>
         <p class="lede">
-          Agentic engineering has made building faster, cheaper, and available
-          to more people. LBS AI Lab teaches students the harder loop: choose a
-          real LBS use case, build quickly, test with real users, and improve
-          from feedback.
+          AI-assisted coding makes prototypes easier than ever. LBS AI Lab
+          teaches the harder loop: choose a real LBS use case, ship quickly,
+          test with students and alumni, and improve from feedback.
         </p>
         <div class="hero-actions">
           <Button href="/cohorts/cohort-01/" size="lg">Explore Cohort 01</Button
@@ -65,19 +64,17 @@ const jsonLd = {
             >Apply for September 2026</Button
           >
         </div>
-        <div class="hero-partner">
-          <GoogleDeepMindLogo label="Cohort 01 in partnership with" />
-        </div>
-        <p class="hero-note">
-          Every project is built for an LBS use case, with a practical route to
-          student and alumni feedback.
-        </p>
       </div>
 
       <aside class="hero-panel" aria-label="Cohort 01 facts">
-        <div>
-          <span>Cohort 01</span>
-          <strong>10 April - 12 June 2026</strong>
+        <div class="cohort-panel-top">
+          <div>
+            <span>Cohort 01</span>
+            <strong>10 April - 12 June 2026</strong>
+          </div>
+          <div class="panel-partner">
+            <GoogleDeepMindLogo label="In partnership with" compact />
+          </div>
         </div>
         <dl>
           <div>
@@ -93,6 +90,9 @@ const jsonLd = {
             <dd>4</dd>
           </div>
         </dl>
+        <p class="panel-note">
+          A 9-week build cycle around LBS use cases, real users, and feedback.
+        </p>
       </aside>
     </div>
   </section>
@@ -221,25 +221,25 @@ const jsonLd = {
     );
     border-bottom: 1px solid var(--color-border);
     overflow: hidden;
-    padding-block: clamp(36px, 6vw, 64px) clamp(16px, 3vw, 28px);
+    padding-block: clamp(42px, 6vw, 72px) clamp(28px, 4vw, 42px);
   }
 
   .hero-grid {
-    align-items: end;
+    align-items: center;
     display: grid;
-    gap: clamp(36px, 6vw, 84px);
-    grid-template-columns: minmax(0, 1.05fr) minmax(280px, 0.48fr);
+    gap: clamp(36px, 6vw, 76px);
+    grid-template-columns: minmax(0, 1fr) minmax(320px, 0.48fr);
   }
 
   .hero-copy h1 {
     color: var(--color-lbs-blue);
     font-size: clamp(2.9rem, 5.4vw, 4.7rem);
     margin: 16px 0;
-    max-width: 880px;
+    max-width: 800px;
   }
 
   .hero-copy .lede {
-    max-width: 690px;
+    max-width: 650px;
   }
 
   .hero-actions {
@@ -249,17 +249,6 @@ const jsonLd = {
     margin-top: 24px;
   }
 
-  .hero-partner {
-    margin-top: 22px;
-  }
-
-  .hero-note {
-    color: var(--color-muted);
-    font-size: var(--step--1);
-    font-weight: 800;
-    margin-top: 20px;
-  }
-
   .hero-panel {
     background: var(--color-white);
     border: 1px solid var(--color-border);
@@ -267,11 +256,20 @@ const jsonLd = {
     padding: clamp(20px, 3vw, 30px);
   }
 
-  .hero-panel > div {
+  .cohort-panel-top {
     border-bottom: 1px solid var(--color-border);
     display: grid;
+    gap: 20px;
+    padding-bottom: 24px;
+  }
+
+  .cohort-panel-top > div:first-child {
+    display: grid;
     gap: 8px;
-    padding-bottom: 22px;
+  }
+
+  .panel-partner {
+    padding-top: 2px;
   }
 
   .hero-panel span,
@@ -300,6 +298,16 @@ const jsonLd = {
     font-weight: 700;
     line-height: 1;
     margin: 0;
+  }
+
+  .panel-note {
+    border-top: 1px solid var(--color-border);
+    color: var(--color-ink-soft);
+    font-size: var(--step--1);
+    font-weight: 780;
+    line-height: 1.35;
+    margin: 22px 0 0;
+    padding-top: 18px;
   }
 
   .manifesto {
@@ -402,10 +410,6 @@ const jsonLd = {
     .pillar-grid {
       grid-template-columns: 1fr;
     }
-
-    .hero-panel dl {
-      grid-template-columns: 1fr;
-    }
   }
 
   @media (max-width: 640px) {
@@ -414,7 +418,7 @@ const jsonLd = {
     }
 
     .home-hero {
-      padding-block: 24px 10px;
+      padding-block: 24px 18px;
     }
 
     .hero-copy h1 {
@@ -432,17 +436,13 @@ const jsonLd = {
       margin-top: 20px;
     }
 
-    .hero-note {
-      font-size: 0.76rem;
-      margin-top: 12px;
-    }
-
     .hero-panel {
       padding: 14px;
     }
 
-    .hero-panel > div {
-      padding-bottom: 8px;
+    .cohort-panel-top {
+      gap: 12px;
+      padding-bottom: 12px;
     }
 
     .hero-panel strong {
@@ -461,6 +461,12 @@ const jsonLd = {
 
     .hero-panel dd {
       font-size: 1.48rem;
+    }
+
+    .panel-note {
+      font-size: 0.74rem;
+      margin-top: 12px;
+      padding-top: 10px;
     }
   }
 </style>
