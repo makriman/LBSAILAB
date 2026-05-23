@@ -14,6 +14,7 @@ pnpm-debug.log*
 
 # local QA artifacts
 qa-screenshots/
+.wrangler/
 
 
 # environment variables

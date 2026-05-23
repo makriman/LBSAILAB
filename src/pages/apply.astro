@@ -109,11 +109,8 @@ import Button from "@components/atoms/Button.astro";
       <div class="submissions-panel">
         <div class="submissions-top">
           <strong>September 2026 submissions</strong>
-          <button type="button" data-load-submissions>View submissions</button>
         </div>
-        <p class="submissions-status" data-submissions-status>
-          Submissions load from the public GitHub submissions file.
-        </p>
+        <p class="submissions-status" data-submissions-status role="status" hidden></p>
         <div class="submission-list" data-submission-list hidden></div>
       </div>
     </div>
@@ -164,13 +161,19 @@ import Button from "@components/atoms/Button.astro";
 <script is:inline>
   const form = document.querySelector("[data-application-form]");
   const formStatus = document.querySelector("[data-form-status]");
-  const loadButton = document.querySelector("[data-load-submissions]");
   const submissionsStatus = document.querySelector("[data-submissions-status]");
   const submissionsList = document.querySelector("[data-submission-list]");
 
   const setText = (node, text) => {
     if (node) {
       node.textContent = text;
+    }
+  };
+
+  const setStatus = (text, hidden = false) => {
+    if (submissionsStatus) {
+      submissionsStatus.textContent = text;
+      submissionsStatus.hidden = hidden;
     }
   };
 
@@ -194,8 +197,7 @@ import Button from "@components/atoms/Button.astro";
 
     if (!applications.length) {
       submissionsList.hidden = true;
-      setText(
-        submissionsStatus,
+      setStatus(
         "No public submissions yet. Be the first to share a build idea.",
       );
       return;
@@ -210,9 +212,12 @@ import Button from "@components/atoms/Button.astro";
     const thead = document.createElement("thead");
     const headerRow = document.createElement("tr");
 
-    for (const label of ["Name", "Course", "Idea", "Action"]) {
+    for (const label of ["Name", "Course", "Idea", ""]) {
       const header = document.createElement("th");
       header.scope = "col";
+      if (!label) {
+        header.setAttribute("aria-label", "Connect");
+      }
       header.textContent = label;
       headerRow.append(header);
     }
@@ -239,7 +244,7 @@ import Button from "@components/atoms/Button.astro";
       const contact = document.createElement("a");
       contact.href = contactHref(application);
       contact.className = "connect-button";
-      contact.textContent = "Connect to build together";
+      contact.textContent = "Connect";
 
       action.append(contact);
       row.append(name, course, idea, action);
@@ -251,8 +256,7 @@ import Button from "@components/atoms/Button.astro";
     submissionsList.append(wrapper);
 
     submissionsList.hidden = false;
-    setText(
-      submissionsStatus,
+    setStatus(
       `${applications.length} public submission${applications.length === 1 ? "" : "s"} found.`,
     );
   };
@@ -260,8 +264,7 @@ import Button from "@components/atoms/Button.astro";
   const loadSubmissions = async () => {
     if (!submissionsList) return;
 
-    setText(submissionsStatus, "Loading submissions...");
-    loadButton?.setAttribute("disabled", "true");
+    setStatus("", true);
 
     try {
       const response = await fetch("/api/applications", {
@@ -280,18 +283,15 @@ import Button from "@components/atoms/Button.astro";
       renderSubmissions(data.applications || []);
     } catch (error) {
       submissionsList.hidden = true;
-      setText(
-        submissionsStatus,
+      setStatus(
         error instanceof Error
           ? error.message
           : "Submissions are not available yet.",
       );
-    } finally {
-      loadButton?.removeAttribute("disabled");
     }
   };
 
-  loadButton?.addEventListener("click", loadSubmissions);
+  loadSubmissions();
 
   form?.addEventListener("submit", async (event) => {
     event.preventDefault();
@@ -588,12 +588,6 @@ import Button from "@components/atoms/Button.astro";
   .submissions-top strong {
     color: var(--color-lbs-blue);
     font-size: var(--step-1);
-  }
-
-  .submissions-top button {
-    background: var(--color-lbs-blue);
-    min-height: 44px;
-    padding: 12px 18px;
   }
 
   .submissions-status {
