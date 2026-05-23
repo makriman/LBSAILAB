@@ -179,7 +179,7 @@ import Button from "@components/atoms/Button.astro";
 
   const contactHref = (application) => {
     const subject = `LBS AI Lab: exploring your ${application.course} build idea`;
-    const body = `Hi ${application.name.split(" ")[0]},\n\nI saw your LBS AI Lab submission about "${ideaPreview(application.idea)}". Would you be open to chatting about working together?\n\n`;
+    const body = `Hi ${application.name.split(" ")[0]},\n\nI saw your LBS AI Lab submission. Would you be open to chatting about working together?\n\n`;
     return `mailto:${application.email}?subject=${encodeURIComponent(subject)}&body=${encodeURIComponent(body)}`;
   };
 
@@ -190,15 +190,10 @@ import Button from "@components/atoms/Button.astro";
     return cell;
   };
 
-  const ideaPreview = (idea) => {
-    const normalizedIdea = String(idea || "")
+  const ideaText = (idea) =>
+    String(idea || "")
       .replace(/\s+/g, " ")
       .trim();
-
-    return normalizedIdea.length > 280
-      ? `${normalizedIdea.slice(0, 277).trim()}...`
-      : normalizedIdea;
-  };
 
   const renderSubmissions = (applications) => {
     if (!submissionsList) return;
@@ -245,7 +240,7 @@ import Button from "@components/atoms/Button.astro";
       const course = tableCell("Course", application.course);
       course.className = "submission-course";
 
-      const idea = tableCell("Idea", ideaPreview(application.idea));
+      const idea = tableCell("Idea", ideaText(application.idea));
       idea.className = "submission-idea";
 
       const action = document.createElement("td");
