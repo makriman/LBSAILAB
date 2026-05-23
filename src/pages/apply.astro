@@ -163,6 +163,7 @@ import Button from "@components/atoms/Button.astro";
   const formStatus = document.querySelector("[data-form-status]");
   const submissionsStatus = document.querySelector("[data-submissions-status]");
   const submissionsList = document.querySelector("[data-submission-list]");
+  const IDEA_PREVIEW_LENGTH = 280;
 
   const setText = (node, text) => {
     if (node) {
@@ -194,6 +195,45 @@ import Button from "@components/atoms/Button.astro";
     String(idea || "")
       .replace(/\s+/g, " ")
       .trim();
+
+  const ideaPreview = (idea) =>
+    idea.length > IDEA_PREVIEW_LENGTH
+      ? `${idea.slice(0, IDEA_PREVIEW_LENGTH - 3).trim()}...`
+      : idea;
+
+  const ideaCell = (application) => {
+    const cell = document.createElement("td");
+    const fullIdea = ideaText(application.idea);
+    const text = document.createElement("span");
+
+    cell.dataset.label = "Idea";
+    cell.className = "submission-idea";
+    text.className = "submission-idea-text";
+
+    if (fullIdea.length <= IDEA_PREVIEW_LENGTH) {
+      text.textContent = fullIdea;
+      cell.append(text);
+      return cell;
+    }
+
+    const toggle = document.createElement("button");
+    toggle.type = "button";
+    toggle.className = "idea-toggle";
+
+    const setExpanded = (expanded) => {
+      text.textContent = expanded ? fullIdea : ideaPreview(fullIdea);
+      toggle.textContent = expanded ? "Show less" : "Read more";
+      toggle.setAttribute("aria-expanded", String(expanded));
+    };
+
+    toggle.addEventListener("click", () => {
+      setExpanded(toggle.getAttribute("aria-expanded") !== "true");
+    });
+
+    setExpanded(false);
+    cell.append(text, toggle);
+    return cell;
+  };
 
   const renderSubmissions = (applications) => {
     if (!submissionsList) return;
@@ -240,8 +280,7 @@ import Button from "@components/atoms/Button.astro";
       const course = tableCell("Course", application.course);
       course.className = "submission-course";
 
-      const idea = tableCell("Idea", ideaText(application.idea));
-      idea.className = "submission-idea";
+      const idea = ideaCell(application);
 
       const action = document.createElement("td");
       action.className = "submission-action";
@@ -676,6 +715,34 @@ import Button from "@components/atoms/Button.astro";
 
   :global(.submission-idea) {
     overflow-wrap: anywhere;
+  }
+
+  :global(.submission-idea-text) {
+    display: block;
+  }
+
+  :global(.idea-toggle) {
+    background: transparent;
+    border: 0;
+    border-radius: 0;
+    color: var(--color-lbs-blue);
+    cursor: pointer;
+    display: inline-flex;
+    font-size: 0.88rem;
+    font-weight: 850;
+    line-height: 1.1;
+    margin-top: 10px;
+    min-height: 0;
+    padding: 0;
+    text-decoration: underline;
+    text-underline-offset: 3px;
+    width: auto;
+  }
+
+  :global(.idea-toggle:hover),
+  :global(.idea-toggle:focus-visible) {
+    background: transparent;
+    color: var(--color-lbs-red);
   }
 
   :global(.connect-button) {
