@@ -28,7 +28,7 @@ const GITHUB_API = "https://api.github.com";
 const INSERT_MARKER = "<!-- APPLICATIONS:START -->";
 const END_MARKER = "<!-- APPLICATIONS:END -->";
 const APPLICATION_RE = /<!-- application:(.*?) -->/gs;
-const APPLICATIONS_CACHE_KEY_VERSION = "2026-05-23-clear-test-entries";
+const APPLICATIONS_CACHE_KEY_VERSION = "2026-05-23-prefill-csv-submissions";
 const APPLICATIONS_CACHE_TTL_SECONDS = 60 * 60 * 24;
 
 const jsonHeaders = {
