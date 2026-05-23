@@ -49,39 +49,59 @@ It also deploys `src/worker.ts`, which powers the secure application form API.
 ## Application Form / Google Sheets
 
 The Apply page submits to `/api/applications`. The browser never talks to
-Google directly. Cloudflare Worker secrets hold the Google credentials, and the
-Worker writes to / reads from a Google Sheet.
+Google directly. A Cloudflare Worker proxies to a Google Apps Script web app
+attached to the submissions Sheet, so no Google Cloud project or service account
+is required.
 
-Create a Google Sheet with a tab named `Submissions` and this header row:
+The current submissions Sheet is:
+
+```text
+https://docs.google.com/spreadsheets/d/18lPwCDSqAzJmeki2uEp_N15OAS9gqvbUXoDquWgo7Zk/edit
+```
+
+The Apps Script will create a tab named `Submissions` if it does not already
+exist. The header row is:
 
 ```text
 submitted_at | name | email | course | idea | public_consent | source
 ```
 
-Required Worker environment values:
+### Apps Script Setup
+
+Generate a shared token:
 
 ```sh
-npx wrangler secret put GOOGLE_SHEET_ID
-npx wrangler secret put GOOGLE_SERVICE_ACCOUNT_EMAIL
-npx wrangler secret put GOOGLE_PRIVATE_KEY
+openssl rand -hex 32
 ```
 
-Optional:
+Use the CLI route:
 
 ```sh
-npx wrangler secret put GOOGLE_SHEET_NAME
+npx @google/clasp login
+cd apps-script/lbs-ai-lab-applications
+npx @google/clasp create --type sheets --title "LBS AI Lab Applications API" --parentId 18lPwCDSqAzJmeki2uEp_N15OAS9gqvbUXoDquWgo7Zk
+npx @google/clasp push
+npx @google/clasp open
 ```
 
-To get the values:
+In the opened Apps Script project:
 
-1. Create or choose a Google Cloud project.
-2. Enable the Google Sheets API.
-3. Create a service account.
-4. Create a JSON key for that service account.
-5. Copy `client_email` into `GOOGLE_SERVICE_ACCOUNT_EMAIL`.
-6. Copy `private_key` into `GOOGLE_PRIVATE_KEY`.
-7. Copy the spreadsheet ID from the sheet URL into `GOOGLE_SHEET_ID`.
-8. Share the Google Sheet with the service account `client_email` as Editor.
+1. Go to Project Settings.
+2. Add Script Property `APPS_SCRIPT_TOKEN` with the generated token.
+3. Deploy as a Web app.
+4. Execute as: `Me`.
+5. Who has access: `Anyone`.
+6. Copy the Web app URL.
+
+Then configure Cloudflare Worker secrets:
+
+```sh
+npx wrangler secret put APPS_SCRIPT_URL
+npx wrangler secret put APPS_SCRIPT_TOKEN
+```
+
+Use the same token in Apps Script and Cloudflare. The Apps Script URL is not
+called from the browser directly; it is only called by the Worker.
 
 Static headers, redirects, robots, sitemap, and Open Graph metadata are included.
 
