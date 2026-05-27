@@ -27,5 +27,15 @@
     "prettier-plugin-astro": "^0.14.1",
     "rollup": "npm:@rollup/wasm-node@^4.60.4",
     "typescript": "^6.0.3"
+  },
+  "license": "MIT",
+  "description": "A content-driven Astro website for London Business School students building AI products with real users.",
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/makriman/LBSAILAB.git"
+  },
+  "homepage": "https://lbsailab.com",
+  "bugs": {
+    "url": "https://github.com/makriman/LBSAILAB/issues"
   }
 }

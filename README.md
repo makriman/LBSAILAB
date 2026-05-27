@@ -1,93 +1,65 @@
 # LBS AI Lab
 
-Static Astro website for LBS AI Lab, where London Business School students learn to build AI products, test with real users, and iterate from feedback.
+A content-driven Astro website for London Business School students building AI products with real users.
 
-The site is built as a fast, content-driven institutional platform for the Data Science & AI Initiative, with cohort, team, mentor, and application pages generated from Astro Content Collections. Cohort 01 is presented in partnership with Google DeepMind.
+Live: [https://lbsailab.com](https://lbsailab.com)
 
-## Stack
+## Mission
 
-- Astro
-- TypeScript
-- Native `.astro` components
+LBS AI Lab exists to teach the loop after the prototype: choosing real user problems, shipping quickly, testing with students and alumni, and improving from feedback. The site turns that mission into a fast public home for cohorts, teams, mentors, and applications.
+
+## What This Repository Contains
+
+Static Astro site for the London Business School AI Lab and Data Science & AI Initiative, including cohort pages, team profiles, mentors, application flows, and a Cloudflare Worker-backed public submissions board.
+
+## Highlights
+
+- Cohort, team, mentor, application, contact, and about pages.
+- Cohort 01 presentation with Google DeepMind partnership assets.
+- Secure application form endpoint writing public opt-in submissions to Markdown.
+- Static headers, redirects, robots, sitemap, and Open Graph metadata.
+
+## Tech Stack
+
+- Astro 6 with TypeScript
 - Astro Content Collections
-- Static output for Cloudflare Pages
-- Local font packages via Fontsource
+- Fontsource local fonts
+- Cloudflare Pages / Workers
+- GitHub Contents API for opt-in application submissions
 
-## Local Development
+## Getting Started
 
-```sh
+```bash
 npm install
 npm run dev
 ```
 
-The local site runs at `http://localhost:4321/` by default.
+## Quality Checks
 
-## Production Build
-
-```sh
+```bash
 npm run check
 npm run build
 ```
 
-The static build is written to `dist/`.
+## Repository Notes
 
-## Cloudflare Workers
+- Worker deployments need a repository-scoped GITHUB_TOKEN secret for public submissions.
+- Application submissions are public only when the applicant opts in.
 
-Use these deployment settings:
+## Contributing
 
-- Build command: `npm run build`
-- Build output directory: `dist`
-- Node version: `20` or `22`
+Contributions are welcome. The best contributions are specific, tested, and grounded in the product mission. Good places to help include documentation, accessibility, tests, bug reports, UI polish, data validation, and safer AI behavior.
 
-If the Cloudflare project uses a Wrangler deploy command, use:
+Read [CONTRIBUTING.md](CONTRIBUTING.md) before opening a pull request.
 
-- Deploy command: `npx wrangler versions upload`
+## Security
 
-The `wrangler.jsonc` file points Wrangler at the generated `dist/` assets.
-It also deploys `src/worker.ts`, which powers the secure application form API.
+Please do not open public issues for secrets, auth bypasses, data exposure, provider key leaks, or abuse vectors. Follow [SECURITY.md](SECURITY.md).
 
-## Application Form / GitHub Markdown
+## Code of Conduct
 
-The Apply page submits to `/api/applications`. The Cloudflare Worker writes each
-public opt-in submission to a Markdown file in this open GitHub repo, then reads
-the same file back for the public submissions board.
+This project follows [CODE_OF_CONDUCT.md](CODE_OF_CONDUCT.md). Be direct, kind, and useful.
 
-The submissions file is:
+## License
 
-```text
-data/application-submissions.md
-```
-
-Required Worker secret:
-
-```sh
-npx wrangler secret put GITHUB_TOKEN
-```
-
-A fine-grained GitHub token is enough. Scope it to this repository and grant
-`Contents: Read and write`. The Worker uses GitHub's Contents API to update the
-Markdown file on `main`.
-
-Optional Worker variables:
-
-```sh
-npx wrangler secret put GITHUB_REPO
-npx wrangler secret put GITHUB_BRANCH
-npx wrangler secret put GITHUB_SUBMISSIONS_PATH
-```
-
-Defaults are `makriman/LBSAILAB`, `main`, and
-`data/application-submissions.md`.
-
-Static headers, redirects, robots, sitemap, and Open Graph metadata are included.
-
-## Content
-
-Primary content lives in:
-
-- `src/content/teams/`
-- `src/content/cohorts/`
-- `src/data/people.json`
-- `src/data/mentors.json`
-
-Participant names and emails are rendered publicly on team pages for direct product inquiries.
+MIT. See [LICENSE](LICENSE).
