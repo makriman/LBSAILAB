@@ -1,7 +1,7 @@
 ---
 import BaseLayout from "@layouts/BaseLayout.astro";
 import Button from "@components/atoms/Button.astro";
-import { DSAI_URL } from "@utils/site";
+import { DSAI_URL, MENTOR_APPLICATION_URL } from "@utils/site";
 ---
 
 <BaseLayout
@@ -53,10 +53,7 @@ import { DSAI_URL } from "@utils/site";
           interest in supporting future batches as teams build, test, and
           iterate.
         </p>
-        <Button
-          href="/apply/?intent=mentor#register-interest"
-          variant="secondary"
-        >
+        <Button href={MENTOR_APPLICATION_URL} variant="secondary">
           Apply to mentor
         </Button>
       </article>

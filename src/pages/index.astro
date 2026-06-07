@@ -3,6 +3,7 @@ import { getCollection } from "astro:content";
 import BaseLayout from "@layouts/BaseLayout.astro";
 import Button from "@components/atoms/Button.astro";
 import SectionHeader from "@components/atoms/SectionHeader.astro";
+import DirectorCard from "@components/cards/DirectorCard.astro";
 import TeamGrid from "@components/sections/TeamGrid.astro";
 import MentorGrid from "@components/sections/MentorGrid.astro";
 import ApplyCTA from "@components/sections/ApplyCTA.astro";
@@ -70,27 +71,6 @@ const jsonLd = {
           loading="eager"
           decoding="async"
         />
-      </div>
-    </div>
-  </section>
-
-  <section class="proof-section" aria-label="Spring 2026 Batch facts">
-    <div class="container proof-stats">
-      <div>
-        <strong>9</strong>
-        <span>teams</span>
-      </div>
-      <div>
-        <strong>22</strong>
-        <span>builders</span>
-      </div>
-      <div>
-        <strong>4</strong>
-        <span>mentors</span>
-      </div>
-      <div>
-        <strong>8</strong>
-        <span>weeks</span>
       </div>
     </div>
   </section>
@@ -163,6 +143,10 @@ const jsonLd = {
       />
       <Button href="/mentors/" variant="secondary">Meet the mentors</Button>
     </div>
+    <div class="container academic-preview">
+      <p class="eyebrow">Academic lead</p>
+      <DirectorCard />
+    </div>
     <div class="container mentor-list">
       <MentorGrid mentors={mentors} />
     </div>
@@ -216,41 +200,6 @@ const jsonLd = {
     width: 100%;
   }
 
-  .proof-section {
-    background: var(--color-white);
-    padding-block: clamp(18px, 4vw, 34px);
-  }
-
-  .proof-stats {
-    border-block: 1px solid var(--color-border);
-    display: grid;
-    grid-template-columns: repeat(4, minmax(0, 1fr));
-  }
-
-  .proof-stats div {
-    border-left: 1px solid var(--color-border);
-    display: grid;
-    gap: 6px;
-    padding: 16px;
-  }
-
-  .proof-stats div:first-child {
-    border-left: 0;
-  }
-
-  .proof-stats strong {
-    color: var(--color-lbs-blue);
-    font-family: var(--font-serif);
-    font-size: clamp(2rem, 4vw, 3.8rem);
-    line-height: 0.95;
-  }
-
-  .proof-stats span {
-    color: var(--color-muted);
-    font-size: var(--step--1);
-    font-weight: 820;
-  }
-
   .learn-grid {
     display: grid;
     gap: 0;
@@ -294,8 +243,13 @@ const jsonLd = {
   }
 
   .team-preview,
+  .academic-preview,
   .mentor-list {
     margin-top: 34px;
+  }
+
+  .academic-preview .eyebrow {
+    margin-bottom: 14px;
   }
 
   @media (max-width: 900px) {
@@ -310,23 +264,16 @@ const jsonLd = {
   }
 
   @media (max-width: 680px) {
-    .proof-stats,
     .learn-grid {
       grid-template-columns: 1fr;
     }
 
-    .proof-stats div,
-    .proof-stats div:first-child,
     .learn-grid article:nth-child(odd),
     .learn-grid article:nth-child(even) {
       border-left: 0;
       border-right: 0;
       padding-left: 0;
       padding-right: 0;
-    }
-
-    .proof-stats div + div {
-      border-top: 1px solid var(--color-border);
     }
   }
 </style>
