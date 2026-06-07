@@ -29,7 +29,7 @@
     "typescript": "^6.0.3"
   },
   "license": "MIT",
-  "description": "A content-driven Astro website for London Business School students building AI products with real users.",
+  "description": "A content-driven Astro website for London Business School participants building AI products for LBS workflows.",
   "repository": {
     "type": "git",
     "url": "https://github.com/makriman/LBSAILAB.git"
