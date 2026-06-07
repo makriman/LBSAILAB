@@ -3,10 +3,10 @@ id: lbs-compass
 slug: lbs-compass
 name: LBS Compass
 displayName: LBS Compass
-cohort: cohort-01
-cohortLabel: Cohort 01 / Spring 2026
+batch: spring-2026
+batchLabel: Spring 2026 Batch
 category: Onboarding / Knowledge assistant
-status: Prototype / cohort build
+status: Prototype / batch build
 productUrl: https://compass.lbsailab.com
 tagline: A knowledge-base chatbot for incoming students navigating LBS.
 summary: >-

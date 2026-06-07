@@ -1,11 +1,11 @@
 import type { CollectionEntry } from "astro:content";
 
 export type TeamEntry = CollectionEntry<"teams">;
-export type CohortEntry = CollectionEntry<"cohorts">;
+export type BatchEntry = CollectionEntry<"batches">;
 export type PersonEntry = CollectionEntry<"people">;
 export type MentorEntry = CollectionEntry<"mentors">;
 
-export function sortTeamsByCohortList(teams: TeamEntry[], teamIds: string[]) {
+export function sortTeamsByBatchList(teams: TeamEntry[], teamIds: string[]) {
   const order = new Map(teamIds.map((id, index) => [id, index]));
 
   return [...teams].sort((a, b) => {

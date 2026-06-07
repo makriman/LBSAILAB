@@ -8,6 +8,7 @@ export const LBS_URL = "https://www.london.edu/";
 export const GOOGLE_DEEPMIND_URL = "https://deepmind.google/";
 
 export const REGISTER_INTEREST_URL = "/apply/";
+export const MENTOR_APPLICATION_URL = "/apply/?intent=mentor#register-interest";
 
 export const defaultDescription =
-  "LBS AI Lab helps London Business School students learn to build AI products, test with real LBS users, and iterate from feedback.";
+  "LBS AI Lab helps London Business School participants build AI products for LBS workflows";

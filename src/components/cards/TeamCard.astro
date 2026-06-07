@@ -3,50 +3,32 @@ import type { TeamEntry } from "@utils/collections";
 
 interface Props {
   team: TeamEntry;
-  featured?: boolean;
+  basePath?: string;
 }
 
-const { team, featured = false } = Astro.props;
-const builderNames = team.data.members.map((member) => member.name);
+const { team, basePath = "/batches/spring-2026" } = Astro.props;
+const href = `${basePath}/${team.data.slug}/`;
+const label = team.data.status.toLowerCase().includes("prototype")
+  ? "Prototype"
+  : team.data.status;
 ---
 
-<article class:list={["team-card", { featured }]}>
-  <div class="meta">
-    <span>{team.data.cohortLabel}</span>
-  </div>
-  <div class="content">
-    <h3>{team.data.displayName}</h3>
-    <p>{team.data.tagline}</p>
-    <ul class="builders" aria-label={`${team.data.displayName} builders`}>
-      {builderNames.map((name) => <li>{name}</li>)}
-    </ul>
-  </div>
-  <div class="footer">
-    <div class="links">
-      {
-        team.data.productUrl && (
-          <a href={team.data.productUrl} target="_blank" rel="noreferrer">
-            Product
-          </a>
-        )
-      }
-      <a href={`/teams/${team.data.slug}/`}>Profile</a>
-    </div>
-  </div>
-</article>
+<a class="team-card" href={href}>
+  <span class="status">{label}</span>
+  <h3>{team.data.displayName}</h3>
+  <p>{team.data.tagline}</p>
+  <span class="team-link">View team</span>
+</a>
 
 <style>
   .team-card {
     background: var(--color-white);
     border: 1px solid var(--color-border);
-    border-radius: var(--radius-card);
-    box-shadow: 0 0 0 rgba(20, 23, 93, 0);
     display: grid;
-    gap: clamp(24px, 3vw, 34px);
-    grid-template-rows: auto 1fr auto;
-    height: 100%;
-    min-height: 280px;
-    padding: clamp(22px, 3vw, 30px);
+    gap: 14px;
+    min-height: 220px;
+    padding: clamp(20px, 3vw, 26px);
+    text-decoration: none;
     transition:
       border-color 180ms ease,
       box-shadow 180ms ease,
@@ -56,101 +38,43 @@ const builderNames = team.data.members.map((member) => member.name);
   .team-card:hover {
     border-color: var(--color-lbs-blue);
     box-shadow: var(--shadow-card);
-    transform: translateY(-3px);
+    transform: translateY(-2px);
   }
 
-  .team-card.featured {
-    grid-template-columns: minmax(0, 0.9fr) minmax(0, 1.6fr);
-    min-height: 230px;
-  }
-
-  .meta {
-    align-content: start;
-    display: grid;
-    gap: 8px;
-  }
-
-  .meta span {
-    color: var(--color-muted);
+  .status {
+    color: var(--color-lbs-red);
     font-size: var(--step--1);
-    font-weight: 780;
-  }
-
-  .content {
-    align-content: start;
-    display: grid;
-    gap: 14px;
+    font-weight: 860;
   }
 
   h3 {
     color: var(--color-lbs-blue);
-    font-size: clamp(1.65rem, 2.25vw, 2.45rem);
+    font-family: var(--font-sans);
+    font-size: var(--step-1);
+    line-height: 1.1;
     margin: 0;
     overflow-wrap: anywhere;
   }
 
   p {
     color: var(--color-ink-soft);
+    font-size: 0.98rem;
     line-height: 1.45;
+    margin: 0;
   }
 
-  .builders {
-    display: flex;
-    flex-wrap: wrap;
-    gap: 8px;
-    list-style: none;
-    margin: 4px 0 0;
-    padding: 0;
-  }
-
-  .builders li {
-    background: var(--color-cloud);
-    border: 1px solid var(--color-border);
-    border-radius: var(--radius-button);
-    color: var(--color-ink-soft);
-    font-size: 0.76rem;
-    font-weight: 780;
-    line-height: 1.2;
-    padding: 7px 10px;
-  }
-
-  .footer {
+  .team-link {
     align-self: end;
     border-top: 1px solid var(--color-border);
-    display: flex;
-    flex-wrap: wrap;
-    gap: 12px;
-    justify-content: space-between;
-    padding-top: 18px;
-  }
-
-  .links {
-    display: flex;
-    gap: 14px;
-  }
-
-  .links a {
     color: var(--color-lbs-blue);
     font-size: var(--step--1);
-    font-weight: 820;
-    text-decoration: none;
+    font-weight: 860;
+    margin-top: 12px;
+    padding-top: 14px;
   }
 
-  .links a::after {
+  .team-link::after {
     color: var(--color-lbs-red);
     content: " ->";
-  }
-
-  @media (max-width: 760px) {
-    .team-card.featured {
-      grid-template-columns: 1fr;
-    }
-  }
-
-  @media (max-width: 520px) {
-    .team-card {
-      gap: 18px;
-      min-height: auto;
-    }
   }
 </style>

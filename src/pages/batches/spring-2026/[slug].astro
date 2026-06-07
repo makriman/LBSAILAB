@@ -1,0 +1,24 @@
+---
+import { getCollection } from "astro:content";
+import BaseLayout from "@layouts/BaseLayout.astro";
+import TeamDetail from "@components/sections/TeamDetail.astro";
+
+export async function getStaticPaths() {
+  const teams = await getCollection("teams");
+  return teams
+    .filter((team) => team.data.batch === "spring-2026")
+    .map((team) => ({
+      params: { slug: team.data.slug },
+      props: { team },
+    }));
+}
+
+const { team } = Astro.props;
+---
+
+<BaseLayout
+  title={`${team.data.displayName} | Spring 2026 Batch`}
+  description={team.data.tagline}
+>
+  <TeamDetail team={team} />
+</BaseLayout>

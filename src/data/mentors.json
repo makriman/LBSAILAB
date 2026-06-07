@@ -8,7 +8,7 @@
     "image": "/mentors/ramakrishnan-lokanathan.jpg",
     "linkedinUrl": "https://www.linkedin.com/in/makriman",
     "email": "rlokanathan.mba2027@london.edu",
-    "cohort": "cohort-01",
+    "batch": "spring-2026",
     "showEmailPublicly": true
   },
   {
@@ -20,7 +20,7 @@
     "image": "/mentors/akshay-nagpal.jpg",
     "linkedinUrl": "https://www.linkedin.com/in/akiii/",
     "email": "akshaynagpal1995@gmail.com",
-    "cohort": "cohort-01",
+    "batch": "spring-2026",
     "showEmailPublicly": true
   },
   {
@@ -32,7 +32,7 @@
     "image": "/mentors/zara-mogadasi.jpg",
     "linkedinUrl": "https://www.linkedin.com/in/zaramogadasi/",
     "email": "zmogadasi.mba2025@london.edu",
-    "cohort": "cohort-01",
+    "batch": "spring-2026",
     "showEmailPublicly": true
   },
   {
@@ -44,7 +44,7 @@
     "image": "/mentors/rhea-bisaria.png",
     "linkedinUrl": "https://www.linkedin.com/in/rheabisaria/",
     "email": "rbisaria.mba2027@london.edu",
-    "cohort": "cohort-01",
+    "batch": "spring-2026",
     "showEmailPublicly": true
   }
 ]

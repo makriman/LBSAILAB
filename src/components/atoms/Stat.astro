@@ -8,7 +8,7 @@ interface Props {
 const { value, label, light = false } = Astro.props;
 ---
 
-<div class:list={['stat', { light }]}>
+<div class:list={["stat", { light }]}>
   <strong>{value}</strong>
   <span>{label}</span>
 </div>

@@ -1,199 +1,132 @@
 ---
 import BaseLayout from "@layouts/BaseLayout.astro";
 import Button from "@components/atoms/Button.astro";
-import DSAIBlock from "@components/sections/DSAIBlock.astro";
+import ApplyCTA from "@components/sections/ApplyCTA.astro";
 ---
 
 <BaseLayout
   title="About LBS AI Lab"
-  description="LBS AI Lab teaches London Business School students to build AI products, test with real users, and iterate from feedback."
+  description="LBS AI Lab helps participants get involved in AI solution development at London Business School"
 >
-  <section class="about-hero">
-    <div class="container hero-grid">
-      <div>
-        <p class="eyebrow">About LBS AI Lab</p>
-        <h1>Building is easier now. Users are the hard part.</h1>
-        <p class="lede">
-          AI-assisted coding has made it possible to move from idea to prototype
-          quickly. The Lab teaches the harder skill: choosing a real problem,
-          testing with real LBS users, and improving until the product becomes
-          useful.
-        </p>
-        <div class="hero-actions">
-          <Button href="/apply/" variant="red" size="lg"
-            >Register interest</Button
-          >
-          <Button href="/cohorts/cohort-01/" variant="ghost" size="lg"
-            >See Cohort 01</Button
-          >
-        </div>
+  <section class="page-hero">
+    <div class="container hero-inner">
+      <p class="eyebrow">About LBS AI Lab</p>
+      <h1>A hands-on AI lab for the LBS community</h1>
+      <p class="lede">
+        LBS AI Lab helps participants get involved in AI solution development at
+        the School, from identifying opportunities to prototyping and deploying
+        useful products for the LBS community
+      </p>
+      <div class="hero-actions">
+        <Button href="/apply/" variant="red" size="lg">
+          Join the next batch
+        </Button>
+        <Button href="/batches/spring-2026/" variant="ghost" size="lg">
+          View Spring 2026 Batch
+        </Button>
       </div>
-
-      <aside class="hero-note" aria-label="Lab thesis">
-        <span>The Lab model</span>
-        <ol>
-          <li>Learn the modern AI build stack.</li>
-          <li>Build for an LBS use case.</li>
-          <li>Test with students, alumni, and operators.</li>
-          <li>Iterate from evidence, not opinion.</li>
-        </ol>
-      </aside>
     </div>
   </section>
 
-  <section class="section thesis-section">
-    <div class="container thesis-grid">
-      <div class="rule" aria-hidden="true"></div>
+  <section class="section">
+    <div class="container text-grid">
+      <p class="eyebrow">Why the Lab exists</p>
       <div>
-        <p class="eyebrow">Why it exists</p>
-        <h2>The bottleneck moved from building to learning.</h2>
+        <h2>Why the Lab exists</h2>
         <p>
-          Vibe coding, agentic engineering, and automation have compressed the
-          cost of making software. That changes what students need to learn. The
-          question is no longer only “can we build it?” It is “can we find the
-          right users, understand the real workflow, and keep improving?”
+          AI is changing how organisations identify problems, build solutions,
+          and create value. LBS AI Lab was created to give the student community
+          a direct way to explore that shift through hands-on product
+          development
         </p>
-      </div>
-    </div>
-  </section>
-
-  <section class="section section-cloud audience-section">
-    <div class="container audience-grid">
-      <div>
-        <p class="eyebrow">What makes it different</p>
-        <h2>The audience is built into the Lab.</h2>
-      </div>
-      <div class="audience-copy">
         <p>
-          Every Lab project starts with an LBS use case. That gives teams access
-          to the thing most builders struggle to get: real people who can use,
-          reject, critique, and shape the product.
+          The Lab connects participants with LBS workflows, stakeholders, and
+          mentors so they can develop AI solutions that respond to needs across
+          the School
         </p>
-        <dl>
-          <div>
-            <dt>2,000+</dt>
-            <dd>LBS students to learn from</dd>
-          </div>
-          <div>
-            <dt>Alumni</dt>
-            <dd>A global network for feedback and expertise</dd>
-          </div>
-          <div>
-            <dt>Live workflows</dt>
-            <dd>Careers, clubs, learning, funding, campus, and work</dd>
-          </div>
-        </dl>
       </div>
     </div>
   </section>
 
-  <section class="section how-section">
+  <section class="section section-warm">
+    <div class="container text-grid">
+      <p class="eyebrow">For participants</p>
+      <div>
+        <h2>For participants</h2>
+        <p>
+          The Lab gives participants practical experience with AI-based
+          application development, from ideation to prototyping and deployment.
+          Along the way, they learn how to define problems, speak with users,
+          manage stakeholders, evaluate outputs, and iterate toward products
+          that can be adopted
+        </p>
+        <p>
+          It is also a way for participants to contribute directly to the School
+          and develop the technical and product fluency needed for their future
+          careers
+        </p>
+      </div>
+    </div>
+  </section>
+
+  <section class="section batch-model">
     <div class="container">
       <div class="section-intro">
-        <p class="eyebrow">How the Lab works</p>
-        <h2>A practical loop, taught by doing.</h2>
+        <p class="eyebrow">An 8-week batch model</p>
+        <h2>An 8-week batch model</h2>
         <p>
-          The Lab is cohort-based, mentor-supported, and built around shipping.
-          Students learn by moving through the same product loop they will use
-          as founders, operators, and product builders.
+          Each batch brings together teams for an 8-week cycle of discovery,
+          product development, evaluation, and iteration
         </p>
       </div>
-
-      <div class="process-list">
+      <div class="model-grid">
         <article>
-          <span>01</span>
-          <div>
-            <h3>Choose a real LBS workflow</h3>
-            <p>
-              Start with a visible problem in student life, alumni life, campus
-              operations, recruiting, learning, funding, or professional work.
-            </p>
-          </div>
+          <h3>Discover</h3>
+          <p>
+            Identify an LBS workflow, define the problem, and understand the
+            user
+          </p>
         </article>
         <article>
-          <span>02</span>
-          <div>
-            <h3>Build quickly with AI-assisted tools</h3>
-            <p>
-              Use agentic engineering, automation, and product judgement to move
-              from idea to working prototype without waiting months.
-            </p>
-          </div>
+          <h3>Build</h3>
+          <p>
+            Prototype with AI-assisted tools and make product decisions quickly
+          </p>
         </article>
         <article>
-          <span>03</span>
-          <div>
-            <h3>Put it in front of users</h3>
-            <p>
-              Test with people who feel the problem now. Watch what they do,
-              listen to what they say, and separate signal from politeness.
-            </p>
-          </div>
-        </article>
-        <article>
-          <span>04</span>
-          <div>
-            <h3>Improve and show the work</h3>
-            <p>
-              Iterate from feedback, sharpen the product, and demo what changed
-              because of real user evidence.
-            </p>
-          </div>
+          <h3>Evaluate</h3>
+          <p>Test quality, gather feedback, and improve through iteration</p>
         </article>
       </div>
     </div>
   </section>
 
-  <section class="section section-warm outcomes-section">
-    <div class="container outcomes-grid">
-      <div>
-        <p class="eyebrow">What students learn</p>
-        <h2>Not just how to prompt. How to build.</h2>
-      </div>
-      <ul>
-        <li>How to turn a messy workflow into a clear product scope.</li>
-        <li>How to use AI tools to build faster without losing judgement.</li>
-        <li>How to recruit early users and interpret feedback honestly.</li>
-        <li>How to keep shipping when the first version is not right.</li>
-      </ul>
-    </div>
-  </section>
-
-  <DSAIBlock />
+  <ApplyCTA />
 </BaseLayout>
 
 <style>
-  .about-hero {
+  .page-hero {
     background: var(--color-lbs-blue);
     color: var(--color-white);
     padding-block: clamp(56px, 7vw, 96px);
   }
 
-  .hero-grid {
-    align-items: center;
-    display: grid;
-    gap: clamp(32px, 6vw, 76px);
-    grid-template-columns: minmax(0, 1fr) minmax(300px, 0.42fr);
+  .hero-inner {
+    max-width: 980px;
   }
 
-  .hero-grid > * {
-    min-width: 0;
-  }
-
-  :global(.about-hero .eyebrow) {
+  :global(.page-hero .eyebrow) {
     color: rgba(255, 255, 255, 0.82);
   }
 
   h1 {
     color: var(--color-white);
-    font-size: clamp(3rem, 5.4vw, 4.8rem);
-    margin: 18px 0;
-    max-width: 900px;
+    margin: 20px 0;
   }
 
   .lede {
-    color: rgba(255, 255, 255, 0.8);
-    max-width: 780px;
+    color: rgba(255, 255, 255, 0.78);
+    max-width: 820px;
   }
 
   .hero-actions {
@@ -203,234 +136,73 @@ import DSAIBlock from "@components/sections/DSAIBlock.astro";
     margin-top: 28px;
   }
 
-  .hero-note {
-    border-left: 4px solid var(--color-lbs-red);
+  .text-grid {
     display: grid;
-    gap: 18px;
-    padding-left: clamp(20px, 3vw, 30px);
+    gap: clamp(24px, 6vw, 76px);
+    grid-template-columns: minmax(180px, 0.28fr) minmax(0, 1fr);
   }
 
-  .hero-note span {
-    color: rgba(255, 255, 255, 0.62);
-    font-size: var(--step--1);
-    font-weight: 880;
-    text-transform: uppercase;
-  }
-
-  .hero-note ol {
-    counter-reset: item;
-    display: grid;
-    gap: 14px;
-    list-style: none;
-    margin: 0;
-    padding: 0;
-  }
-
-  .hero-note li {
-    color: rgba(255, 255, 255, 0.84);
-    font-size: var(--step-0);
-    font-weight: 760;
-    line-height: 1.35;
-  }
-
-  .thesis-grid {
-    display: grid;
-    gap: clamp(28px, 6vw, 74px);
-    grid-template-columns: minmax(4px, 0.13fr) minmax(0, 1fr);
-  }
-
-  .rule {
-    background: var(--color-lbs-red);
-    min-height: 100%;
-    width: 4px;
-  }
-
-  .thesis-grid h2,
-  .audience-grid h2,
-  .section-intro h2,
-  .outcomes-grid h2 {
+  .text-grid h2,
+  .section-intro h2 {
     color: var(--color-lbs-blue);
-    margin: 16px 0;
-    max-width: 900px;
+    margin: 0 0 18px;
   }
 
-  .thesis-grid p:not(.eyebrow),
-  .audience-copy p,
+  .text-grid p:not(.eyebrow),
   .section-intro p:not(.eyebrow) {
     color: var(--color-ink-soft);
     font-size: var(--step-1);
     max-width: 900px;
   }
 
-  .audience-grid,
-  .outcomes-grid {
-    align-items: start;
-    display: grid;
-    gap: clamp(28px, 6vw, 74px);
-    grid-template-columns: minmax(0, 0.62fr) minmax(0, 1fr);
-  }
-
-  .audience-copy {
-    display: grid;
-    gap: 30px;
-  }
-
-  dl {
-    border-block: 1px solid var(--color-border);
-    display: grid;
-    grid-template-columns: repeat(3, minmax(0, 1fr));
-    margin: 0;
-  }
-
-  dl div {
-    border-left: 1px solid var(--color-border);
-    padding: 18px;
-  }
-
-  dl div:first-child {
-    border-left: 0;
-  }
-
-  dt {
-    color: var(--color-lbs-blue);
-    font-family: var(--font-serif);
-    font-size: var(--step-2);
-    font-weight: 700;
-    line-height: 1;
-  }
-
-  dd {
-    color: var(--color-muted);
-    font-weight: 780;
-    line-height: 1.25;
-    margin: 9px 0 0;
+  .text-grid p + p {
+    margin-top: 18px;
   }
 
   .section-intro {
-    max-width: 860px;
-  }
-
-  .process-list {
-    border-top: 1px solid var(--color-border);
-    margin-top: 42px;
-  }
-
-  .process-list article {
-    border-bottom: 1px solid var(--color-border);
-    display: grid;
-    gap: clamp(18px, 4vw, 46px);
-    grid-template-columns: 80px minmax(0, 1fr);
-    padding-block: clamp(22px, 4vw, 34px);
-  }
-
-  .process-list span {
-    color: var(--color-lbs-red);
-    font-weight: 900;
-  }
-
-  .process-list h3 {
-    color: var(--color-lbs-blue);
-    font-family: var(--font-sans);
-    font-size: var(--step-1);
-    line-height: 1.15;
-    margin: 0 0 8px;
-  }
-
-  .process-list p {
-    color: var(--color-ink-soft);
     max-width: 820px;
   }
 
-  .outcomes-grid ul {
+  .model-grid {
     display: grid;
     gap: 0;
-    list-style: none;
-    margin: 0;
-    padding: 0;
+    grid-template-columns: repeat(3, minmax(0, 1fr));
+    margin-top: 36px;
   }
 
-  .outcomes-grid li {
-    border-top: 1px solid var(--color-border);
-    color: var(--color-ink-soft);
+  .model-grid article {
+    border-left: 1px solid var(--color-border);
+    border-top: 2px solid var(--color-lbs-red);
+    padding: 22px;
+  }
+
+  .model-grid article:first-child {
+    border-left: 0;
+    padding-left: 0;
+  }
+
+  .model-grid h3 {
+    color: var(--color-lbs-blue);
+    font-family: var(--font-sans);
     font-size: var(--step-1);
-    font-weight: 720;
-    line-height: 1.35;
-    padding-block: 18px;
+    margin: 0 0 12px;
   }
 
-  .outcomes-grid li:last-child {
-    border-bottom: 1px solid var(--color-border);
+  .model-grid p {
+    color: var(--color-ink-soft);
+    margin: 0;
   }
 
-  @media (max-width: 900px) {
-    .hero-grid,
-    .audience-grid,
-    .outcomes-grid {
+  @media (max-width: 760px) {
+    .text-grid,
+    .model-grid {
       grid-template-columns: 1fr;
     }
-  }
 
-  @media (max-width: 640px) {
-    .about-hero {
-      padding-block: 42px 50px;
-    }
-
-    h1 {
-      font-size: clamp(2.35rem, 11vw, 3rem);
-    }
-
-    .hero-actions {
-      flex-direction: column;
-    }
-
-    .hero-actions :global(.button) {
-      width: 100%;
-    }
-
-    .hero-note {
+    .model-grid article,
+    .model-grid article:first-child {
       border-left: 0;
-      border-top: 3px solid var(--color-lbs-red);
-      gap: 12px;
-      padding-left: 0;
-      padding-top: 16px;
-    }
-
-    .hero-note ol {
-      gap: 10px 14px;
-      grid-template-columns: repeat(2, minmax(0, 1fr));
-    }
-
-    .hero-note li {
-      font-size: 0.92rem;
-    }
-
-    .thesis-grid {
-      grid-template-columns: 1fr;
-    }
-
-    .rule {
-      height: 4px;
-      min-height: 0;
-      width: 58px;
-    }
-
-    dl {
-      grid-template-columns: 1fr;
-    }
-
-    dl div,
-    dl div:first-child {
-      border-left: 0;
-      border-top: 1px solid var(--color-border);
-      padding: 16px 0;
-    }
-
-    dl div:first-child {
-      border-top: 0;
-    }
-
-    .process-list article {
-      grid-template-columns: 1fr;
+      padding-inline: 0;
     }
   }
 </style>

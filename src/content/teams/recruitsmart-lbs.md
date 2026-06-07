@@ -3,10 +3,10 @@ id: recruitsmart-lbs
 slug: recruitsmart-lbs
 name: RecruitSmart LBS
 displayName: RecruitSmart LBS
-cohort: cohort-01
-cohortLabel: Cohort 01 / Spring 2026
+batch: spring-2026
+batchLabel: Spring 2026 Batch
 category: Career AI / Student workflow
-status: Prototype / cohort build
+status: Prototype / batch build
 productUrl: https://recruitsmart.lbsailab.com
 tagline: An AI-powered job search co-pilot built for LBS students.
 summary: >-

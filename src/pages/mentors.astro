@@ -1,31 +1,83 @@
 ---
 import { getCollection } from "astro:content";
 import BaseLayout from "@layouts/BaseLayout.astro";
+import Button from "@components/atoms/Button.astro";
+import DirectorCard from "@components/cards/DirectorCard.astro";
 import MentorGrid from "@components/sections/MentorGrid.astro";
+import { MENTOR_APPLICATION_URL } from "@utils/site";
+
 const mentors = await getCollection("mentors");
 ---
 
 <BaseLayout
   title="Mentors"
-  description="Meet the product and technical mentors supporting LBS AI Lab teams as they build, test with users, and iterate."
+  description="Meet the product and technical mentors supporting LBS AI Lab teams"
 >
   <section class="page-hero">
-    <div class="container">
+    <div class="container hero-inner">
       <p class="eyebrow">Mentors</p>
-      <h1>Mentors helping teams build, test, and improve.</h1>
+      <h1>Guidance from product and technical mentors</h1>
       <p class="lede">
-        Product and technical mentors support teams as they move from idea to
-        prototype, from prototype to user feedback, and from feedback to a
-        stronger product.
+        LBS AI Lab mentors help teams define problems, make product decisions,
+        build with AI-assisted tools, evaluate outputs, and iterate toward
+        useful products
       </p>
+      <div class="hero-actions">
+        <Button href={MENTOR_APPLICATION_URL} variant="red" size="lg">
+          Apply to mentor
+        </Button>
+        <Button href="/batches/spring-2026/" variant="ghost" size="lg">
+          View Spring 2026 Batch
+        </Button>
+      </div>
     </div>
   </section>
 
-  <section class="section section-cloud">
+  <section class="section academic-section">
     <div class="container">
+      <p class="eyebrow">Academic lead</p>
+      <h2>Academic lead</h2>
+      <DirectorCard />
+    </div>
+  </section>
+
+  <section class="section section-warm mentors-section">
+    <div class="container section-intro">
+      <p class="eyebrow">Mentors</p>
+      <h2>Mentors</h2>
+      <p>
+        Teams are supported by product and technical mentors through build
+        sessions, product reviews, implementation guidance, and feedback cycles
+      </p>
+    </div>
+    <div class="container mentor-list">
       <MentorGrid mentors={mentors} />
     </div>
   </section>
+
+  <section class="section mentorship-cta">
+    <div class="container cta-inner">
+      <div>
+        <p class="eyebrow">Mentor a future batch</p>
+        <h2>Mentor a future batch</h2>
+        <p>
+          LBS AI Lab welcomes product, technical, and industry mentors who can
+          help teams shape better AI products, navigate adoption, and build with
+          confidence
+        </p>
+      </div>
+      <Button href={MENTOR_APPLICATION_URL} variant="secondary">
+        Apply to mentor
+      </Button>
+    </div>
+  </section>
+
+  <nav class="bottom-links" aria-label="Mentor page links">
+    <div class="container">
+      <a href="/batches/spring-2026/">View Spring 2026 Batch</a>
+      <a href="/apply/">Join the next batch</a>
+    </div>
+  </nav>
 </BaseLayout>
 
 <style>
@@ -33,6 +85,10 @@ const mentors = await getCollection("mentors");
     background: var(--color-lbs-blue);
     color: var(--color-white);
     padding-block: clamp(52px, 7vw, 92px);
+  }
+
+  .hero-inner {
+    max-width: 940px;
   }
 
   :global(.page-hero .eyebrow) {
@@ -47,5 +103,76 @@ const mentors = await getCollection("mentors");
   .lede {
     color: rgba(255, 255, 255, 0.78);
     max-width: 820px;
+  }
+
+  .hero-actions {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 12px;
+    margin-top: 28px;
+  }
+
+  .academic-section h2,
+  .section-intro h2,
+  .cta-inner h2 {
+    color: var(--color-lbs-blue);
+    margin: 12px 0 24px;
+  }
+
+  .section-intro p:not(.eyebrow),
+  .cta-inner p:not(.eyebrow) {
+    color: var(--color-ink-soft);
+    font-size: var(--step-1);
+    max-width: 820px;
+  }
+
+  .mentor-list {
+    margin-top: 30px;
+  }
+
+  .mentorship-cta {
+    background: var(--color-white);
+    border-top: 1px solid var(--color-border);
+  }
+
+  .cta-inner {
+    align-items: center;
+    display: grid;
+    gap: 28px;
+    grid-template-columns: minmax(0, 1fr) auto;
+  }
+
+  .bottom-links {
+    background: var(--color-warm-white);
+    border-top: 1px solid var(--color-border);
+    padding-block: 20px;
+  }
+
+  .bottom-links .container {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 16px 22px;
+  }
+
+  .bottom-links a {
+    color: var(--color-lbs-blue);
+    font-size: var(--step--1);
+    font-weight: 850;
+    text-decoration: none;
+  }
+
+  .bottom-links a::after {
+    color: var(--color-lbs-red);
+    content: " ->";
+  }
+
+  @media (max-width: 760px) {
+    .cta-inner {
+      grid-template-columns: 1fr;
+    }
+
+    .cta-inner :global(.button) {
+      justify-self: start;
+    }
   }
 </style>

@@ -3,10 +3,10 @@ id: the-wayfinders
 slug: the-wayfinders
 name: The Wayfinders
 displayName: The Wayfinders
-cohort: cohort-01
-cohortLabel: Cohort 01 / Spring 2026
+batch: spring-2026
+batchLabel: Spring 2026 Batch
 category: Campus navigation / Mobile utility
-status: Prototype / cohort build
+status: Prototype / batch build
 productUrl: https://wayfinders.lbsailab.com
 tagline: A mobile guide to rooms and facilities across LBS campuses.
 summary: >-

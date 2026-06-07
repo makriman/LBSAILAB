@@ -1,18 +1,18 @@
 ---
-import Eyebrow from './Eyebrow.astro';
+import Eyebrow from "./Eyebrow.astro";
 
 interface Props {
   eyebrow?: string;
   title: string;
   body?: string;
-  align?: 'left' | 'center';
+  align?: "left" | "center";
   light?: boolean;
 }
 
-const { eyebrow, title, body, align = 'left', light = false } = Astro.props;
+const { eyebrow, title, body, align = "left", light = false } = Astro.props;
 ---
 
-<div class:list={['section-header', `align-${align}`, { light }]}>
+<div class:list={["section-header", `align-${align}`, { light }]}>
   {eyebrow && <Eyebrow text={eyebrow} light={light} />}
   <h2>{title}</h2>
   {body && <p>{body}</p>}

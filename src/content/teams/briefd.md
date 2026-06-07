@@ -3,10 +3,10 @@ id: briefd
 slug: briefd
 name: Briefd
 displayName: Briefd
-cohort: cohort-01
-cohortLabel: Cohort 01 / Spring 2026
+batch: spring-2026
+batchLabel: Spring 2026 Batch
 category: Events and opportunity discovery
-status: Prototype / cohort build
+status: Prototype / batch build
 productUrl: https://briefd.lbsailab.com
 tagline: One master calendar for LBS events, jobs, and opportunities.
 summary: >-

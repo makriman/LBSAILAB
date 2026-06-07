@@ -19,7 +19,7 @@ h1 {
   font-size: var(--step-4);
 }
 
-:is(.page-hero, .cohort-hero, .team-hero) h1 {
+:is(.page-hero, .batch-hero, .team-hero) h1 {
   font-size: clamp(2.65rem, 5.2vw, 5.1rem);
   max-width: 920px;
 }
@@ -66,7 +66,7 @@ li {
 }
 
 @media (max-width: 640px) {
-  :is(.page-hero, .cohort-hero, .team-hero) h1 {
+  :is(.page-hero, .batch-hero, .team-hero) h1 {
     font-size: clamp(2.1rem, 10vw, 2.8rem);
     line-height: 0.96;
   }

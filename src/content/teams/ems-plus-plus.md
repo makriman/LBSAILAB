@@ -3,10 +3,10 @@ id: ems-plus-plus
 slug: ems-plus-plus
 name: EMS++
 displayName: EMS++
-cohort: cohort-01
-cohortLabel: Cohort 01 / Spring 2026
+batch: spring-2026
+batchLabel: Spring 2026 Batch
 category: Academic planning / MBA workflow
-status: Prototype / cohort build
+status: Prototype / batch build
 productUrl: https://emsplusplus.lbsailab.com
 tagline: A coherent curriculum planner for MBA elective selection and timetable management.
 summary: >-

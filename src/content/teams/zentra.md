@@ -3,10 +3,10 @@ id: zentra
 slug: zentra
 name: Zentra
 displayName: Zentra
-cohort: cohort-01
-cohortLabel: Cohort 01 / Spring 2026
+batch: spring-2026
+batchLabel: Spring 2026 Batch
 category: Professional services / Time capture
-status: Prototype / cohort build
+status: Prototype / batch build
 productUrl: https://zentra.lbsailab.com
 tagline: AI time capture and billable narrative generation for professional work.
 summary: >-

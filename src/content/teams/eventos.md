@@ -3,10 +3,10 @@ id: eventos
 slug: eventos
 name: EventOS
 displayName: EventOS
-cohort: cohort-01
-cohortLabel: Cohort 01 / Spring 2026
+batch: spring-2026
+batchLabel: Spring 2026 Batch
 category: Club operations / Event automation
-status: Prototype / cohort build
+status: Prototype / batch build
 productUrl: https://eventos.lbsailab.com
 tagline: AI-assisted club event planning, venue sizing, and form generation.
 summary: >-

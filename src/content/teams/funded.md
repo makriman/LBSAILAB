@@ -3,10 +3,10 @@ id: funded
 slug: funded
 name: FundEd
 displayName: FundEd
-cohort: cohort-01
-cohortLabel: Cohort 01 / Spring 2026
+batch: spring-2026
+batchLabel: Spring 2026 Batch
 category: Admissions / Funding discovery
-status: Prototype / cohort build
+status: Prototype / batch build
 productUrl: https://funded.lbsailab.com
 tagline: A funding discovery and matching platform for prospective LBS students.
 summary: >-

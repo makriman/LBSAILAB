@@ -1,10 +1,10 @@
 ---
 const director = {
   name: "Kostis Christodoulou",
-  title: "Head of LBS AI Lab",
+  title: "Academic lead",
   role: "Clinical Professor of Management Science and Operations; Academic Director (MBA, MAM, EMBAG)",
   focus:
-    "Academic leadership for the Lab, connecting student builders with rigorous AI, analytics, decision-making, and real-world product learning.",
+    "Kostis supports the academic direction of the Lab, connecting participant teams with rigorous AI, analytics, decision-making, and product learning",
   email: "kchristodoulou@london.edu",
   profileUrl:
     "https://www.london.edu/faculty-and-research/faculty-profiles/k/kostis-christodoulou",
@@ -33,13 +33,7 @@ const director = {
     <p class="director-role">{director.role}</p>
     <p>{director.focus}</p>
     <div class="director-links">
-      <a class="connect-link" href={`mailto:${director.email}`}>Connect</a>
-      <a
-        class="profile-link"
-        href={director.profileUrl}
-        target="_blank"
-        rel="noreferrer"
-      >
+      <a href={director.profileUrl} target="_blank" rel="noreferrer">
         LBS profile
       </a>
     </div>
@@ -51,102 +45,76 @@ const director = {
     background: var(--color-white);
     border: 1px solid var(--color-border);
     display: grid;
-    grid-column: 1 / -1;
-    grid-template-columns: minmax(220px, 0.32fr) minmax(0, 1fr);
-    margin-top: 18px;
-    min-height: 260px;
+    grid-template-columns: minmax(180px, 0.24fr) minmax(0, 1fr);
   }
 
   .director-photo {
     background: var(--color-cloud);
     border-right: 1px solid var(--color-border);
     display: block;
+    min-height: 220px;
     overflow: hidden;
-    text-decoration: none;
   }
 
   img {
     height: 100%;
-    min-height: 260px;
+    min-height: 220px;
     object-fit: cover;
-    object-position: center;
     width: 100%;
   }
 
   .director-body {
     align-content: center;
     display: grid;
-    gap: 12px;
-    padding: clamp(24px, 4vw, 42px);
+    gap: 10px;
+    padding: clamp(22px, 4vw, 38px);
   }
 
   .director-kicker {
     color: var(--color-lbs-red);
     font-size: 0.78rem;
     font-weight: 900;
-    letter-spacing: 0.04em;
     margin: 0;
-    text-transform: uppercase;
   }
 
   h3 {
     color: var(--color-lbs-blue);
-    font-size: clamp(2rem, 4vw, 3.6rem);
-    line-height: 0.95;
+    font-family: var(--font-sans);
+    font-size: var(--step-2);
+    line-height: 1.05;
     margin: 0;
   }
 
   .director-role {
     color: var(--color-lbs-blue);
-    font-weight: 850;
+    font-weight: 820;
     margin: 0;
   }
 
   .director-body p:not(.director-kicker):not(.director-role) {
     color: var(--color-ink-soft);
-    font-size: var(--step-0);
     line-height: 1.45;
     margin: 0;
-    max-width: 820px;
+    max-width: 760px;
   }
 
   .director-links {
-    align-items: center;
-    display: flex;
-    flex-wrap: wrap;
-    gap: 12px;
     margin-top: 8px;
   }
 
-  .connect-link,
-  .profile-link {
-    align-items: center;
-    display: inline-flex;
+  a {
+    color: var(--color-lbs-blue);
     font-size: var(--step--1);
     font-weight: 850;
-    justify-content: center;
-    min-height: 42px;
-    padding: 10px 16px;
     text-decoration: none;
   }
 
-  .connect-link {
-    background: var(--color-lbs-blue);
-    border-radius: var(--radius-button);
-    color: var(--color-white);
+  a::after {
+    color: var(--color-lbs-red);
+    content: " ->";
   }
 
-  .connect-link:hover {
-    background: var(--color-lbs-red);
-  }
-
-  .profile-link {
-    color: var(--color-lbs-blue);
-    text-decoration: underline;
-    text-decoration-color: rgba(205, 13, 47, 0.36);
-  }
-
-  @media (max-width: 760px) {
+  @media (max-width: 720px) {
     .director-card {
       grid-template-columns: 1fr;
     }
@@ -154,6 +122,7 @@ const director = {
     .director-photo {
       border-bottom: 1px solid var(--color-border);
       border-right: 0;
+      min-height: 0;
     }
 
     img {

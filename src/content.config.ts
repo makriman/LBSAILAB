@@ -13,7 +13,7 @@ const peopleSchema = z.object({
   focus: z.string().optional(),
   image: z.string().optional(),
   linkedinUrl: z.url().optional(),
-  cohort: z.string().optional(),
+  batch: z.string().optional(),
   showEmailPublicly: z.boolean().default(false),
 });
 
@@ -24,8 +24,8 @@ const teams = defineCollection({
     slug: z.string(),
     name: z.string(),
     displayName: z.string(),
-    cohort: z.string(),
-    cohortLabel: z.string(),
+    batch: z.string(),
+    batchLabel: z.string(),
     category: z.string(),
     status: z.string(),
     productUrl: z.url().optional(),
@@ -47,9 +47,9 @@ const teams = defineCollection({
   }),
 });
 
-const cohorts = defineCollection({
+const batches = defineCollection({
   loader: glob({
-    base: "./src/content/cohorts",
+    base: "./src/content/batches",
     pattern: "**/*.{json,yaml,yml}",
   }),
   schema: z.object({
@@ -79,4 +79,4 @@ const mentors = defineCollection({
   schema: peopleSchema,
 });
 
-export const collections = { teams, cohorts, people, mentors };
+export const collections = { teams, batches, people, mentors };

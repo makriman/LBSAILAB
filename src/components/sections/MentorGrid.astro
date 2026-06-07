@@ -1,5 +1,4 @@
 ---
-import DirectorCard from "@components/cards/DirectorCard.astro";
 import MentorCard from "@components/cards/MentorCard.astro";
 import type { MentorEntry } from "@utils/collections";
 
@@ -12,20 +11,13 @@ const { mentors } = Astro.props;
 
 <div class="mentor-grid">
   {mentors.map((mentor) => <MentorCard mentor={mentor} />)}
-  <DirectorCard />
 </div>
 
 <style>
   .mentor-grid {
     display: grid;
     gap: 18px;
-    grid-template-columns: repeat(4, minmax(0, 1fr));
-  }
-
-  @media (max-width: 1020px) {
-    .mentor-grid {
-      grid-template-columns: repeat(2, minmax(0, 1fr));
-    }
+    grid-template-columns: repeat(2, minmax(0, 1fr));
   }
 
   @media (max-width: 620px) {

@@ -3,8 +3,7 @@ import { DSAI_URL, LBS_URL } from "@utils/site";
 
 const labLinks = [
   { href: "/about/", label: "About" },
-  { href: "/cohorts/", label: "Cohorts" },
-  { href: "/teams/", label: "Teams" },
+  { href: "/batches/", label: "Batches" },
   { href: "/mentors/", label: "Mentors" },
   { href: "/contact/", label: "Contact" },
 ];
@@ -19,29 +18,6 @@ const socialLinks = [
     href: "http://www.linkedin.com/company/london-business-school",
     label: "LinkedIn",
   },
-  {
-    href: "http://www.youtube.com/user/londonbusinessschool",
-    label: "YouTube",
-  },
-  {
-    href: "https://www.instagram.com/londonbschool/?hl=en",
-    label: "Instagram",
-  },
-  { href: "http://www.facebook.com/londonbusinessschool", label: "Facebook" },
-  { href: "http://www.twitter.com/lbs", label: "X" },
-  {
-    href: "https://mp.weixin.qq.com/s/tR-No6jRcyxTTAkghnfmwA",
-    label: "WeChat",
-  },
-  {
-    href: "https://www.rednote.com/user/profile/66686da60000000007007d32?xsec_token=AB0FHoU_3finTNE7HFaFnCS4tYmOmaf8SX2HS1Cbg85qQ",
-    label: "Rednote",
-  },
-  {
-    href: "https://www.weibo.com/londonbusinessschool?is_all=1",
-    label: "Weibo",
-  },
-  { href: "https://admissionsblog.london.edu/", label: "Admissions Blog" },
 ];
 
 const legalLinks = [
@@ -68,8 +44,8 @@ const year = new Date().getFullYear();
             <img src="/lbs-logo.svg" alt="" width="44" height="44" />
           </span>
           <span class="brand-text">
-            <strong>AI Lab</strong>
-            <span>Build. Test. Iterate.</span>
+            <strong>LBS AI Lab</strong>
+            <span>DSAI Initiative</span>
           </span>
         </a>
       </div>
@@ -79,8 +55,8 @@ const year = new Date().getFullYear();
       </nav>
 
       <div class="footer-actions">
-        <a href="/apply/">Register interest</a>
-        <a href="/apply/#submissions">Find co-builders</a>
+        <a href="/apply/">Join the next batch</a>
+        <a href="/batches/spring-2026/">Spring 2026 Batch</a>
       </div>
     </div>
 
@@ -96,7 +72,7 @@ const year = new Date().getFullYear();
       </nav>
 
       <nav aria-label="LBS in social media" class="social-links">
-        <span>LBS social</span>
+        <span>Social</span>
         {
           socialLinks.map((link) => (
             <a href={link.href} target="_blank" rel="noreferrer">

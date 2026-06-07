@@ -350,7 +350,7 @@ function initialSubmissionsFile(): string {
   return [
     "# LBS AI Lab Application Submissions",
     "",
-    "Public submissions from students who opted in on the Apply page.",
+    "Public submissions from participants who opted in on the Apply page.",
     "",
     INSERT_MARKER,
     "",

@@ -5,7 +5,7 @@
   aria-labelledby="title desc"
 >
   <title id="title">LBS AI Lab</title>
-  <desc id="desc">Learn to build AI products with real users.</desc>
+  <desc id="desc">Helping leaders become AI builders</desc>
   <rect width="1200" height="630" fill="#f8f7f4" />
   <rect x="0" y="0" width="470" height="630" fill="#14175d" />
   <rect x="90" y="94" width="12" height="92" fill="#cd0d2f" />
@@ -58,7 +58,7 @@
     font-size="72"
     font-weight="700"
   >
-    real users.
+    LBS workflows
   </text>
   <line x1="555" y1="438" x2="825" y2="438" stroke="#cd0d2f" stroke-width="8" />
   <text
@@ -69,6 +69,6 @@
     font-size="30"
     font-weight="700"
   >
-    Cohort 01 with Google DeepMind
+    Spring 2026 Batch
   </text>
 </svg>

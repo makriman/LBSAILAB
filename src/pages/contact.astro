@@ -6,15 +6,15 @@ import { DSAI_URL } from "@utils/site";
 
 <BaseLayout
   title="Contact"
-  description="Contact LBS AI Lab for questions about cohorts, mentoring, partnerships, user testing, or student-built AI products."
+  description="Contact LBS AI Lab for questions about batches, mentoring, partnerships, user testing, or participant-built AI products"
 >
   <section class="page-hero">
     <div class="container">
       <p class="eyebrow">Contact</p>
-      <h1>Contact LBS AI Lab.</h1>
+      <h1>Contact LBS AI Lab</h1>
       <p class="lede">
-        For questions about cohorts, mentoring, partnerships, user testing, or
-        student-built AI products, contact the LBS AI Lab team.
+        For questions about batches, mentoring, partnerships, user testing, or
+        participant-built AI products, contact the LBS AI Lab team
       </p>
     </div>
   </section>
@@ -23,7 +23,7 @@ import { DSAI_URL } from "@utils/site";
     <div class="container contact-grid">
       <article>
         <p class="eyebrow">General inquiries</p>
-        <h2>Reach the Data Science & AI Initiative.</h2>
+        <h2>Reach the Data Science & AI Initiative</h2>
         <p>
           For general questions, use the DSAI Initiative contact route while the
           dedicated AI Lab inbox is being set up.
@@ -35,23 +35,30 @@ import { DSAI_URL } from "@utils/site";
 
       <article>
         <p class="eyebrow">Team inquiries</p>
-        <h2>Use team pages for product-specific introductions.</h2>
+        <h2>Use team pages for product-specific introductions</h2>
         <p>
           Team pages list each builder and public email address for direct
           product questions, feedback, and testing interest.
         </p>
-        <Button href="/teams/" variant="secondary">View teams</Button>
+        <Button href="/batches/spring-2026/" variant="secondary">
+          View Spring 2026 Batch
+        </Button>
       </article>
 
       <article>
         <p class="eyebrow">Mentoring</p>
-        <h2>Help student teams sharpen product direction and execution.</h2>
+        <h2>Help teams sharpen product direction and execution</h2>
         <p>
           Alumni, operators, founders, and technical builders can register
-          interest in supporting future cohorts as teams build, test, and
+          interest in supporting future batches as teams build, test, and
           iterate.
         </p>
-        <Button href="/apply/" variant="secondary">Register interest</Button>
+        <Button
+          href="/apply/?intent=mentor#register-interest"
+          variant="secondary"
+        >
+          Apply to mentor
+        </Button>
       </article>
     </div>
   </section>

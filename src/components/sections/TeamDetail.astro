@@ -1,53 +1,44 @@
 ---
 import type { TeamEntry } from "@utils/collections";
 import Button from "@components/atoms/Button.astro";
-import GoogleDeepMindLogo from "@components/brand/GoogleDeepMindLogo.astro";
 
 interface Props {
   team: TeamEntry;
-  relatedTeams: TeamEntry[];
 }
 
-const { team, relatedTeams } = Astro.props;
+const { team } = Astro.props;
+
+const category = team.data.category.toLowerCase();
+const focusArea = category.includes("career")
+  ? "Recruiting"
+  : category.includes("event") || category.includes("club")
+    ? "Events"
+    : category.includes("academic") || category.includes("elective")
+      ? "Electives"
+      : category.includes("funding") || category.includes("admissions")
+        ? "Funding"
+        : category.includes("professional")
+          ? "Professional work"
+          : "Campus";
 ---
 
 <article class="team-detail">
   <section class="team-hero">
-    <div class="container hero-inner">
+    <div class="container hero-grid">
       <div>
-        <p class="eyebrow">Cohort 01 project</p>
+        <p class="eyebrow">Spring 2026 Batch</p>
         <h1>{team.data.displayName}</h1>
         <p class="lede">{team.data.tagline}</p>
-        <div class="hero-actions">
-          {
-            team.data.productUrl && (
-              <Button href={team.data.productUrl} variant="red" size="lg">
-                View product
-              </Button>
-            )
-          }
-        </div>
       </div>
-      <aside class="meta-panel" aria-label="Project metadata">
-        <div class="meta-partner">
-          <GoogleDeepMindLogo
-            tone="light"
-            compact
-            label="Cohort 01 in partnership with"
-          />
-        </div>
+      <aside class="meta-panel" aria-label="Team metadata">
         <dl>
           <div>
-            <dt>Cohort</dt>
-            <dd>{team.data.cohortLabel}</dd>
+            <dt>Batch</dt>
+            <dd>Spring 2026</dd>
           </div>
           <div>
-            <dt>Problem area</dt>
-            <dd>{team.data.category}</dd>
-          </div>
-          <div>
-            <dt>Status</dt>
-            <dd>{team.data.status}</dd>
+            <dt>Focus area</dt>
+            <dd>{focusArea}</dd>
           </div>
         </dl>
       </aside>
@@ -55,71 +46,73 @@ const { team, relatedTeams } = Astro.props;
   </section>
 
   <section class="section">
-    <div class="container profile-grid">
-      <div class="profile-main">
+    <div class="container detail-grid">
+      <div class="main-content">
         <section>
-          <p class="eyebrow">The problem</p>
-          <h2>{team.data.category}</h2>
-          <p>
-            The team starts from a practical LBS workflow with a reachable user
-            audience, then uses the cohort to test the product, learn from
-            feedback, and keep improving.
-          </p>
-        </section>
-
-        <section>
-          <p class="eyebrow">What the team is building</p>
-          <h2>{team.data.displayName}</h2>
+          <p class="eyebrow">Product overview</p>
+          <h2>Product overview</h2>
           <p>{team.data.summary}</p>
         </section>
 
         <section>
-          <p class="eyebrow">Cohort context</p>
-          <h2>Built inside the founding cohort.</h2>
-          <p>
-            This project is part of Cohort 01, delivered in partnership with
-            Google DeepMind and running from 10 April to 12 June 2026.
-          </p>
+          <p class="eyebrow">What they are building</p>
+          <h2>What they are building</h2>
+          <div class="build-grid">
+            <article>
+              <h3>User need</h3>
+              <p>
+                The team is addressing an LBS workflow in {team.data.category}
+              </p>
+            </article>
+            <article>
+              <h3>Product approach</h3>
+              <p>{team.data.tagline}</p>
+            </article>
+            <article>
+              <h3>Next step</h3>
+              <p>
+                Test quality, gather feedback, and improve the prototype through
+                iteration
+              </p>
+            </article>
+          </div>
         </section>
+
+        {
+          team.data.productUrl && (
+            <section>
+              <p class="eyebrow">Try the product</p>
+              <h2>Try the product</h2>
+              <Button href={team.data.productUrl} variant="secondary">
+                Open prototype
+              </Button>
+            </section>
+          )
+        }
+
+        <a class="back-link" href="/batches/spring-2026/"
+          >Back to Spring 2026 Batch</a
+        >
       </div>
 
-      <aside class="profile-side">
-        <section class="member-card">
-          <h2>Team</h2>
-          <ul>
-            {
-              team.data.members.map((member) => (
-                <li>
-                  <strong>{member.name}</strong>
-                  <span>{member.role}</span>
-                  <a href={`mailto:${member.email}`}>{member.email}</a>
-                </li>
-              ))
-            }
-          </ul>
-        </section>
+      <aside class="team-members">
+        <h2>Team members</h2>
+        <ul>
+          {
+            team.data.members.map((member) => (
+              <li>
+                <strong>{member.name}</strong>
+                <span>{member.role}</span>
+                {member.showEmailPublicly && (
+                  <a href={`mailto:${member.email}`}>Email</a>
+                )}
+              </li>
+            ))
+          }
+        </ul>
       </aside>
     </div>
   </section>
-
-  {
-    relatedTeams.length > 0 && (
-      <section class="section section-cloud related">
-        <div class="container">
-          <p class="eyebrow">Related teams</p>
-          <h2>More Cohort 01 builds</h2>
-          <div class="related-list">
-            {relatedTeams.map((related) => (
-              <a href={`/teams/${related.data.slug}/`}>
-                <strong>{related.data.displayName}</strong>
-                <span>{related.data.tagline}</span>
-              </a>
-            ))}
-          </div>
-        </div>
-      </section>
-    )
-  }
 </article>
 
 <style>
@@ -129,19 +122,15 @@ const { team, relatedTeams } = Astro.props;
     padding-block: clamp(52px, 7vw, 92px);
   }
 
-  .hero-inner {
-    align-items: center;
+  .hero-grid {
+    align-items: end;
     display: grid;
-    gap: clamp(36px, 6vw, 80px);
-    grid-template-columns: minmax(0, 1.15fr) minmax(280px, 0.55fr);
-  }
-
-  .hero-inner > * {
-    min-width: 0;
+    gap: clamp(30px, 6vw, 72px);
+    grid-template-columns: minmax(0, 1fr) minmax(280px, 0.36fr);
   }
 
   :global(.team-hero .eyebrow) {
-    color: rgba(255, 255, 255, 0.8);
+    color: rgba(255, 255, 255, 0.82);
   }
 
   h1 {
@@ -154,192 +143,143 @@ const { team, relatedTeams } = Astro.props;
     max-width: 760px;
   }
 
-  .hero-actions {
-    display: flex;
-    flex-wrap: wrap;
-    gap: 12px;
-    margin-top: 30px;
-  }
-
   .meta-panel {
-    background: rgba(255, 255, 255, 0.08);
     border: 1px solid rgba(255, 255, 255, 0.2);
-    display: grid;
-    gap: 20px;
-    padding: 26px;
-  }
-
-  .meta-partner {
-    border-bottom: 1px solid rgba(255, 255, 255, 0.16);
-    padding-bottom: 18px;
+    padding: 22px;
   }
 
   dl {
     display: grid;
     gap: 18px;
-    grid-template-columns: repeat(2, minmax(0, 1fr));
     margin: 0;
   }
 
   dt {
-    color: rgba(255, 255, 255, 0.58);
+    color: rgba(255, 255, 255, 0.62);
     font-size: var(--step--1);
     font-weight: 820;
   }
 
   dd {
     color: var(--color-white);
-    font-weight: 760;
+    font-weight: 780;
     margin: 5px 0 0;
-    overflow-wrap: anywhere;
   }
 
-  .profile-grid {
+  .detail-grid {
     align-items: start;
     display: grid;
-    gap: clamp(36px, 6vw, 86px);
-    grid-template-columns: minmax(0, 1fr) minmax(280px, 0.42fr);
+    gap: clamp(36px, 7vw, 88px);
+    grid-template-columns: minmax(0, 1fr) minmax(280px, 0.34fr);
   }
 
-  .profile-main {
+  .main-content {
     display: grid;
-    gap: clamp(42px, 6vw, 72px);
+    gap: clamp(42px, 7vw, 70px);
   }
 
-  .profile-main section {
-    border-left: 3px solid var(--color-lbs-red);
-    padding-left: clamp(22px, 3vw, 34px);
-  }
-
-  .profile-main h2 {
+  .main-content h2,
+  .team-members h2 {
     color: var(--color-lbs-blue);
     font-size: var(--step-2);
-    margin: 14px 0;
+    margin: 12px 0 14px;
   }
 
-  .profile-main p:not(.eyebrow) {
+  .main-content p:not(.eyebrow),
+  .build-grid p {
     color: var(--color-ink-soft);
     font-size: var(--step-1);
   }
 
-  .profile-side {
+  .build-grid {
     display: grid;
-    gap: 18px;
+    gap: 16px;
+    grid-template-columns: repeat(3, minmax(0, 1fr));
+    margin-top: 22px;
+  }
+
+  .build-grid article {
+    border-top: 2px solid var(--color-lbs-red);
+    padding-top: 18px;
+  }
+
+  .build-grid h3 {
+    color: var(--color-lbs-blue);
+    font-family: var(--font-sans);
+    font-size: var(--step-0);
+    margin: 0 0 10px;
+  }
+
+  .build-grid p {
+    font-size: 0.98rem;
+    line-height: 1.45;
+    margin: 0;
+  }
+
+  .team-members {
+    background: var(--color-warm-white);
+    border: 1px solid var(--color-border);
+    padding: 22px;
     position: sticky;
     top: 104px;
   }
 
-  .member-card {
-    background: var(--color-warm-white);
-    border: 1px solid var(--color-border);
-    padding: 24px;
-  }
-
-  .member-card h2 {
-    color: var(--color-lbs-blue);
-    font-family: var(--font-sans);
+  .team-members h2 {
     font-size: var(--step-1);
-    line-height: 1.15;
-    margin: 0 0 18px;
+    margin-top: 0;
   }
 
-  .member-card ul {
+  .team-members ul {
     display: grid;
-    gap: 16px;
+    gap: 12px;
     list-style: none;
     margin: 0;
     padding: 0;
   }
 
-  .member-card li {
+  .team-members li {
     border-top: 1px solid var(--color-border);
     display: grid;
-    gap: 3px;
-    padding-top: 14px;
+    gap: 4px;
+    padding-top: 12px;
   }
 
-  .member-card strong {
+  .team-members strong {
     color: var(--color-lbs-blue);
   }
 
-  .member-card span,
-  .member-card em,
-  .member-card p {
-    color: var(--color-muted);
-    font-size: var(--step--1);
-    font-style: normal;
-    font-weight: 700;
-  }
-
-  .member-card a {
-    font-size: var(--step--1);
-    font-weight: 820;
-    overflow-wrap: anywhere;
-  }
-
-  .related h2 {
-    color: var(--color-lbs-blue);
-    margin: 16px 0 24px;
-  }
-
-  .related-list {
-    display: grid;
-    gap: 14px;
-    grid-template-columns: repeat(3, minmax(0, 1fr));
-  }
-
-  .related-list a {
-    background: var(--color-white);
-    border: 1px solid var(--color-border);
-    display: grid;
-    gap: 8px;
-    padding: 20px;
-    text-decoration: none;
-  }
-
-  .related-list strong {
-    color: var(--color-lbs-blue);
-    font-size: var(--step-1);
-  }
-
-  .related-list span {
+  .team-members span,
+  .team-members a {
     color: var(--color-muted);
     font-size: var(--step--1);
     font-weight: 760;
   }
 
-  @media (max-width: 900px) {
-    .hero-inner,
-    .profile-grid {
-      grid-template-columns: 1fr;
-    }
-
-    .profile-side {
-      position: static;
-    }
-
-    .related-list {
-      grid-template-columns: 1fr;
-    }
+  .team-members a {
+    color: var(--color-lbs-blue);
+    text-decoration: none;
   }
 
-  @media (max-width: 520px) {
-    .team-hero {
-      padding-block: 42px 46px;
-    }
+  .back-link {
+    color: var(--color-lbs-blue);
+    font-weight: 860;
+    text-decoration: none;
+  }
 
-    .hero-actions {
-      margin-top: 22px;
-    }
+  .back-link::before {
+    color: var(--color-lbs-red);
+    content: "<- ";
+  }
 
-    .meta-panel {
-      gap: 16px;
-      padding: 18px;
-    }
-
-    dl {
-      gap: 14px;
+  @media (max-width: 900px) {
+    .hero-grid,
+    .detail-grid,
+    .build-grid {
       grid-template-columns: 1fr;
+    }
+
+    .team-members {
+      position: static;
     }
   }
 </style>
