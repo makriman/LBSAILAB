@@ -21,6 +21,13 @@ const focusArea = category.includes("career")
         : category.includes("professional")
           ? "Professional work"
           : "Campus";
+
+const building = team.data.building ?? {
+  userNeed: `The team is addressing an LBS workflow in ${team.data.category}`,
+  productApproach: team.data.tagline,
+  nextStep:
+    "Test quality, gather feedback, and improve the prototype through iteration",
+};
 ---
 
 <article class="team-detail">
@@ -68,20 +75,15 @@ const focusArea = category.includes("career")
           <div class="build-grid">
             <article>
               <h3>User need</h3>
-              <p>
-                The team is addressing an LBS workflow in {team.data.category}
-              </p>
+              <p>{building.userNeed}</p>
             </article>
             <article>
               <h3>Product approach</h3>
-              <p>{team.data.tagline}</p>
+              <p>{building.productApproach}</p>
             </article>
             <article>
               <h3>Next step</h3>
-              <p>
-                Test quality, gather feedback, and improve the prototype through
-                iteration
-              </p>
+              <p>{building.nextStep}</p>
             </article>
           </div>
         </section>

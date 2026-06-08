@@ -31,6 +31,13 @@ const teams = defineCollection({
     productUrl: z.url().optional(),
     tagline: z.string(),
     summary: z.string(),
+    building: z
+      .object({
+        userNeed: z.string(),
+        productApproach: z.string(),
+        nextStep: z.string(),
+      })
+      .optional(),
     members: z.array(
       z.object({
         name: z.string(),
