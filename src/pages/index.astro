@@ -25,7 +25,6 @@ const springTeams = springBatch
     )
   : teams;
 
-const previewTeams = springTeams.slice(0, 6);
 const hasGoogleDeepMindPartner =
   springBatch?.data.partnerName === "Google DeepMind";
 
@@ -159,7 +158,7 @@ const jsonLd = {
       </Button>
     </div>
     <div class="container team-preview">
-      <TeamGrid teams={previewTeams} />
+      <TeamGrid teams={springTeams} />
     </div>
   </section>
 
