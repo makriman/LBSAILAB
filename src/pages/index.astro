@@ -45,8 +45,8 @@ const jsonLd = {
 ---
 
 <BaseLayout
-  title="LBS AI Lab | Helping leaders become AI builders"
-  description="LBS AI Lab helps participants learn to build, test, and launch AI products with users"
+  title="LBS AI Lab | Build AI products for LBS"
+  description="LBS AI Lab helps participants build AI products for LBS workflows through an 8-week batch model"
   jsonLd={jsonLd}
 >
   <section class="home-hero">
@@ -55,10 +55,10 @@ const jsonLd = {
         <p class="eyebrow">
           London Business School / Data Science & AI Initiative
         </p>
-        <h1>Helping the next generation of leaders become AI builders</h1>
+        <h1>Build AI products for LBS</h1>
         <p class="lede">
-          LBS AI Lab is where participants learn to build, test, and launch AI
-          products with users
+          A hands-on lab where participants turn LBS workflows into useful AI
+          products through an 8-week batch model
         </p>
         {
           hasGoogleDeepMindPartner && (
@@ -71,19 +71,28 @@ const jsonLd = {
           )
         }
         <div class="hero-actions">
-          <Button href="/apply/" size="lg">Join the next batch</Button>
-          <Button href="/batches/spring-2026/" variant="secondary" size="lg">
+          <Button href="/apply/">Join the next batch</Button>
+          <Button href="/batches/spring-2026/" variant="secondary">
             View Spring 2026 Batch
           </Button>
         </div>
       </div>
-      <div class="hero-image">
-        <img
-          src="/images/lbs-ai-lab-workshop-hero.png"
-          alt="Participants collaborating in a product sprint workshop"
-          loading="eager"
-          decoding="async"
-        />
+      <div class="hero-media" aria-label="LBS AI Lab batch context">
+        <div class="hero-image">
+          <img
+            src="/images/lbs-ai-lab-workshop-hero.png"
+            alt="Participants collaborating in a product sprint workshop"
+            loading="eager"
+            decoding="async"
+          />
+        </div>
+        <div class="hero-note">
+          <p class="eyebrow">Spring 2026 Batch</p>
+          <p>
+            Nine teams are building AI products for LBS workflows through an
+            8-week cycle of discovery, development, evaluation, and iteration
+          </p>
+        </div>
       </div>
     </div>
   </section>
@@ -179,49 +188,83 @@ const jsonLd = {
   .home-hero {
     background: var(--color-warm-white);
     border-bottom: 1px solid var(--color-border);
-    padding-block: clamp(44px, 7vw, 86px);
+    padding-block: clamp(42px, 6vw, 74px);
   }
 
   .hero-grid {
-    align-items: center;
+    align-items: stretch;
     display: grid;
-    gap: clamp(34px, 6vw, 76px);
-    grid-template-columns: minmax(0, 0.92fr) minmax(360px, 1fr);
+    gap: clamp(34px, 5vw, 70px);
+    grid-template-columns: minmax(0, 0.95fr) minmax(380px, 0.88fr);
   }
 
   .hero-copy h1 {
     color: var(--color-lbs-blue);
-    font-size: clamp(2.8rem, 5.6vw, 5.1rem);
-    margin: 18px 0;
-    max-width: 780px;
+    font-size: clamp(3rem, 5vw, 5.2rem);
+    letter-spacing: 0;
+    line-height: 0.93;
+    margin: 18px 0 20px;
+    max-width: 760px;
   }
 
   .hero-copy .lede {
     color: var(--color-ink-soft);
-    max-width: 620px;
+    font-size: clamp(1.18rem, 1.02rem + 0.62vw, 1.52rem);
+    line-height: 1.45;
+    max-width: 640px;
   }
 
   .hero-partner {
-    margin-top: 24px;
+    background: var(--color-white);
+    border-left: 3px solid var(--color-lbs-red);
+    display: inline-block;
+    margin-top: 26px;
+    padding: 16px 18px;
   }
 
   .hero-actions {
     display: flex;
     flex-wrap: wrap;
     gap: 12px;
-    margin-top: 26px;
+    margin-top: 28px;
+  }
+
+  .hero-media {
+    align-self: center;
+    display: grid;
+    gap: 18px;
   }
 
   .hero-image {
     border: 1px solid var(--color-border);
+    min-height: 0;
     overflow: hidden;
   }
 
   .hero-image img {
-    aspect-ratio: 16 / 9;
+    aspect-ratio: 4 / 3;
     height: auto;
     object-fit: cover;
     width: 100%;
+  }
+
+  .hero-note {
+    border-top: 2px solid var(--color-lbs-red);
+    display: grid;
+    gap: 8px;
+    padding-top: 16px;
+  }
+
+  .hero-note .eyebrow {
+    margin: 0;
+  }
+
+  .hero-note p:not(.eyebrow) {
+    color: var(--color-ink-soft);
+    font-size: var(--step-0);
+    line-height: 1.45;
+    margin: 0;
+    max-width: 620px;
   }
 
   .learn-grid {
@@ -289,6 +332,25 @@ const jsonLd = {
 
     .section-split :global(.button) {
       justify-self: start;
+    }
+
+    .hero-copy h1 {
+      max-width: 680px;
+    }
+  }
+
+  @media (max-width: 520px) {
+    .hero-copy h1 {
+      font-size: clamp(2.55rem, 13vw, 3.55rem);
+    }
+
+    .hero-partner {
+      display: block;
+      padding: 14px 15px;
+    }
+
+    .hero-image img {
+      aspect-ratio: 5 / 4;
     }
   }
 
