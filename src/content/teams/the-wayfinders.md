@@ -13,9 +13,8 @@ summary: >-
   A mobile app to help people find rooms and facilities across the LBS campuses.
 members:
   - name: Simon Scott
-    email: sscott.mifpt2025@london.edu
     role: MIFPT2025
-    showEmailPublicly: true
+    showEmailPublicly: false
   - name: Rita Antunes Figueiredo Carvalho
     email: ritaa.mba2027@london.edu
     role: MBA2027

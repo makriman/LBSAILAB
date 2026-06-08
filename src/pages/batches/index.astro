@@ -2,6 +2,7 @@
 import { getCollection } from "astro:content";
 import BaseLayout from "@layouts/BaseLayout.astro";
 import Button from "@components/atoms/Button.astro";
+import GoogleDeepMindLogo from "@components/brand/GoogleDeepMindLogo.astro";
 import TeamGrid from "@components/sections/TeamGrid.astro";
 import ApplyCTA from "@components/sections/ApplyCTA.astro";
 import { SITE_URL } from "@utils/site";
@@ -19,6 +20,8 @@ const springTeams = springBatch
       springBatch.data.teams,
     )
   : teams;
+const hasGoogleDeepMindPartner =
+  springBatch?.data.partnerName === "Google DeepMind";
 
 const jsonLd = {
   "@context": "https://schema.org",
@@ -92,6 +95,11 @@ const jsonLd = {
           Nine teams joined the first LBS AI Lab batch to build AI products for
           LBS workflows
         </p>
+        {
+          hasGoogleDeepMindPartner && (
+            <GoogleDeepMindLogo label="In partnership with" compact />
+          )
+        }
       </div>
       <Button href="/batches/spring-2026/" variant="secondary">
         View Spring 2026 Batch
@@ -184,6 +192,10 @@ const jsonLd = {
     color: var(--color-ink-soft);
     font-size: var(--step-1);
     margin: 0;
+  }
+
+  .batch-top :global(.gdm-lockup) {
+    margin-top: 22px;
   }
 
   .batch-top {

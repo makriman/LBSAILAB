@@ -195,9 +195,8 @@
     "role": "MIFPT2025",
     "team": "WayFinders",
     "publicTeam": "The Wayfinders",
-    "email": "sscott.mifpt2025@london.edu",
     "batch": "spring-2026",
-    "showEmailPublicly": true
+    "showEmailPublicly": false
   },
   {
     "id": "victoria-manning",

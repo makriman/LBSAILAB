@@ -3,6 +3,7 @@ import { getCollection } from "astro:content";
 import BaseLayout from "@layouts/BaseLayout.astro";
 import Button from "@components/atoms/Button.astro";
 import SectionHeader from "@components/atoms/SectionHeader.astro";
+import GoogleDeepMindLogo from "@components/brand/GoogleDeepMindLogo.astro";
 import DirectorCard from "@components/cards/DirectorCard.astro";
 import TeamGrid from "@components/sections/TeamGrid.astro";
 import MentorGrid from "@components/sections/MentorGrid.astro";
@@ -25,6 +26,8 @@ const springTeams = springBatch
   : teams;
 
 const previewTeams = springTeams.slice(0, 6);
+const hasGoogleDeepMindPartner =
+  springBatch?.data.partnerName === "Google DeepMind";
 
 const jsonLd = {
   "@context": "https://schema.org",
@@ -57,6 +60,16 @@ const jsonLd = {
           LBS AI Lab is where participants learn to build, test, and launch AI
           products with users
         </p>
+        {
+          hasGoogleDeepMindPartner && (
+            <div class="hero-partner">
+              <GoogleDeepMindLogo
+                label="Spring 2026 Batch in partnership with"
+                compact
+              />
+            </div>
+          )
+        }
         <div class="hero-actions">
           <Button href="/apply/" size="lg">Join the next batch</Button>
           <Button href="/batches/spring-2026/" variant="secondary" size="lg">
@@ -120,11 +133,18 @@ const jsonLd = {
 
   <section class="section section-warm batch-preview">
     <div class="container section-split">
-      <SectionHeader
-        eyebrow="Spring 2026 Batch"
-        title="Nine teams building AI products for LBS workflows"
-        body="Nine teams joined the first LBS AI Lab batch to build AI products for LBS workflows"
-      />
+      <div class="batch-intro">
+        <SectionHeader
+          eyebrow="Spring 2026 Batch"
+          title="Nine teams building AI products for LBS workflows"
+          body="Nine teams joined the first LBS AI Lab batch to build AI products for LBS workflows"
+        />
+        {
+          hasGoogleDeepMindPartner && (
+            <GoogleDeepMindLogo label="In partnership with" compact />
+          )
+        }
+      </div>
       <Button href="/batches/spring-2026/" variant="secondary">
         View Spring 2026 Batch
       </Button>
@@ -179,6 +199,10 @@ const jsonLd = {
   .hero-copy .lede {
     color: var(--color-ink-soft);
     max-width: 620px;
+  }
+
+  .hero-partner {
+    margin-top: 24px;
   }
 
   .hero-actions {
@@ -240,6 +264,11 @@ const jsonLd = {
     display: grid;
     gap: 24px;
     grid-template-columns: minmax(0, 1fr) auto;
+  }
+
+  .batch-intro {
+    display: grid;
+    gap: 22px;
   }
 
   .team-preview,

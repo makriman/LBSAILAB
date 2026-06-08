@@ -5,7 +5,7 @@ import { z } from "astro/zod";
 const peopleSchema = z.object({
   id: z.string(),
   name: z.string(),
-  email: z.email(),
+  email: z.email().optional(),
   role: z.string(),
   team: z.string().optional(),
   publicTeam: z.string().optional(),
@@ -34,7 +34,7 @@ const teams = defineCollection({
     members: z.array(
       z.object({
         name: z.string(),
-        email: z.email(),
+        email: z.email().optional(),
         role: z.string(),
         showEmailPublicly: z.boolean().default(false),
       }),

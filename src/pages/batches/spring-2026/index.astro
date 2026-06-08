@@ -2,6 +2,7 @@
 import { getCollection } from "astro:content";
 import BaseLayout from "@layouts/BaseLayout.astro";
 import Button from "@components/atoms/Button.astro";
+import GoogleDeepMindLogo from "@components/brand/GoogleDeepMindLogo.astro";
 import TeamGrid from "@components/sections/TeamGrid.astro";
 import ApplyCTA from "@components/sections/ApplyCTA.astro";
 import { sortTeamsByBatchList } from "@utils/collections";
@@ -18,11 +19,13 @@ const springTeams = springBatch
       springBatch.data.teams,
     )
   : teams;
+const hasGoogleDeepMindPartner =
+  springBatch?.data.partnerName === "Google DeepMind";
 ---
 
 <BaseLayout
   title="Spring 2026 Batch"
-  description="Meet the Spring 2026 Batch of LBS AI Lab teams building AI products for LBS workflows"
+  description="Meet the Spring 2026 Batch of LBS AI Lab teams building AI products for LBS workflows in partnership with Google DeepMind"
 >
   <section class="page-hero">
     <div class="container hero-grid">
@@ -33,6 +36,17 @@ const springTeams = springBatch
           Nine teams joined the first LBS AI Lab batch to build AI products for
           LBS workflows
         </p>
+        {
+          hasGoogleDeepMindPartner && (
+            <div class="partner-lockup">
+              <GoogleDeepMindLogo
+                label="Delivered in partnership with"
+                tone="light"
+                compact
+              />
+            </div>
+          )
+        }
         <div class="hero-actions">
           <Button href="/apply/" variant="red" size="lg">
             Join the next batch
@@ -100,6 +114,10 @@ const springTeams = springBatch
     display: flex;
     flex-wrap: wrap;
     gap: 12px;
+    margin-top: 28px;
+  }
+
+  .partner-lockup {
     margin-top: 28px;
   }
 

@@ -1,6 +1,7 @@
 ---
 import type { TeamEntry } from "@utils/collections";
 import Button from "@components/atoms/Button.astro";
+import GoogleDeepMindLogo from "@components/brand/GoogleDeepMindLogo.astro";
 
 interface Props {
   team: TeamEntry;
@@ -41,6 +42,13 @@ const focusArea = category.includes("career")
             <dd>{focusArea}</dd>
           </div>
         </dl>
+        <div class="partner-lockup">
+          <GoogleDeepMindLogo
+            label="Spring 2026 Batch in partnership with"
+            tone="light"
+            compact
+          />
+        </div>
       </aside>
     </div>
   </section>
@@ -103,7 +111,7 @@ const focusArea = category.includes("career")
               <li>
                 <strong>{member.name}</strong>
                 <span>{member.role}</span>
-                {member.showEmailPublicly && (
+                {member.showEmailPublicly && member.email && (
                   <a href={`mailto:${member.email}`}>Email</a>
                 )}
               </li>
@@ -152,6 +160,12 @@ const focusArea = category.includes("career")
     display: grid;
     gap: 18px;
     margin: 0;
+  }
+
+  .partner-lockup {
+    border-top: 1px solid rgba(255, 255, 255, 0.16);
+    margin-top: 20px;
+    padding-top: 20px;
   }
 
   dt {
