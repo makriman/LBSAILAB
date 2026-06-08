@@ -4,6 +4,16 @@ Public submissions from students who opted in on the Apply page.
 
 <!-- APPLICATIONS:START -->
 
+<!-- application:{"submittedAt":"2026-06-08T20:17:16.556Z","name":"Kyle Chua","email":"kchua.mba2027@london.edu","course":"MBA","idea":"I'm building a mobile-first app to automate class prep (Canvas) for LBS students. Currently, the mobile Canvas app gives a horrible UX. You can't even check your grades or see your groups, and digging around to find a single PDF wastes valuable time we should be spending on other things. Out of pure frustration, I started using OpenClaw to script personal workarounds to bypass the interface entirely. Now, I want to turn those scripts into a real product.\n\nTo make this work, I will use agentic web scraping. It connects to a student's calendar and uses the agents to automatically download the required readings right before class. It also has a simple chat interface where you can just ask, \"What are the files for tomorrow?\" to instantly pull up the right documents along with a quick AI-generated summary."} -->
+### Kyle Chua - MBA
+
+I'm building a mobile\-first app to automate class prep \(Canvas\) for LBS students\. Currently, the mobile Canvas app gives a horrible UX\. You can't even check your grades or see your groups, and digging around to find a single PDF wastes valuable time we should be spending on other things\. Out of pure frustration, I started using OpenClaw to script personal workarounds to bypass the interface entirely\. Now, I want to turn those scripts into a real product\.
+
+To make this work, I will use agentic web scraping\. It connects to a student's calendar and uses the agents to automatically download the required readings right before class\. It also has a simple chat interface where you can just ask, "What are the files for tomorrow?" to instantly pull up the right documents along with a quick AI\-generated summary\.
+
+[Contact Kyle Chua](mailto:kchua.mba2027@london.edu?subject=LBS%20AI%20Lab%3A%20exploring%20your%20MBA%20build%20idea)
+
+
 <!-- application:{"submittedAt":"2026-06-08T20:16:33.641Z","name":"Testq","email":"test@london.edu","course":"MBA","idea":"nothing."} -->
 ### Testq - MBA
 
