@@ -1,13 +1,13 @@
 ---
-id: the-wayfinders
-slug: the-wayfinders
-name: The Wayfinders
-displayName: The Wayfinders
+id: wayfinder
+slug: wayfinder
+name: Wayfinder
+displayName: Wayfinder
 batch: spring-2026
 batchLabel: Spring 2026 Batch
 category: Campus navigation / Mobile utility
 status: Prototype / batch build
-productUrl: https://wayfinders.lbsailab.com
+productUrl: https://wayfinder.lbsailab.com
 tagline: A mobile guide to rooms and facilities across LBS campuses.
 summary: >-
   A mobile app to help people find rooms and facilities across the LBS campuses.
@@ -20,6 +20,4 @@ members:
     role: MBA2027
     showEmailPublicly: true
 contactPolicy: Participant emails are approved for public display on the team page.
-visibilityNotes: >-
-  Normalize roster alias WayFinders to public product name The Wayfinders.
 ---
