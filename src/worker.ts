@@ -132,9 +132,9 @@ function canonicalRedirectResponse(
 
   const redirectUrl = canonicalUrl(url);
   redirectUrl.search = cleanedSearch;
-  const lowercasePath = redirectUrl.pathname.toLowerCase();
 
-  if (redirectUrl.pathname !== lowercasePath) {
+  if (shouldNormalizePathCase(redirectUrl.pathname)) {
+    const lowercasePath = redirectUrl.pathname.toLowerCase();
     redirectUrl.pathname = lowercasePath;
   }
 
@@ -203,6 +203,11 @@ function legacyRedirectDestination(pathname: string): URL | null {
 function shouldAddTrailingSlash(pathname: string): boolean {
   if (pathname === "/" || pathname.endsWith("/")) return false;
 
+  const lastSegment = pathname.split("/").at(-1) ?? "";
+  return !lastSegment.includes(".");
+}
+
+function shouldNormalizePathCase(pathname: string): boolean {
   const lastSegment = pathname.split("/").at(-1) ?? "";
   return !lastSegment.includes(".");
 }
