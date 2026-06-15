@@ -2,6 +2,8 @@
 import Header from "@components/layout/Header.astro";
 import Footer from "@components/layout/Footer.astro";
 import SkipLink from "@components/layout/SkipLink.astro";
+import interLatinFont from "@fontsource-variable/inter/files/inter-latin-wght-normal.woff2?url";
+import sourceSerifLatin600Font from "@fontsource/source-serif-4/files/source-serif-4-latin-600-normal.woff2?url";
 import "@styles/global.css";
 import { defaultDescription, SITE_NAME, SITE_URL } from "@utils/site";
 import {
@@ -73,6 +75,20 @@ const robotsContent = noindex ? "noindex,nofollow" : robots;
     <link rel="canonical" href={canonical} />
     <link rel="alternate" hreflang="en-gb" href={canonical} />
     <link rel="alternate" hreflang="x-default" href={canonical} />
+    <link
+      rel="preload"
+      as="font"
+      href={interLatinFont}
+      type="font/woff2"
+      crossorigin
+    />
+    <link
+      rel="preload"
+      as="font"
+      href={sourceSerifLatin600Font}
+      type="font/woff2"
+      crossorigin
+    />
     <link
       rel="alternate"
       type="application/atom+xml"

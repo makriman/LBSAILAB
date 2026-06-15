@@ -15,6 +15,7 @@
     "seo:audit:live": "node scripts/audit-live-seo.mjs",
     "seo:images": "node scripts/generate-og-images.mjs",
     "seo:indexnow": "node scripts/submit-indexnow.mjs",
+    "seo:perf": "node scripts/audit-performance.mjs",
     "deploy": "npm run build && npx wrangler deploy && npm run seo:indexnow",
     "format": "prettier --write .",
     "format:check": "prettier --check .",

@@ -326,6 +326,7 @@ function isLongLivedAsset(pathname: string): boolean {
     pathname.startsWith("/favicon/") ||
     /^\/og-[^/]+\.png$/.test(pathname) ||
     /^\/google-deepmind-logo-[^/]+\.png$/.test(pathname) ||
+    pathname === "/lbs-logo.svg" ||
     pathname === "/og-default.svg" ||
     pathname === "/site.webmanifest"
   );
