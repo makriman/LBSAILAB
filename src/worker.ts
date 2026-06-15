@@ -268,6 +268,10 @@ function withSeoHeaders(response: Response, pathname: string): Response {
     headers.set("X-Robots-Tag", INDEXABLE_ROBOTS);
   }
 
+  if (pathname === "/feed.xml") {
+    headers.set("Content-Type", "application/atom+xml; charset=utf-8");
+  }
+
   headers.set("Cache-Control", cacheControlFor(pathname, headers));
 
   return new Response(response.body, {
