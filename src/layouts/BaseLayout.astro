@@ -73,6 +73,12 @@ const robotsContent = noindex ? "noindex,nofollow" : robots;
     <link rel="canonical" href={canonical} />
     <link rel="alternate" hreflang="en-gb" href={canonical} />
     <link rel="alternate" hreflang="x-default" href={canonical} />
+    <link
+      rel="alternate"
+      type="application/atom+xml"
+      title={`${SITE_NAME} feed`}
+      href={new URL("/feed.xml", Astro.site ?? SITE_URL).toString()}
+    />
     {
       preloadImageUrl && (
         <link

@@ -7,7 +7,7 @@ import {
   SITE_URL,
 } from "@utils/site";
 
-export const SEO_UPDATED_AT = "2026-06-08";
+export const SEO_UPDATED_AT = "2026-06-15";
 export const DEFAULT_ROBOTS = "index,follow,max-image-preview:large";
 export const DEFAULT_OG_IMAGE = "/og-default.png";
 export const SPRING_BATCH_OG_IMAGE = "/og-spring-2026.png";

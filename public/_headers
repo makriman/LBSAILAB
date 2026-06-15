@@ -36,6 +36,10 @@
   X-Robots-Tag: index, follow, max-image-preview:large
   Cache-Control: public, max-age=300, must-revalidate
 
+/feed.xml
+  X-Robots-Tag: index, follow, max-image-preview:large
+  Cache-Control: public, max-age=300, must-revalidate
+
 /sitemap-*.xml
   X-Robots-Tag: index, follow, max-image-preview:large
   Cache-Control: public, max-age=300, must-revalidate

@@ -300,6 +300,7 @@ function isNoindexPath(pathname: string): boolean {
 function isCrawlerUtilityPath(pathname: string): boolean {
   return (
     pathname === "/robots.txt" ||
+    pathname === "/feed.xml" ||
     pathname === "/image-sitemap.xml" ||
     pathname === "/sitemap-index.xml" ||
     /^\/sitemap-\d+\.xml$/.test(pathname)

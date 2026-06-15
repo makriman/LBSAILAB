@@ -2,7 +2,7 @@
 import { defineConfig } from "astro/config";
 import sitemap from "@astrojs/sitemap";
 
-const SITE_UPDATED_AT = "2026-06-08";
+const SITE_UPDATED_AT = "2026-06-15";
 
 // https://astro.build/config
 export default defineConfig({

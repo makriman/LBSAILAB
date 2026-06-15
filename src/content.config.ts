@@ -55,7 +55,7 @@ const teams = defineCollection({
     seoDescription: z.string().optional(),
     seoImage: z.string().optional(),
     seoImageAlt: z.string().optional(),
-    updatedAt: z.string().default("2026-06-08"),
+    updatedAt: z.string().default("2026-06-15"),
   }),
 });
 
@@ -82,7 +82,7 @@ const batches = defineCollection({
     seoDescription: z.string().optional(),
     seoImage: z.string().optional(),
     seoImageAlt: z.string().optional(),
-    updatedAt: z.string().default("2026-06-08"),
+    updatedAt: z.string().default("2026-06-15"),
   }),
 });
 
