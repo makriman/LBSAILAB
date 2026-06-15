@@ -41,6 +41,13 @@ const REQUIRED_SITEMAPS = [
   `${SITE_ORIGIN}/image-sitemap.xml`,
   `${SITE_ORIGIN}/feed.xml`,
 ];
+const DUPLICATE_ORIGINS = (
+  process.env.SEO_DUPLICATE_ORIGINS ||
+  "https://lbsailab.zahra-moghadasi.workers.dev"
+)
+  .split(",")
+  .map((origin) => origin.trim().replace(/\/+$/, ""))
+  .filter((origin) => origin && origin !== SITE_ORIGIN);
 const LONG_CACHE_PATHS = [
   /^\/_astro\//,
   /^\/images\//,
@@ -66,6 +73,10 @@ const CANONICAL_REDIRECTS = [
   [`${SITE_ORIGIN}/About`, `${SITE_ORIGIN}/about/`],
   [`${SITE_ORIGIN}/about`, `${SITE_ORIGIN}/about/`],
   [`${SITE_ORIGIN}/about/?utm_source=test&gclid=test`, `${SITE_ORIGIN}/about/`],
+  ...DUPLICATE_ORIGINS.map((origin) => [
+    `${origin}/about`,
+    `${SITE_ORIGIN}/about/`,
+  ]),
 ];
 const GONE_URLS = ["/images/lbs-ai-lab-workshop-hero.png"];
 const failures = [];
@@ -719,6 +730,29 @@ async function auditNoindexAndGone() {
   }
 }
 
+async function auditMissingPage() {
+  const url = `${SITE_ORIGIN}/missing-seo-audit-page/`;
+  const { response, body } = await text(url, { accept: "text/html" });
+
+  if (response.status !== 404) {
+    fail(`${url}: expected hard 404, got ${response.status}`);
+  }
+
+  assertSecurityHeaders(response, url);
+  assertShortCache(response, url);
+
+  if ((response.headers.get("x-robots-tag") || "") !== NOINDEX_ROBOTS) {
+    fail(`${url}: expected ${NOINDEX_ROBOTS} X-Robots-Tag`);
+  }
+
+  if (
+    body.includes(INDEXABLE_META_ROBOTS) ||
+    /<link\b[^>]*rel=["']canonical["']/i.test(body)
+  ) {
+    fail(`${url}: 404 body contains indexable page metadata`);
+  }
+}
+
 async function auditSecurityText() {
   const url = `${SITE_ORIGIN}/.well-known/security.txt`;
   const { response, body } = await text(url, { accept: "text/plain" });
@@ -771,6 +805,7 @@ async function auditLiveSeo() {
   await auditSecurityText();
   await auditRedirects();
   await auditNoindexAndGone();
+  await auditMissingPage();
   await auditReachability(pages);
 
   if (warnings.length) {
