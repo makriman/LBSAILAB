@@ -1,4 +1,12 @@
 User-agent: *
+Disallow: /api/
+Disallow: /admin/
+Disallow: /login/
+Disallow: /search/
+Disallow: /cart/
+Disallow: /checkout/
+Disallow: /internal/
+Disallow: /private/
 Allow: /
 Sitemap: https://lbsailab.com/sitemap-index.xml
 Sitemap: https://lbsailab.com/image-sitemap.xml

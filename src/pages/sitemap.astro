@@ -1,0 +1,183 @@
+---
+import { getCollection } from "astro:content";
+import BaseLayout from "@layouts/BaseLayout.astro";
+import { sortTeamsByBatchList } from "@utils/collections";
+import { pageJsonLd } from "@utils/seo";
+
+const [teams, batches] = await Promise.all([
+  getCollection("teams"),
+  getCollection("batches"),
+]);
+
+const springBatch = batches.find((batch) => batch.data.id === "spring-2026");
+const springTeams = springBatch
+  ? sortTeamsByBatchList(
+      teams.filter((team) => team.data.batch === springBatch.data.id),
+      springBatch.data.teams,
+    )
+  : teams;
+
+const pageTitle = "Sitemap";
+const pageDescription =
+  "A crawlable directory of public LBS AI Lab pages, batch pages, team profiles, and technical sitemap files";
+const primaryPages = [
+  { href: "/", label: "Home" },
+  { href: "/about/", label: "About" },
+  { href: "/batches/", label: "Batches" },
+  { href: "/batches/spring-2026/", label: "Spring 2026 Batch" },
+  { href: "/mentors/", label: "Mentors" },
+  { href: "/apply/", label: "Apply" },
+  { href: "/contact/", label: "Contact" },
+];
+const technicalPages = [
+  { href: "/sitemap-index.xml", label: "XML sitemap" },
+  { href: "/image-sitemap.xml", label: "Image sitemap" },
+  { href: "/robots.txt", label: "Robots.txt" },
+];
+const jsonLd = pageJsonLd({
+  title: pageTitle,
+  description: pageDescription,
+  path: "/sitemap/",
+  breadcrumbs: [
+    { name: "LBS AI Lab", path: "/" },
+    { name: "Sitemap", path: "/sitemap/" },
+  ],
+});
+---
+
+<BaseLayout title={pageTitle} description={pageDescription} jsonLd={jsonLd}>
+  <section class="page-hero">
+    <div class="container">
+      <p class="eyebrow">Sitemap</p>
+      <h1>Sitemap</h1>
+      <p class="lede">
+        A crawlable directory of public LBS AI Lab pages, batch pages, team
+        profiles, and technical sitemap files
+      </p>
+    </div>
+  </section>
+
+  <section class="section">
+    <div class="container sitemap-grid">
+      <section aria-labelledby="primary-pages">
+        <h2 id="primary-pages">Primary pages</h2>
+        <ul>
+          {
+            primaryPages.map((page) => (
+              <li>
+                <a href={page.href}>{page.label}</a>
+              </li>
+            ))
+          }
+        </ul>
+      </section>
+
+      <section aria-labelledby="spring-teams">
+        <h2 id="spring-teams">Spring 2026 Batch teams</h2>
+        <ul>
+          {
+            springTeams.map((team) => (
+              <li>
+                <a href={`/batches/spring-2026/${team.data.slug}/`}>
+                  {team.data.displayName}
+                </a>
+              </li>
+            ))
+          }
+        </ul>
+      </section>
+
+      <section aria-labelledby="technical-files">
+        <h2 id="technical-files">Technical files</h2>
+        <ul>
+          {
+            technicalPages.map((page) => (
+              <li>
+                <a href={page.href}>{page.label}</a>
+              </li>
+            ))
+          }
+        </ul>
+      </section>
+    </div>
+  </section>
+</BaseLayout>
+
+<style>
+  .page-hero {
+    background: var(--color-lbs-blue);
+    color: var(--color-white);
+    padding-block: clamp(52px, 7vw, 92px);
+  }
+
+  :global(.page-hero .eyebrow) {
+    color: rgba(255, 255, 255, 0.82);
+  }
+
+  h1 {
+    color: var(--color-white);
+    margin: 20px 0;
+  }
+
+  .lede {
+    color: rgba(255, 255, 255, 0.78);
+    max-width: 760px;
+  }
+
+  .sitemap-grid {
+    display: grid;
+    gap: 0;
+    grid-template-columns: repeat(3, minmax(0, 1fr));
+  }
+
+  .sitemap-grid section {
+    border: 1px solid var(--color-border);
+    border-left: 0;
+    padding: clamp(22px, 4vw, 34px);
+  }
+
+  .sitemap-grid section:first-child {
+    border-left: 1px solid var(--color-border);
+  }
+
+  h2 {
+    color: var(--color-lbs-blue);
+    font-family: var(--font-sans);
+    font-size: var(--step-1);
+    margin: 0 0 18px;
+  }
+
+  ul {
+    display: grid;
+    gap: 12px;
+    list-style: none;
+    margin: 0;
+    padding: 0;
+  }
+
+  a {
+    color: var(--color-lbs-blue);
+    font-weight: 820;
+    text-decoration: none;
+  }
+
+  a:hover {
+    color: var(--color-lbs-red);
+  }
+
+  @media (max-width: 860px) {
+    .sitemap-grid {
+      grid-template-columns: 1fr;
+    }
+
+    .sitemap-grid section,
+    .sitemap-grid section:first-child {
+      border-left: 1px solid var(--color-border);
+      border-top: 0;
+    }
+
+    .sitemap-grid section:first-child {
+      border-top: 1px solid var(--color-border);
+    }
+  }
+</style>

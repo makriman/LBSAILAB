@@ -40,7 +40,21 @@ const SECURITY_HEADERS = {
   "X-Content-Type-Options": "nosniff",
   "Referrer-Policy": "strict-origin-when-cross-origin",
   "Permissions-Policy": "camera=(), microphone=(), geolocation=()",
+  "Strict-Transport-Security": "max-age=31536000",
 };
+const GONE_PATHS = new Set([
+  "/images/lbs-ai-lab-workshop-hero.png",
+  "/mentors/rhea-bisaria.png",
+]);
+const NOINDEX_PATH_PREFIXES = [
+  "/admin/",
+  "/cart/",
+  "/checkout/",
+  "/internal/",
+  "/login/",
+  "/private/",
+  "/search/",
+];
 const TRACKING_PARAM_NAMES = new Set([
   "dclid",
   "fbclid",
@@ -95,6 +109,7 @@ export default {
     const canonicalRedirect = canonicalRedirectResponse(request, url);
 
     if (canonicalRedirect) return canonicalRedirect;
+    if (GONE_PATHS.has(url.pathname)) return gone();
 
     if (url.pathname === "/api/applications") {
       if (request.method === "GET") {
@@ -226,8 +241,14 @@ function withSeoHeaders(response: Response, pathname: string): Response {
 
   setHeaders(headers, SECURITY_HEADERS);
 
-  if (response.status === 404 || response.status === 410) {
+  if (
+    response.status === 404 ||
+    response.status === 410 ||
+    isNoindexPath(pathname)
+  ) {
     headers.set("X-Robots-Tag", NOINDEX_ROBOTS);
+  } else if (isCrawlerUtilityPath(pathname)) {
+    headers.set("X-Robots-Tag", INDEXABLE_ROBOTS);
   } else if (isHtmlResponse(headers)) {
     headers.set("X-Robots-Tag", INDEXABLE_ROBOTS);
   }
@@ -254,6 +275,22 @@ function cacheControlFor(pathname: string, headers: Headers): string {
   return SHORT_CACHE_CONTROL;
 }
 
+function isNoindexPath(pathname: string): boolean {
+  const normalizedPath = pathname.toLowerCase();
+  return NOINDEX_PATH_PREFIXES.some((prefix) =>
+    normalizedPath.startsWith(prefix),
+  );
+}
+
+function isCrawlerUtilityPath(pathname: string): boolean {
+  return (
+    pathname === "/robots.txt" ||
+    pathname === "/image-sitemap.xml" ||
+    pathname === "/sitemap-index.xml" ||
+    /^\/sitemap-\d+\.xml$/.test(pathname)
+  );
+}
+
 function isLongLivedAsset(pathname: string): boolean {
   return (
     pathname.startsWith("/_astro/") ||
@@ -269,6 +306,21 @@ function isLongLivedAsset(pathname: string): boolean {
 
 function isHtmlResponse(headers: Headers): boolean {
   return headers.get("Content-Type")?.includes("text/html") ?? false;
+}
+
+function gone(): Response {
+  const headers = new Headers({
+    "Cache-Control": SHORT_CACHE_CONTROL,
+    "X-Robots-Tag": NOINDEX_ROBOTS,
+  });
+
+  setHeaders(headers, SECURITY_HEADERS);
+
+  return new Response(null, {
+    status: 410,
+    statusText: "Gone",
+    headers,
+  });
 }
 
 async function handleCreateApplication(
