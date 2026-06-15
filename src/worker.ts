@@ -30,15 +30,52 @@ const END_MARKER = "<!-- APPLICATIONS:END -->";
 const APPLICATION_RE = /<!-- application:(.*?) -->/gs;
 const APPLICATIONS_CACHE_KEY_VERSION = "2026-05-23-prefill-csv-submissions";
 const APPLICATIONS_CACHE_TTL_SECONDS = 60 * 60 * 24;
+const CANONICAL_HOST = "lbsailab.com";
+const INDEXABLE_ROBOTS = "index, follow, max-image-preview:large";
+const NOINDEX_ROBOTS = "noindex, nofollow";
+const LEGACY_REDIRECTS = new Map([
+  ["/home", "/"],
+  ["/cohort", "/batches/"],
+  ["/cohorts", "/batches/"],
+  ["/cohort-01", "/batches/spring-2026/"],
+  ["/cohorts/cohort-01", "/batches/spring-2026/"],
+  ["/cohorts/cohort-02", "/batches/#autumn-2026"],
+  ["/teams", "/batches/spring-2026/"],
+  ["/teams/recruitsmart", "/batches/spring-2026/recruitsmart-lbs/"],
+  ["/teams/cafe-smart", "/batches/spring-2026/london-eats-pal/"],
+  ["/teams/cafesmart", "/batches/spring-2026/london-eats-pal/"],
+  ["/teams/campus-collective", "/batches/spring-2026/london-eats-pal/"],
+  [
+    "/teams/cafe-smart-campus-collective",
+    "/batches/spring-2026/london-eats-pal/",
+  ],
+  ["/teams/wayfinder", "/batches/spring-2026/wayfinder/"],
+  ["/teams/wayfinders", "/batches/spring-2026/wayfinder/"],
+  ["/batches/spring-2026/cafe-smart", "/batches/spring-2026/london-eats-pal/"],
+  ["/batches/spring-2026/cafesmart", "/batches/spring-2026/london-eats-pal/"],
+  [
+    "/batches/spring-2026/campus-collective",
+    "/batches/spring-2026/london-eats-pal/",
+  ],
+  [
+    "/batches/spring-2026/cafe-smart-campus-collective",
+    "/batches/spring-2026/london-eats-pal/",
+  ],
+  ["/batches/spring-2026/the-wayfinders", "/batches/spring-2026/wayfinder/"],
+]);
 
 const jsonHeaders = {
   "Content-Type": "application/json; charset=utf-8",
   "Cache-Control": "no-store",
+  "X-Robots-Tag": NOINDEX_ROBOTS,
 };
 
 export default {
   async fetch(request: Request, env: Env): Promise<Response> {
     const url = new URL(request.url);
+    const canonicalRedirect = canonicalRedirectResponse(request, url);
+
+    if (canonicalRedirect) return canonicalRedirect;
 
     if (url.pathname === "/api/applications") {
       if (request.method === "GET") {
@@ -52,9 +89,108 @@ export default {
       return json({ error: "Method not allowed" }, 405);
     }
 
-    return env.ASSETS.fetch(request);
+    return withSeoHeaders(await env.ASSETS.fetch(request));
   },
 };
+
+function canonicalRedirectResponse(
+  request: Request,
+  url: URL,
+): Response | null {
+  if (!["GET", "HEAD"].includes(request.method)) return null;
+  if (url.pathname.startsWith("/api/")) return null;
+
+  const legacyDestination = legacyRedirectDestination(url.pathname);
+
+  if (legacyDestination) {
+    const redirectUrl = canonicalUrl(url);
+    redirectUrl.pathname = legacyDestination.pathname;
+    redirectUrl.search = legacyDestination.search || url.search;
+    redirectUrl.hash = legacyDestination.hash;
+    return Response.redirect(redirectUrl.toString(), 301);
+  }
+
+  const redirectUrl = canonicalUrl(url);
+  const lowercasePath = redirectUrl.pathname.toLowerCase();
+
+  if (redirectUrl.pathname !== lowercasePath) {
+    redirectUrl.pathname = lowercasePath;
+  }
+
+  if (shouldAddTrailingSlash(redirectUrl.pathname)) {
+    redirectUrl.pathname = `${redirectUrl.pathname}/`;
+  }
+
+  return redirectUrl.toString() === url.toString()
+    ? null
+    : Response.redirect(redirectUrl.toString(), 301);
+}
+
+function canonicalUrl(url: URL): URL {
+  const nextUrl = new URL(url);
+
+  if (!isLocalHost(nextUrl.hostname)) {
+    nextUrl.protocol = "https:";
+    nextUrl.hostname = CANONICAL_HOST;
+    nextUrl.port = "";
+  }
+
+  return nextUrl;
+}
+
+function legacyRedirectDestination(pathname: string): URL | null {
+  const normalizedPath = pathname
+    .replace(/\/+$/, "")
+    .toLowerCase()
+    .replace(/^$/, "/");
+  const destination = LEGACY_REDIRECTS.get(normalizedPath);
+
+  if (destination) return new URL(destination, `https://${CANONICAL_HOST}`);
+
+  const oldTeamMatch = normalizedPath.match(/^\/teams\/([^/]+)$/);
+  if (!oldTeamMatch) return null;
+
+  return new URL(
+    `/batches/spring-2026/${oldTeamMatch[1]}/`,
+    `https://${CANONICAL_HOST}`,
+  );
+}
+
+function shouldAddTrailingSlash(pathname: string): boolean {
+  if (pathname === "/" || pathname.endsWith("/")) return false;
+
+  const lastSegment = pathname.split("/").at(-1) ?? "";
+  return !lastSegment.includes(".");
+}
+
+function isLocalHost(hostname: string): boolean {
+  return (
+    hostname === "localhost" ||
+    hostname === "127.0.0.1" ||
+    hostname === "::1" ||
+    hostname.endsWith(".localhost")
+  );
+}
+
+function withSeoHeaders(response: Response): Response {
+  const headers = new Headers(response.headers);
+
+  if (response.status === 404 || response.status === 410) {
+    headers.set("X-Robots-Tag", NOINDEX_ROBOTS);
+  } else if (isHtmlResponse(headers)) {
+    headers.set("X-Robots-Tag", INDEXABLE_ROBOTS);
+  }
+
+  return new Response(response.body, {
+    status: response.status,
+    statusText: response.statusText,
+    headers,
+  });
+}
+
+function isHtmlResponse(headers: Headers): boolean {
+  return headers.get("Content-Type")?.includes("text/html") ?? false;
+}
 
 async function handleCreateApplication(
   request: Request,
