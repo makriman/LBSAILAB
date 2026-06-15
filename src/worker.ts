@@ -31,6 +31,8 @@ const APPLICATION_RE = /<!-- application:(.*?) -->/gs;
 const APPLICATIONS_CACHE_KEY_VERSION = "2026-05-23-prefill-csv-submissions";
 const APPLICATIONS_CACHE_TTL_SECONDS = 60 * 60 * 24;
 const CANONICAL_HOST = "lbsailab.com";
+const INDEXNOW_KEY = "5e5bfddcc11447d381079b24b2d1e213";
+const INDEXNOW_KEY_PATH = `/${INDEXNOW_KEY}.txt`;
 const INDEXABLE_ROBOTS = "index, follow, max-image-preview:large";
 const NOINDEX_ROBOTS = "noindex, nofollow";
 const SHORT_CACHE_CONTROL = "public, max-age=300, must-revalidate";
@@ -111,6 +113,7 @@ export default {
 
     if (canonicalRedirect) return canonicalRedirect;
     if (GONE_PATHS.has(url.pathname)) return gone();
+    if (url.pathname === INDEXNOW_KEY_PATH) return indexNowKey();
     if (url.pathname === "/healthz") return healthCheck();
 
     if (url.pathname === "/api/applications") {
@@ -355,6 +358,21 @@ function healthCheck(): Response {
     },
     200,
   );
+}
+
+function indexNowKey(): Response {
+  const headers = new Headers({
+    "Cache-Control": SHORT_CACHE_CONTROL,
+    "Content-Type": "text/plain; charset=utf-8",
+    "X-Robots-Tag": NOINDEX_ROBOTS,
+  });
+
+  setHeaders(headers, SECURITY_HEADERS);
+
+  return new Response(INDEXNOW_KEY, {
+    status: 200,
+    headers,
+  });
 }
 
 async function handleCreateApplication(
