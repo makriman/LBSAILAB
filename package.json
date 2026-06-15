@@ -13,6 +13,7 @@
     "seo:assets": "node scripts/optimize-images.mjs",
     "seo:audit": "node scripts/audit-seo.mjs",
     "seo:audit:live": "node scripts/audit-live-seo.mjs",
+    "seo:all": "npm run build && npm run seo:audit && npm run seo:monitor && npm run seo:audit:live && npm run seo:perf",
     "seo:images": "node scripts/generate-og-images.mjs",
     "seo:indexnow": "node scripts/submit-indexnow.mjs",
     "seo:monitor": "node scripts/monitor-seo.mjs",

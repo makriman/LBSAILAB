@@ -1,4 +1,4 @@
-import { existsSync, readFileSync } from "node:fs";
+import { existsSync, readFileSync, readdirSync } from "node:fs";
 import path from "node:path";
 import { fileURLToPath } from "node:url";
 
@@ -31,6 +31,22 @@ function readDist(relativePath) {
   return readFileSync(fullPath, "utf8");
 }
 
+function distFiles(directory = DIST) {
+  const files = [];
+
+  for (const entry of readdirSync(directory, { withFileTypes: true })) {
+    const fullPath = path.join(directory, entry.name);
+
+    if (entry.isDirectory()) {
+      files.push(...distFiles(fullPath));
+    } else {
+      files.push(fullPath);
+    }
+  }
+
+  return files;
+}
+
 function allTags(html, tagName) {
   return [...html.matchAll(new RegExp(`<${tagName}\\b[^>]*>`, "gi"))].map(
     (match) => match[0],
@@ -59,6 +75,10 @@ function metaContent(html, selector) {
   return "";
 }
 
+function pageTitle(html) {
+  return html.match(/<title>([^<]+)<\/title>/i)?.[1] || "";
+}
+
 function linkAttrs(html, rel) {
   return allTags(html, "link")
     .map(attrs)
@@ -83,6 +103,20 @@ function pageFileForUrl(url) {
   return pathname.slice(1);
 }
 
+function pageUrlForFile(file) {
+  const relative = path.relative(DIST, file);
+
+  if (relative === "index.html") return `${SITE_URL}/`;
+  if (!relative.endsWith(`${path.sep}index.html`)) return null;
+
+  const pathname = relative
+    .slice(0, -"/index.html".length)
+    .split(path.sep)
+    .join("/");
+
+  return `${SITE_URL}/${pathname}/`;
+}
+
 function assertEqual(actual, expected, label) {
   if (actual !== expected) {
     fail(`${label}: expected "${expected}", got "${actual || "(missing)"}"`);
@@ -91,6 +125,35 @@ function assertEqual(actual, expected, label) {
 
 function assertTruthy(value, label) {
   if (!value) fail(`${label}: missing`);
+}
+
+function recordUniqueMetadata(index, value, url, label) {
+  const normalized = value.trim().replace(/\s+/g, " ");
+
+  if (!normalized) return;
+
+  const existing = index.get(normalized);
+
+  if (existing) {
+    fail(`${url}: duplicate ${label} also used by ${existing}`);
+    return;
+  }
+
+  index.set(normalized, url);
+}
+
+function auditGeneratedPageCoverage(sitemapLocs) {
+  const sitemapUrls = new Set(sitemapLocs);
+  const generatedPageUrls = distFiles()
+    .filter((file) => file.endsWith(`${path.sep}index.html`))
+    .map(pageUrlForFile)
+    .filter(Boolean);
+
+  for (const url of generatedPageUrls) {
+    if (!sitemapUrls.has(url)) {
+      fail(`${url}: generated public page is missing from sitemap`);
+    }
+  }
 }
 
 function auditSitemap() {
@@ -186,7 +249,7 @@ function auditCrawlerFiles() {
   }
 }
 
-function auditPage(url) {
+function auditPage(url, metadataIndex) {
   const relativeFile = pageFileForUrl(url);
   const html = readDist(relativeFile);
   const canonicalLinks = linkAttrs(html, "canonical");
@@ -199,14 +262,32 @@ function auditPage(url) {
 
   if (!html) return;
 
+  const title = pageTitle(html);
+  const description = metaContent(html, "description");
+
+  recordUniqueMetadata(metadataIndex.titles, title, url, "title");
+  recordUniqueMetadata(
+    metadataIndex.descriptions,
+    description,
+    url,
+    "meta description",
+  );
+
   if (canonicalLinks.length !== 1) {
     fail(`${url}: expected one canonical link, found ${canonicalLinks.length}`);
   } else {
     assertEqual(canonicalLinks[0].href, url, `${url}: canonical`);
   }
 
-  assertTruthy(html.match(/<title>([^<]{10,70})<\/title>/), `${url}: title`);
-  assertTruthy(metaContent(html, "description"), `${url}: meta description`);
+  assertTruthy(
+    title.length >= 10 && title.length <= 70,
+    `${url}: title length`,
+  );
+  assertTruthy(description, `${url}: meta description`);
+  assertTruthy(
+    description.length >= 50 && description.length <= 165,
+    `${url}: meta description length`,
+  );
   assertEqual(
     metaContent(html, "robots"),
     "index,follow,max-image-preview:large",
@@ -222,6 +303,12 @@ function auditPage(url) {
   assertTruthy(metaContent(html, "og:title"), `${url}: og:title`);
   assertTruthy(metaContent(html, "og:description"), `${url}: og:description`);
   assertEqual(metaContent(html, "og:url"), url, `${url}: og:url`);
+  assertEqual(metaContent(html, "og:title"), title, `${url}: og:title`);
+  assertEqual(
+    metaContent(html, "og:description"),
+    description,
+    `${url}: og:description`,
+  );
   assertTruthy(
     metaContent(html, "og:image").startsWith(`${SITE_URL}/`),
     `${url}: absolute og:image`,
@@ -248,8 +335,18 @@ function auditPage(url) {
     `${url}: twitter:card`,
   );
   assertTruthy(metaContent(html, "twitter:title"), `${url}: twitter:title`);
+  assertEqual(
+    metaContent(html, "twitter:title"),
+    title,
+    `${url}: twitter:title`,
+  );
   assertTruthy(
     metaContent(html, "twitter:description"),
+    `${url}: twitter:description`,
+  );
+  assertEqual(
+    metaContent(html, "twitter:description"),
+    description,
     `${url}: twitter:description`,
   );
   assertTruthy(
@@ -334,10 +431,16 @@ function audit() {
   auditCrawlerFiles();
 
   const pages = auditSitemap();
+  const metadataIndex = {
+    descriptions: new Map(),
+    titles: new Map(),
+  };
 
   for (const page of pages) {
-    auditPage(page);
+    auditPage(page, metadataIndex);
   }
+
+  auditGeneratedPageCoverage(pages);
 
   if (failures.length) {
     console.error("SEO audit failed:");
