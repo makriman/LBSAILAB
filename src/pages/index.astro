@@ -55,6 +55,10 @@ const jsonLd = [
   description={pageDescription}
   image={SPRING_BATCH_OG_IMAGE}
   imageAlt={SPRING_BATCH_OG_IMAGE_ALT}
+  preloadImage="/images/lbs-ai-lab-workshop-hero-960.webp"
+  preloadImageSrcset="/images/lbs-ai-lab-workshop-hero-960.webp 960w, /images/lbs-ai-lab-workshop-hero-1280.webp 1280w, /images/lbs-ai-lab-workshop-hero-1672.webp 1672w"
+  preloadImageSizes="(max-width: 820px) calc(100vw - 32px), min(38vw, 560px)"
+  preloadImageType="image/webp"
   jsonLd={jsonLd}
 >
   <section class="home-hero">
@@ -87,12 +91,22 @@ const jsonLd = [
       </div>
       <div class="hero-media" aria-label="LBS AI Lab batch context">
         <div class="hero-image">
-          <img
-            src="/images/lbs-ai-lab-workshop-hero.png"
-            alt="Participants collaborating in a product sprint workshop"
-            loading="eager"
-            decoding="async"
-          />
+          <picture>
+            <source
+              type="image/webp"
+              srcset="/images/lbs-ai-lab-workshop-hero-960.webp 960w, /images/lbs-ai-lab-workshop-hero-1280.webp 1280w, /images/lbs-ai-lab-workshop-hero-1672.webp 1672w"
+              sizes="(max-width: 820px) calc(100vw - 32px), min(38vw, 560px)"
+            />
+            <img
+              src="/images/lbs-ai-lab-workshop-hero.jpg"
+              alt="Participants collaborating in a product sprint workshop"
+              width="1672"
+              height="941"
+              loading="eager"
+              decoding="async"
+              fetchpriority="high"
+            />
+          </picture>
         </div>
         <div class="hero-note">
           <p class="eyebrow">Spring 2026 Batch</p>
@@ -247,6 +261,10 @@ const jsonLd = [
     border: 1px solid var(--color-border);
     min-height: 0;
     overflow: hidden;
+  }
+
+  .hero-image picture {
+    display: block;
   }
 
   .hero-image img {

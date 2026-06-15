@@ -7,9 +7,10 @@
   },
   "scripts": {
     "dev": "astro dev",
-    "build": "npm run seo:images && astro check && astro build",
+    "build": "npm run seo:assets && npm run seo:images && astro check && astro build",
     "preview": "astro preview",
     "check": "astro check",
+    "seo:assets": "node scripts/optimize-images.mjs",
     "seo:images": "node scripts/generate-og-images.mjs",
     "format": "prettier --write .",
     "format:check": "prettier --check .",
@@ -28,6 +29,7 @@
     "prettier": "^3.8.3",
     "prettier-plugin-astro": "^0.14.1",
     "rollup": "npm:@rollup/wasm-node@^4.60.4",
+    "sharp": "^0.34.5",
     "typescript": "^6.0.3"
   },
   "license": "MIT",

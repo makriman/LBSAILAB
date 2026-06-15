@@ -22,6 +22,10 @@ interface Props {
   imageType?: string;
   imageWidth?: number;
   noindex?: boolean;
+  preloadImage?: string;
+  preloadImageSizes?: string;
+  preloadImageSrcset?: string;
+  preloadImageType?: string;
   robots?: string;
   jsonLd?: Record<string, unknown> | Record<string, unknown>[];
 }
@@ -35,6 +39,10 @@ const {
   imageType = OG_IMAGE_TYPE,
   imageWidth = OG_IMAGE_WIDTH,
   noindex = false,
+  preloadImage,
+  preloadImageSizes,
+  preloadImageSrcset,
+  preloadImageType,
   robots = DEFAULT_ROBOTS,
   jsonLd,
 } = Astro.props;
@@ -44,6 +52,9 @@ const canonical = new URL(
   Astro.site ?? SITE_URL,
 ).toString();
 const ogImage = new URL(image, Astro.site ?? SITE_URL).toString();
+const preloadImageUrl = preloadImage
+  ? new URL(preloadImage, Astro.site ?? SITE_URL).toString()
+  : undefined;
 const pageTitle = title.includes(SITE_NAME) ? title : `${title} | ${SITE_NAME}`;
 const jsonLdItems = Array.isArray(jsonLd) ? jsonLd : jsonLd ? [jsonLd] : [];
 const robotsContent = noindex ? "noindex,nofollow" : robots;
@@ -60,6 +71,18 @@ const robotsContent = noindex ? "noindex,nofollow" : robots;
     <meta name="robots" content={robotsContent} />
     <meta name="theme-color" content="#17145f" />
     <link rel="canonical" href={canonical} />
+    {
+      preloadImageUrl && (
+        <link
+          rel="preload"
+          as="image"
+          href={preloadImageUrl}
+          type={preloadImageType}
+          imagesrcset={preloadImageSrcset}
+          imagesizes={preloadImageSizes}
+        />
+      )
+    }
     <link rel="shortcut icon" href="/favicon/favicon.ico" type="image/x-icon" />
     <link rel="icon" href="/favicon/favicon.ico" type="image/x-icon" />
     <link

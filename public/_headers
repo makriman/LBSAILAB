@@ -28,6 +28,18 @@
   X-Robots-Tag: index, follow, max-image-preview:large
   Cache-Control: public, max-age=300, must-revalidate
 
+/image-sitemap.xml
+  X-Robots-Tag: index, follow, max-image-preview:large
+  Cache-Control: public, max-age=300, must-revalidate
+
+/sitemap-*.xml
+  X-Robots-Tag: index, follow, max-image-preview:large
+  Cache-Control: public, max-age=300, must-revalidate
+
+/robots.txt
+  X-Robots-Tag: index, follow, max-image-preview:large
+  Cache-Control: public, max-age=300, must-revalidate
+
 /_astro/*
   Cache-Control: public, max-age=31536000, immutable
 

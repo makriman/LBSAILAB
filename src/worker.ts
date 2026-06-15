@@ -41,6 +41,17 @@ const SECURITY_HEADERS = {
   "Referrer-Policy": "strict-origin-when-cross-origin",
   "Permissions-Policy": "camera=(), microphone=(), geolocation=()",
 };
+const TRACKING_PARAM_NAMES = new Set([
+  "dclid",
+  "fbclid",
+  "gclid",
+  "igshid",
+  "mc_cid",
+  "mc_eid",
+  "msclkid",
+  "ref",
+  "ref_src",
+]);
 const LEGACY_REDIRECTS = new Map([
   ["/home", "/"],
   ["/cohort", "/batches/"],
@@ -109,16 +120,18 @@ function canonicalRedirectResponse(
   if (url.pathname.startsWith("/api/")) return null;
 
   const legacyDestination = legacyRedirectDestination(url.pathname);
+  const cleanedSearch = canonicalSearch(url.searchParams);
 
   if (legacyDestination) {
     const redirectUrl = canonicalUrl(url);
     redirectUrl.pathname = legacyDestination.pathname;
-    redirectUrl.search = legacyDestination.search || url.search;
+    redirectUrl.search = legacyDestination.search || cleanedSearch;
     redirectUrl.hash = legacyDestination.hash;
     return Response.redirect(redirectUrl.toString(), 301);
   }
 
   const redirectUrl = canonicalUrl(url);
+  redirectUrl.search = cleanedSearch;
   const lowercasePath = redirectUrl.pathname.toLowerCase();
 
   if (redirectUrl.pathname !== lowercasePath) {
@@ -132,6 +145,29 @@ function canonicalRedirectResponse(
   return redirectUrl.toString() === url.toString()
     ? null
     : Response.redirect(redirectUrl.toString(), 301);
+}
+
+function canonicalSearch(searchParams: URLSearchParams): string {
+  const cleanedParams = new URLSearchParams();
+
+  for (const [name, value] of searchParams) {
+    if (isTrackingParam(name)) continue;
+
+    cleanedParams.append(name, value);
+  }
+
+  const cleaned = cleanedParams.toString();
+  return cleaned ? `?${cleaned}` : "";
+}
+
+function isTrackingParam(name: string): boolean {
+  const normalized = name.toLowerCase();
+
+  return (
+    normalized.startsWith("utm_") ||
+    normalized.startsWith("_hs") ||
+    TRACKING_PARAM_NAMES.has(normalized)
+  );
 }
 
 function canonicalUrl(url: URL): URL {

@@ -1,3 +1,4 @@
 User-agent: *
 Allow: /
 Sitemap: https://lbsailab.com/sitemap-index.xml
+Sitemap: https://lbsailab.com/image-sitemap.xml
