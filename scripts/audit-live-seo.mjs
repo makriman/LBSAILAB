@@ -7,7 +7,10 @@ const SITE_URL = process.env.SEO_SITE_URL || "https://lbsailab.com";
 const SITE = new URL(SITE_URL);
 const SITE_ORIGIN = SITE.origin;
 const SITE_HOST = SITE.host;
-const INDEXABLE_ROBOTS = "index, follow, max-image-preview:large";
+const INDEXABLE_ROBOTS =
+  "index, follow, max-snippet:-1, max-image-preview:large, max-video-preview:-1";
+const INDEXABLE_META_ROBOTS =
+  "index,follow,max-snippet:-1,max-image-preview:large,max-video-preview:-1";
 const NOINDEX_ROBOTS = "noindex, nofollow";
 const REQUIRED_SECURITY_HEADERS = [
   "content-security-policy",
@@ -516,8 +519,8 @@ function assertPageMetadata(html, url) {
   }
 
   if (canonical !== url) fail(`${url}: canonical mismatch "${canonical}"`);
-  if (metaContent(html, "robots") !== "index,follow,max-image-preview:large") {
-    fail(`${url}: meta robots is not indexable with max-image-preview`);
+  if (metaContent(html, "robots") !== INDEXABLE_META_ROBOTS) {
+    fail(`${url}: meta robots is missing indexable preview directives`);
   }
 
   for (const required of [

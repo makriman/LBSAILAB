@@ -8,7 +8,8 @@ import {
 } from "@utils/site";
 
 export const SEO_UPDATED_AT = "2026-06-15";
-export const DEFAULT_ROBOTS = "index,follow,max-image-preview:large";
+export const DEFAULT_ROBOTS =
+  "index,follow,max-snippet:-1,max-image-preview:large,max-video-preview:-1";
 export const DEFAULT_OG_IMAGE = "/og-default.png";
 export const SPRING_BATCH_OG_IMAGE = "/og-spring-2026.png";
 export const DEFAULT_OG_IMAGE_ALT =

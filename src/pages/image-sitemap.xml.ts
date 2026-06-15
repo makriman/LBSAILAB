@@ -130,7 +130,8 @@ export async function GET() {
     headers: {
       "Content-Type": "application/xml; charset=utf-8",
       "Cache-Control": "public, max-age=300, must-revalidate",
-      "X-Robots-Tag": "index, follow, max-image-preview:large",
+      "X-Robots-Tag":
+        "index, follow, max-snippet:-1, max-image-preview:large, max-video-preview:-1",
       "Access-Control-Allow-Origin": SITE_URL,
     },
   });

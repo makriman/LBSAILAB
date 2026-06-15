@@ -13,6 +13,8 @@ const REQUIRED_SITEMAPS = [
   `${SITE_URL}/image-sitemap.xml`,
   `${SITE_URL}/feed.xml`,
 ];
+const INDEXABLE_META_ROBOTS =
+  "index,follow,max-snippet:-1,max-image-preview:large,max-video-preview:-1";
 
 const failures = [];
 
@@ -492,7 +494,7 @@ function auditPage(url, metadataIndex) {
   );
   assertEqual(
     metaContent(html, "robots"),
-    "index,follow,max-image-preview:large",
+    INDEXABLE_META_ROBOTS,
     `${url}: meta robots`,
   );
   assertEqual(metaContent(html, "og:type"), "website", `${url}: og:type`);

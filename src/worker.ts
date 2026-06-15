@@ -34,7 +34,8 @@ const CANONICAL_HOST = "lbsailab.com";
 const INDEXNOW_KEY = "5e5bfddcc11447d381079b24b2d1e213";
 const INDEXNOW_KEY_PATH = `/${INDEXNOW_KEY}.txt`;
 const SECURITY_TXT_PATH = "/.well-known/security.txt";
-const INDEXABLE_ROBOTS = "index, follow, max-image-preview:large";
+const INDEXABLE_ROBOTS =
+  "index, follow, max-snippet:-1, max-image-preview:large, max-video-preview:-1";
 const NOINDEX_ROBOTS = "noindex, nofollow";
 const SHORT_CACHE_CONTROL = "public, max-age=300, must-revalidate";
 const LONG_CACHE_CONTROL = "public, max-age=31536000, immutable";
