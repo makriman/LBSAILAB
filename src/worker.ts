@@ -33,6 +33,14 @@ const APPLICATIONS_CACHE_TTL_SECONDS = 60 * 60 * 24;
 const CANONICAL_HOST = "lbsailab.com";
 const INDEXABLE_ROBOTS = "index, follow, max-image-preview:large";
 const NOINDEX_ROBOTS = "noindex, nofollow";
+const SHORT_CACHE_CONTROL = "public, max-age=300, must-revalidate";
+const LONG_CACHE_CONTROL = "public, max-age=31536000, immutable";
+const SECURITY_HEADERS = {
+  "X-Frame-Options": "DENY",
+  "X-Content-Type-Options": "nosniff",
+  "Referrer-Policy": "strict-origin-when-cross-origin",
+  "Permissions-Policy": "camera=(), microphone=(), geolocation=()",
+};
 const LEGACY_REDIRECTS = new Map([
   ["/home", "/"],
   ["/cohort", "/batches/"],
@@ -89,7 +97,7 @@ export default {
       return json({ error: "Method not allowed" }, 405);
     }
 
-    return withSeoHeaders(await env.ASSETS.fetch(request));
+    return withSeoHeaders(await env.ASSETS.fetch(request), url.pathname);
   },
 };
 
@@ -172,8 +180,10 @@ function isLocalHost(hostname: string): boolean {
   );
 }
 
-function withSeoHeaders(response: Response): Response {
+function withSeoHeaders(response: Response, pathname: string): Response {
   const headers = new Headers(response.headers);
+
+  setHeaders(headers, SECURITY_HEADERS);
 
   if (response.status === 404 || response.status === 410) {
     headers.set("X-Robots-Tag", NOINDEX_ROBOTS);
@@ -181,11 +191,39 @@ function withSeoHeaders(response: Response): Response {
     headers.set("X-Robots-Tag", INDEXABLE_ROBOTS);
   }
 
+  headers.set("Cache-Control", cacheControlFor(pathname, headers));
+
   return new Response(response.body, {
     status: response.status,
     statusText: response.statusText,
     headers,
   });
+}
+
+function setHeaders(headers: Headers, values: Record<string, string>): void {
+  for (const [name, value] of Object.entries(values)) {
+    headers.set(name, value);
+  }
+}
+
+function cacheControlFor(pathname: string, headers: Headers): string {
+  if (isLongLivedAsset(pathname)) return LONG_CACHE_CONTROL;
+  if (isHtmlResponse(headers)) return SHORT_CACHE_CONTROL;
+
+  return SHORT_CACHE_CONTROL;
+}
+
+function isLongLivedAsset(pathname: string): boolean {
+  return (
+    pathname.startsWith("/_astro/") ||
+    pathname.startsWith("/assets/") ||
+    pathname.startsWith("/images/") ||
+    pathname.startsWith("/mentors/") ||
+    pathname.startsWith("/favicon/") ||
+    /^\/og-[^/]+\.png$/.test(pathname) ||
+    pathname === "/og-default.svg" ||
+    pathname === "/site.webmanifest"
+  );
 }
 
 function isHtmlResponse(headers: Headers): boolean {
