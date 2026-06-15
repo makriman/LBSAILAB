@@ -51,6 +51,11 @@ const teams = defineCollection({
     featured: z.boolean().default(false),
     image: z.string().optional(),
     screenshots: z.array(z.string()).default([]),
+    seoTitle: z.string().optional(),
+    seoDescription: z.string().optional(),
+    seoImage: z.string().optional(),
+    seoImageAlt: z.string().optional(),
+    updatedAt: z.string().default("2026-06-08"),
   }),
 });
 
@@ -73,6 +78,11 @@ const batches = defineCollection({
     partnerName: z.string().optional(),
     partnerUrl: z.url().optional(),
     teams: z.array(z.string()).default([]),
+    seoTitle: z.string().optional(),
+    seoDescription: z.string().optional(),
+    seoImage: z.string().optional(),
+    seoImageAlt: z.string().optional(),
+    updatedAt: z.string().default("2026-06-08"),
   }),
 });
 

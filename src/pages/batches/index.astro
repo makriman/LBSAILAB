@@ -5,8 +5,14 @@ import Button from "@components/atoms/Button.astro";
 import GoogleDeepMindLogo from "@components/brand/GoogleDeepMindLogo.astro";
 import TeamGrid from "@components/sections/TeamGrid.astro";
 import ApplyCTA from "@components/sections/ApplyCTA.astro";
-import { SITE_URL } from "@utils/site";
 import { sortTeamsByBatchList } from "@utils/collections";
+import {
+  itemListJsonLd,
+  pageJsonLd,
+  SPRING_BATCH_OG_IMAGE,
+  SPRING_BATCH_OG_IMAGE_ALT,
+  springBatchPartnerJsonLd,
+} from "@utils/seo";
 
 const [teams, batches] = await Promise.all([
   getCollection("teams"),
@@ -23,22 +29,42 @@ const springTeams = springBatch
 const hasGoogleDeepMindPartner =
   springBatch?.data.partnerName === "Google DeepMind";
 
-const jsonLd = {
-  "@context": "https://schema.org",
-  "@type": "ItemList",
-  name: "LBS AI Lab Spring 2026 Batch teams",
-  itemListElement: springTeams.map((team, index) => ({
-    "@type": "ListItem",
-    position: index + 1,
-    url: `${SITE_URL}/batches/spring-2026/${team.data.slug}/`,
-    name: team.data.displayName,
-  })),
-};
+const pageTitle = "Batches";
+const pageDescription =
+  "Explore LBS AI Lab batches and teams building AI products for LBS workflows";
+const jsonLd = [
+  ...pageJsonLd({
+    title: pageTitle,
+    description: pageDescription,
+    path: "/batches/",
+    image: SPRING_BATCH_OG_IMAGE,
+    breadcrumbs: [
+      { name: "LBS AI Lab", path: "/" },
+      { name: "Batches", path: "/batches/" },
+    ],
+  }),
+  itemListJsonLd({
+    name: "LBS AI Lab Spring 2026 Batch teams",
+    description:
+      "Spring 2026 Batch teams building AI products for LBS workflows",
+    items: springTeams.map((team) => ({
+      name: team.data.displayName,
+      url: `/batches/spring-2026/${team.data.slug}/`,
+      description: team.data.tagline,
+    })),
+  }),
+];
+
+if (hasGoogleDeepMindPartner) {
+  jsonLd.push(springBatchPartnerJsonLd());
+}
 ---
 
 <BaseLayout
-  title="Batches"
-  description="Explore LBS AI Lab batches and teams building AI products for LBS workflows"
+  title={pageTitle}
+  description={pageDescription}
+  image={SPRING_BATCH_OG_IMAGE}
+  imageAlt={SPRING_BATCH_OG_IMAGE_ALT}
   jsonLd={jsonLd}
 >
   <section class="page-hero">

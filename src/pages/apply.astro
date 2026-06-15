@@ -1,12 +1,23 @@
 ---
 import BaseLayout from "@layouts/BaseLayout.astro";
 import Button from "@components/atoms/Button.astro";
+import { pageJsonLd } from "@utils/seo";
+
+const pageTitle = "Join the next batch";
+const pageDescription =
+  "Register interest for the Autumn 2026 Batch of LBS AI Lab";
+const jsonLd = pageJsonLd({
+  title: pageTitle,
+  description: pageDescription,
+  path: "/apply/",
+  breadcrumbs: [
+    { name: "LBS AI Lab", path: "/" },
+    { name: "Join the next batch", path: "/apply/" },
+  ],
+});
 ---
 
-<BaseLayout
-  title="Join the next batch"
-  description="Register interest for the Autumn 2026 Batch of LBS AI Lab"
->
+<BaseLayout title={pageTitle} description={pageDescription} jsonLd={jsonLd}>
   <section class="page-hero">
     <div class="container hero-grid">
       <div class="hero-copy">

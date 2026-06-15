@@ -2,12 +2,23 @@
 import BaseLayout from "@layouts/BaseLayout.astro";
 import Button from "@components/atoms/Button.astro";
 import { DSAI_URL, MENTOR_APPLICATION_URL } from "@utils/site";
+import { pageJsonLd } from "@utils/seo";
+
+const pageTitle = "Contact";
+const pageDescription =
+  "Contact LBS AI Lab for questions about batches, mentoring, partnerships, user testing, or participant-built AI products";
+const jsonLd = pageJsonLd({
+  title: pageTitle,
+  description: pageDescription,
+  path: "/contact/",
+  breadcrumbs: [
+    { name: "LBS AI Lab", path: "/" },
+    { name: "Contact", path: "/contact/" },
+  ],
+});
 ---
 
-<BaseLayout
-  title="Contact"
-  description="Contact LBS AI Lab for questions about batches, mentoring, partnerships, user testing, or participant-built AI products"
->
+<BaseLayout title={pageTitle} description={pageDescription} jsonLd={jsonLd}>
   <section class="page-hero">
     <div class="container">
       <p class="eyebrow">Contact</p>

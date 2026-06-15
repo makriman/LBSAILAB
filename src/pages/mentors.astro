@@ -5,14 +5,46 @@ import Button from "@components/atoms/Button.astro";
 import DirectorCard from "@components/cards/DirectorCard.astro";
 import MentorGrid from "@components/sections/MentorGrid.astro";
 import { MENTOR_APPLICATION_URL } from "@utils/site";
+import { itemListJsonLd, pageJsonLd } from "@utils/seo";
 
 const mentors = await getCollection("mentors");
+const pageTitle = "Mentors";
+const pageDescription =
+  "Meet the product and technical mentors supporting LBS AI Lab teams";
+const jsonLd = [
+  ...pageJsonLd({
+    title: pageTitle,
+    description: pageDescription,
+    path: "/mentors/",
+    breadcrumbs: [
+      { name: "LBS AI Lab", path: "/" },
+      { name: "Mentors", path: "/mentors/" },
+    ],
+  }),
+  itemListJsonLd({
+    name: "LBS AI Lab mentors",
+    description: pageDescription,
+    items: [
+      {
+        name: "Kostis Christodoulou",
+        url: "https://www.london.edu/faculty-and-research/faculty-profiles/k/kostis-christodoulou",
+        type: "Person",
+        description: "Academic lead",
+        image: "/mentors/kostis-christodoulou.jpg",
+      },
+      ...mentors.map((mentor) => ({
+        name: mentor.data.name,
+        url: mentor.data.linkedinUrl ?? "/mentors/",
+        type: "Person",
+        description: mentor.data.mentorType ?? mentor.data.role,
+        image: mentor.data.image,
+      })),
+    ],
+  }),
+];
 ---
 
-<BaseLayout
-  title="Mentors"
-  description="Meet the product and technical mentors supporting LBS AI Lab teams"
->
+<BaseLayout title={pageTitle} description={pageDescription} jsonLd={jsonLd}>
   <section class="page-hero">
     <div class="container hero-inner">
       <p class="eyebrow">Mentors</p>

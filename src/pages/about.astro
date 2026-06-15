@@ -2,12 +2,23 @@
 import BaseLayout from "@layouts/BaseLayout.astro";
 import Button from "@components/atoms/Button.astro";
 import ApplyCTA from "@components/sections/ApplyCTA.astro";
+import { pageJsonLd } from "@utils/seo";
+
+const pageTitle = "About LBS AI Lab";
+const pageDescription =
+  "LBS AI Lab helps participants get involved in AI solution development at London Business School";
+const jsonLd = pageJsonLd({
+  title: pageTitle,
+  description: pageDescription,
+  path: "/about/",
+  breadcrumbs: [
+    { name: "LBS AI Lab", path: "/" },
+    { name: "About", path: "/about/" },
+  ],
+});
 ---
 
-<BaseLayout
-  title="About LBS AI Lab"
-  description="LBS AI Lab helps participants get involved in AI solution development at London Business School"
->
+<BaseLayout title={pageTitle} description={pageDescription} jsonLd={jsonLd}>
   <section class="page-hero">
     <div class="container hero-inner">
       <p class="eyebrow">About LBS AI Lab</p>

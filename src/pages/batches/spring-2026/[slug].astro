@@ -2,6 +2,7 @@
 import { getCollection } from "astro:content";
 import BaseLayout from "@layouts/BaseLayout.astro";
 import TeamDetail from "@components/sections/TeamDetail.astro";
+import { DEFAULT_OG_IMAGE, pageJsonLd } from "@utils/seo";
 
 export async function getStaticPaths() {
   const teams = await getCollection("teams");
@@ -14,11 +15,35 @@ export async function getStaticPaths() {
 }
 
 const { team } = Astro.props;
+const pageTitle =
+  team.data.seoTitle ?? `${team.data.displayName} | Spring 2026 Batch`;
+const pageDescription = team.data.seoDescription ?? team.data.tagline;
+const pagePath = `/batches/spring-2026/${team.data.slug}/`;
+const pageImage = team.data.seoImage ?? DEFAULT_OG_IMAGE;
+const pageImageAlt =
+  team.data.seoImageAlt ??
+  `${team.data.displayName} profile in the LBS AI Lab Spring 2026 Batch`;
+const jsonLd = pageJsonLd({
+  title: pageTitle,
+  description: pageDescription,
+  path: pagePath,
+  image: pageImage,
+  updatedAt: team.data.updatedAt,
+  breadcrumbs: [
+    { name: "LBS AI Lab", path: "/" },
+    { name: "Batches", path: "/batches/" },
+    { name: "Spring 2026 Batch", path: "/batches/spring-2026/" },
+    { name: team.data.displayName, path: pagePath },
+  ],
+});
 ---
 
 <BaseLayout
-  title={`${team.data.displayName} | Spring 2026 Batch`}
-  description={team.data.tagline}
+  title={pageTitle}
+  description={pageDescription}
+  image={pageImage}
+  imageAlt={pageImageAlt}
+  jsonLd={jsonLd}
 >
   <TeamDetail team={team} />
 </BaseLayout>

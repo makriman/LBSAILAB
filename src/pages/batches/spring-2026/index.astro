@@ -6,6 +6,13 @@ import GoogleDeepMindLogo from "@components/brand/GoogleDeepMindLogo.astro";
 import TeamGrid from "@components/sections/TeamGrid.astro";
 import ApplyCTA from "@components/sections/ApplyCTA.astro";
 import { sortTeamsByBatchList } from "@utils/collections";
+import {
+  itemListJsonLd,
+  pageJsonLd,
+  SPRING_BATCH_OG_IMAGE,
+  SPRING_BATCH_OG_IMAGE_ALT,
+  springBatchPartnerJsonLd,
+} from "@utils/seo";
 
 const [teams, batches] = await Promise.all([
   getCollection("teams"),
@@ -21,11 +28,45 @@ const springTeams = springBatch
   : teams;
 const hasGoogleDeepMindPartner =
   springBatch?.data.partnerName === "Google DeepMind";
+
+const pageTitle = "Spring 2026 Batch";
+const pageDescription =
+  "Meet the Spring 2026 Batch of LBS AI Lab teams building AI products for LBS workflows in partnership with Google DeepMind";
+const jsonLd = [
+  ...pageJsonLd({
+    title: pageTitle,
+    description: pageDescription,
+    path: "/batches/spring-2026/",
+    image: SPRING_BATCH_OG_IMAGE,
+    breadcrumbs: [
+      { name: "LBS AI Lab", path: "/" },
+      { name: "Batches", path: "/batches/" },
+      { name: "Spring 2026 Batch", path: "/batches/spring-2026/" },
+    ],
+  }),
+  itemListJsonLd({
+    name: "Spring 2026 Batch teams",
+    description:
+      "Nine Spring 2026 Batch teams building AI products for LBS workflows",
+    items: springTeams.map((team) => ({
+      name: team.data.displayName,
+      url: `/batches/spring-2026/${team.data.slug}/`,
+      description: team.data.tagline,
+    })),
+  }),
+];
+
+if (hasGoogleDeepMindPartner) {
+  jsonLd.push(springBatchPartnerJsonLd());
+}
 ---
 
 <BaseLayout
-  title="Spring 2026 Batch"
-  description="Meet the Spring 2026 Batch of LBS AI Lab teams building AI products for LBS workflows in partnership with Google DeepMind"
+  title={pageTitle}
+  description={pageDescription}
+  image={SPRING_BATCH_OG_IMAGE}
+  imageAlt={SPRING_BATCH_OG_IMAGE_ALT}
+  jsonLd={jsonLd}
 >
   <section class="page-hero">
     <div class="container hero-grid">

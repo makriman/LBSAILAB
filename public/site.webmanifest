@@ -1,0 +1,26 @@
+{
+  "name": "LBS AI Lab",
+  "short_name": "LBS AI Lab",
+  "description": "LBS AI Lab helps London Business School participants build AI products for LBS workflows",
+  "start_url": "/",
+  "display": "standalone",
+  "background_color": "#fbfaf7",
+  "theme_color": "#17145f",
+  "icons": [
+    {
+      "src": "/favicon/favicon-16x16.png",
+      "sizes": "16x16",
+      "type": "image/png"
+    },
+    {
+      "src": "/favicon/favicon-32x32.png",
+      "sizes": "32x32",
+      "type": "image/png"
+    },
+    {
+      "src": "/favicon/apple-touch-icon.png",
+      "sizes": "180x180",
+      "type": "image/png"
+    }
+  ]
+}

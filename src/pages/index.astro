@@ -8,8 +8,14 @@ import DirectorCard from "@components/cards/DirectorCard.astro";
 import TeamGrid from "@components/sections/TeamGrid.astro";
 import MentorGrid from "@components/sections/MentorGrid.astro";
 import ApplyCTA from "@components/sections/ApplyCTA.astro";
-import { LBS_URL, SITE_URL } from "@utils/site";
 import { sortTeamsByBatchList } from "@utils/collections";
+import {
+  organizationJsonLd,
+  pageJsonLd,
+  SPRING_BATCH_OG_IMAGE,
+  SPRING_BATCH_OG_IMAGE_ALT,
+  websiteJsonLd,
+} from "@utils/seo";
 
 const [teams, batches, mentors] = await Promise.all([
   getCollection("teams"),
@@ -28,24 +34,27 @@ const springTeams = springBatch
 const hasGoogleDeepMindPartner =
   springBatch?.data.partnerName === "Google DeepMind";
 
-const jsonLd = {
-  "@context": "https://schema.org",
-  "@type": "EducationalOrganization",
-  name: "LBS AI Lab",
-  parentOrganization: {
-    "@type": "CollegeOrUniversity",
-    name: "London Business School",
-    url: LBS_URL,
-  },
-  url: `${SITE_URL}/`,
-  description:
-    "A hands-on AI lab where London Business School participants build AI products for LBS workflows",
-};
+const pageTitle = "LBS AI Lab | Build AI products for LBS";
+const pageDescription =
+  "LBS AI Lab helps participants build AI products for LBS workflows through an 8-week batch model";
+const jsonLd = [
+  organizationJsonLd(),
+  websiteJsonLd(),
+  ...pageJsonLd({
+    title: pageTitle,
+    description: pageDescription,
+    path: "/",
+    image: SPRING_BATCH_OG_IMAGE,
+    breadcrumbs: [{ name: "LBS AI Lab", path: "/" }],
+  }),
+];
 ---
 
 <BaseLayout
-  title="LBS AI Lab | Build AI products for LBS"
-  description="LBS AI Lab helps participants build AI products for LBS workflows through an 8-week batch model"
+  title={pageTitle}
+  description={pageDescription}
+  image={SPRING_BATCH_OG_IMAGE}
+  imageAlt={SPRING_BATCH_OG_IMAGE_ALT}
   jsonLd={jsonLd}
 >
   <section class="home-hero">

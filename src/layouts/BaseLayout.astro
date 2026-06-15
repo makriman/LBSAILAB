@@ -4,20 +4,38 @@ import Footer from "@components/layout/Footer.astro";
 import SkipLink from "@components/layout/SkipLink.astro";
 import "@styles/global.css";
 import { defaultDescription, SITE_NAME, SITE_URL } from "@utils/site";
+import {
+  DEFAULT_OG_IMAGE,
+  DEFAULT_OG_IMAGE_ALT,
+  DEFAULT_ROBOTS,
+  OG_IMAGE_HEIGHT,
+  OG_IMAGE_TYPE,
+  OG_IMAGE_WIDTH,
+} from "@utils/seo";
 
 interface Props {
   title?: string;
   description?: string;
   image?: string;
+  imageAlt?: string;
+  imageHeight?: number;
+  imageType?: string;
+  imageWidth?: number;
   noindex?: boolean;
+  robots?: string;
   jsonLd?: Record<string, unknown> | Record<string, unknown>[];
 }
 
 const {
   title = `${SITE_NAME} | Helping leaders become AI builders`,
   description = defaultDescription,
-  image = "/og-default.svg",
+  image = DEFAULT_OG_IMAGE,
+  imageAlt = DEFAULT_OG_IMAGE_ALT,
+  imageHeight = OG_IMAGE_HEIGHT,
+  imageType = OG_IMAGE_TYPE,
+  imageWidth = OG_IMAGE_WIDTH,
   noindex = false,
+  robots = DEFAULT_ROBOTS,
   jsonLd,
 } = Astro.props;
 
@@ -28,6 +46,7 @@ const canonical = new URL(
 const ogImage = new URL(image, Astro.site ?? SITE_URL).toString();
 const pageTitle = title.includes(SITE_NAME) ? title : `${title} | ${SITE_NAME}`;
 const jsonLdItems = Array.isArray(jsonLd) ? jsonLd : jsonLd ? [jsonLd] : [];
+const robotsContent = noindex ? "noindex,nofollow" : robots;
 ---
 
 <!doctype html>
@@ -38,6 +57,8 @@ const jsonLdItems = Array.isArray(jsonLd) ? jsonLd : jsonLd ? [jsonLd] : [];
     <meta name="generator" content={Astro.generator} />
     <title>{pageTitle}</title>
     <meta name="description" content={description} />
+    <meta name="robots" content={robotsContent} />
+    <meta name="theme-color" content="#17145f" />
     <link rel="canonical" href={canonical} />
     <link rel="shortcut icon" href="/favicon/favicon.ico" type="image/x-icon" />
     <link rel="icon" href="/favicon/favicon.ico" type="image/x-icon" />
@@ -46,6 +67,7 @@ const jsonLdItems = Array.isArray(jsonLd) ? jsonLd : jsonLd ? [jsonLd] : [];
       sizes="180x180"
       href="/favicon/apple-touch-icon.png"
     />
+    <link rel="manifest" href="/site.webmanifest" />
     <link
       rel="icon"
       type="image/png"
@@ -58,17 +80,22 @@ const jsonLdItems = Array.isArray(jsonLd) ? jsonLd : jsonLd ? [jsonLd] : [];
       sizes="16x16"
       href="/favicon/favicon-16x16.png"
     />
-    {noindex && <meta name="robots" content="noindex,nofollow" />}
     <meta property="og:type" content="website" />
+    <meta property="og:locale" content="en_GB" />
     <meta property="og:site_name" content={SITE_NAME} />
     <meta property="og:title" content={pageTitle} />
     <meta property="og:description" content={description} />
     <meta property="og:url" content={canonical} />
     <meta property="og:image" content={ogImage} />
+    <meta property="og:image:width" content={String(imageWidth)} />
+    <meta property="og:image:height" content={String(imageHeight)} />
+    <meta property="og:image:type" content={imageType} />
+    <meta property="og:image:alt" content={imageAlt} />
     <meta name="twitter:card" content="summary_large_image" />
     <meta name="twitter:title" content={pageTitle} />
     <meta name="twitter:description" content={description} />
     <meta name="twitter:image" content={ogImage} />
+    <meta name="twitter:image:alt" content={imageAlt} />
     {
       jsonLdItems.map((item) => (
         <script

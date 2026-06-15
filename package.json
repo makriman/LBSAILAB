@@ -7,9 +7,10 @@
   },
   "scripts": {
     "dev": "astro dev",
-    "build": "astro check && astro build",
+    "build": "npm run seo:images && astro check && astro build",
     "preview": "astro preview",
     "check": "astro check",
+    "seo:images": "node scripts/generate-og-images.mjs",
     "format": "prettier --write .",
     "format:check": "prettier --check .",
     "astro": "astro"
@@ -22,6 +23,7 @@
   },
   "devDependencies": {
     "@astrojs/check": "^0.9.9",
+    "@resvg/resvg-js": "^2.6.2",
     "@rollup/wasm-node": "^4.60.4",
     "prettier": "^3.8.3",
     "prettier-plugin-astro": "^0.14.1",
