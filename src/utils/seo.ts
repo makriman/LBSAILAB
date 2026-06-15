@@ -44,6 +44,20 @@ interface ItemListEntry {
   image?: string;
 }
 
+interface TeamMemberJsonLdInput {
+  name: string;
+  role: string;
+}
+
+interface TeamProfileJsonLdOptions {
+  name: string;
+  description: string;
+  path: string;
+  category: string;
+  members: TeamMemberJsonLdInput[];
+  productUrl?: string;
+}
+
 export function absoluteUrl(pathOrUrl: string | URL) {
   return new URL(pathOrUrl.toString(), SITE_URL).toString();
 }
@@ -169,6 +183,59 @@ export function itemListJsonLd({
       },
     })),
   };
+}
+
+export function teamProfileJsonLd({
+  name,
+  description,
+  path,
+  category,
+  members,
+  productUrl,
+}: TeamProfileJsonLdOptions): JsonLd[] {
+  const url = absoluteUrl(path);
+  const teamId = `${url}#team`;
+  const team: JsonLd = {
+    "@context": "https://schema.org",
+    "@type": "Organization",
+    "@id": teamId,
+    name,
+    url,
+    description,
+    parentOrganization: {
+      "@id": `${SITE_URL}/#organization`,
+    },
+    knowsAbout: category,
+    member: members.map((member) => ({
+      "@type": "Person",
+      name: member.name,
+      jobTitle: member.role,
+      affiliation: {
+        "@id": teamId,
+      },
+    })),
+  };
+
+  if (!productUrl) return [team];
+
+  return [
+    team,
+    {
+      "@context": "https://schema.org",
+      "@type": "CreativeWork",
+      "@id": `${url}#prototype`,
+      name,
+      url: absoluteUrl(productUrl),
+      description,
+      creator: {
+        "@id": teamId,
+      },
+      isPartOf: {
+        "@id": `${SITE_URL}/batches/spring-2026/#webpage`,
+      },
+      about: category,
+    },
+  ];
 }
 
 export function springBatchPartnerJsonLd(): JsonLd {

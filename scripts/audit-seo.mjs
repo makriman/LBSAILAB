@@ -360,6 +360,69 @@ function auditGeneratedPageCoverage(sitemapLocs) {
   }
 }
 
+function isTeamPage(url) {
+  return /^https:\/\/lbsailab\.com\/batches\/spring-2026\/[^/]+\/$/.test(url);
+}
+
+function auditTeamJsonLd(url, items) {
+  if (!isTeamPage(url)) return;
+
+  const team = items.find(
+    (item) =>
+      item?.["@type"] === "Organization" &&
+      item?.["@id"] === `${url}#team` &&
+      item?.url === url,
+  );
+
+  if (!team) {
+    fail(`${url}: missing team Organization JSON-LD`);
+    return;
+  }
+
+  if (!team.description) {
+    fail(`${url}: team Organization JSON-LD missing description`);
+  }
+
+  if (!team.knowsAbout) {
+    fail(`${url}: team Organization JSON-LD missing knowsAbout`);
+  }
+
+  if (team.parentOrganization?.["@id"] !== `${SITE_URL}/#organization`) {
+    fail(`${url}: team Organization JSON-LD missing parent organization`);
+  }
+
+  const members = Array.isArray(team.member) ? team.member : [];
+
+  if (!members.length) {
+    fail(`${url}: team Organization JSON-LD missing members`);
+  }
+
+  for (const member of members) {
+    if (member?.["@type"] !== "Person" || !member.name || !member.jobTitle) {
+      fail(`${url}: invalid team member Person JSON-LD`);
+    }
+  }
+
+  const prototype = items.find(
+    (item) =>
+      item?.["@type"] === "CreativeWork" &&
+      item?.["@id"] === `${url}#prototype`,
+  );
+
+  if (!prototype) {
+    fail(`${url}: missing prototype CreativeWork JSON-LD`);
+    return;
+  }
+
+  if (!prototype.url || !/^https:\/\//.test(prototype.url)) {
+    fail(`${url}: prototype CreativeWork JSON-LD missing HTTPS URL`);
+  }
+
+  if (prototype.creator?.["@id"] !== `${url}#team`) {
+    fail(`${url}: prototype CreativeWork JSON-LD missing team creator`);
+  }
+}
+
 function auditSitemap() {
   const sitemapIndex = readDist("sitemap-index.xml");
   const sitemap = readDist("sitemap-0.xml");
@@ -467,6 +530,7 @@ function auditPage(url, metadataIndex) {
       /<script\s+type=["']application\/ld\+json["'][^>]*>([\s\S]*?)<\/script>/gi,
     ),
   ];
+  const jsonLdItems = [];
 
   if (!html) return;
 
@@ -591,6 +655,7 @@ function auditPage(url, metadataIndex) {
   for (const [, json] of jsonLdScripts) {
     try {
       const item = JSON.parse(json);
+      jsonLdItems.push(item);
 
       if (item?.["@type"] === "WebPage") {
         assertEqual(
@@ -603,6 +668,8 @@ function auditPage(url, metadataIndex) {
       fail(`${url}: invalid JSON-LD (${error.message})`);
     }
   }
+
+  auditTeamJsonLd(url, jsonLdItems);
 
   for (const tag of allTags(html, "img")) {
     const image = attrs(tag);

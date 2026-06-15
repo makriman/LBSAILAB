@@ -2,7 +2,7 @@
 import { getCollection } from "astro:content";
 import BaseLayout from "@layouts/BaseLayout.astro";
 import TeamDetail from "@components/sections/TeamDetail.astro";
-import { DEFAULT_OG_IMAGE, pageJsonLd } from "@utils/seo";
+import { DEFAULT_OG_IMAGE, pageJsonLd, teamProfileJsonLd } from "@utils/seo";
 
 export async function getStaticPaths() {
   const teams = await getCollection("teams");
@@ -23,19 +23,32 @@ const pageImage = team.data.seoImage ?? DEFAULT_OG_IMAGE;
 const pageImageAlt =
   team.data.seoImageAlt ??
   `${team.data.displayName} profile in the LBS AI Lab Spring 2026 Batch`;
-const jsonLd = pageJsonLd({
-  title: pageTitle,
-  description: pageDescription,
-  path: pagePath,
-  image: pageImage,
-  updatedAt: team.data.updatedAt,
-  breadcrumbs: [
-    { name: "LBS AI Lab", path: "/" },
-    { name: "Batches", path: "/batches/" },
-    { name: "Spring 2026 Batch", path: "/batches/spring-2026/" },
-    { name: team.data.displayName, path: pagePath },
-  ],
-});
+const jsonLd = [
+  ...pageJsonLd({
+    title: pageTitle,
+    description: pageDescription,
+    path: pagePath,
+    image: pageImage,
+    updatedAt: team.data.updatedAt,
+    breadcrumbs: [
+      { name: "LBS AI Lab", path: "/" },
+      { name: "Batches", path: "/batches/" },
+      { name: "Spring 2026 Batch", path: "/batches/spring-2026/" },
+      { name: team.data.displayName, path: pagePath },
+    ],
+  }),
+  ...teamProfileJsonLd({
+    name: team.data.displayName,
+    description: team.data.summary,
+    path: pagePath,
+    category: team.data.category,
+    productUrl: team.data.productUrl,
+    members: team.data.members.map((member) => ({
+      name: member.name,
+      role: member.role,
+    })),
+  }),
+];
 ---
 
 <BaseLayout
