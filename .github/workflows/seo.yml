@@ -27,6 +27,7 @@ jobs:
     env:
       SEO_SITE_URL: https://lbsailab.com
       SEO_DUPLICATE_ORIGINS: https://lbsailab.zahra-moghadasi.workers.dev
+      FORCE_JAVASCRIPT_ACTIONS_TO_NODE24: true
 
     steps:
       - name: Check out repository
@@ -35,7 +36,7 @@ jobs:
       - name: Set up Node.js
         uses: actions/setup-node@v4
         with:
-          node-version: 20.18.0
+          node-version: 24
           cache: npm
 
       - name: Install dependencies
