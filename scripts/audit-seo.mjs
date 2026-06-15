@@ -53,14 +53,36 @@ function allTags(html, tagName) {
   );
 }
 
+function fullTags(html, tagName) {
+  return [
+    ...html.matchAll(
+      new RegExp(`<${tagName}\\b[^>]*>[\\s\\S]*?<\\/${tagName}>`, "gi"),
+    ),
+  ].map((match) => match[0]);
+}
+
 function attrs(tag) {
   const attributes = {};
+  const source = tag
+    .replace(/^<[^\s>]+\s*/i, "")
+    .replace(/\/?>$/i, "")
+    .trim();
 
-  for (const match of tag.matchAll(/([\w:-]+)\s*=\s*(["'])(.*?)\2/g)) {
-    attributes[match[1].toLowerCase()] = match[3];
+  for (const match of source.matchAll(/([\w:-]+)(?:\s*=\s*(["'])(.*?)\2)?/g)) {
+    attributes[match[1].toLowerCase()] =
+      match[3] === undefined ? "" : decodeHtml(match[3]);
   }
 
   return attributes;
+}
+
+function decodeHtml(value) {
+  return value
+    .replaceAll("&amp;", "&")
+    .replaceAll("&quot;", '"')
+    .replaceAll("&#39;", "'")
+    .replaceAll("&lt;", "<")
+    .replaceAll("&gt;", ">");
 }
 
 function metaContent(html, selector) {
@@ -77,6 +99,17 @@ function metaContent(html, selector) {
 
 function pageTitle(html) {
   return html.match(/<title>([^<]+)<\/title>/i)?.[1] || "";
+}
+
+function textContent(markup) {
+  return decodeHtml(
+    markup
+      .replace(/<script\b[\s\S]*?<\/script>/gi, "")
+      .replace(/<style\b[\s\S]*?<\/style>/gi, "")
+      .replace(/<[^>]*>/g, " ")
+      .replace(/\s+/g, " ")
+      .trim(),
+  );
 }
 
 function linkAttrs(html, rel) {
@@ -125,6 +158,173 @@ function assertEqual(actual, expected, label) {
 
 function assertTruthy(value, label) {
   if (!value) fail(`${label}: missing`);
+}
+
+function hasAccessibleName(tag) {
+  const attributes = attrs(tag);
+  const text = textContent(tag);
+
+  return Boolean(
+    text || attributes["aria-label"] || attributes["aria-labelledby"],
+  );
+}
+
+function isExternalHttpUrl(href) {
+  if (!/^https?:\/\//i.test(href)) return false;
+
+  return new URL(href).origin !== SITE_URL;
+}
+
+function auditHtmlIntegrity(html, url) {
+  if (!/<html\b[^>]*\blang=["']en["']/i.test(html)) {
+    fail(`${url}: html lang should be en`);
+  }
+
+  if (!/<meta\b[^>]*name=["']viewport["'][^>]*>/i.test(html)) {
+    fail(`${url}: missing viewport meta`);
+  }
+
+  if (!/<main\b[^>]*\bid=["']main-content["'][^>]*>/i.test(html)) {
+    fail(`${url}: missing main landmark with #main-content`);
+  }
+
+  if (!/<a\b[^>]*href=["']#main-content["'][^>]*>/i.test(html)) {
+    fail(`${url}: missing skip link to main content`);
+  }
+
+  const ids = new Map();
+
+  for (const match of html.matchAll(/<[^>]+\bid\s*=\s*(["'])(.*?)\1[^>]*>/gi)) {
+    const id = match[2];
+    const existing = ids.get(id);
+
+    if (existing) {
+      fail(`${url}: duplicate id "${id}"`);
+    }
+
+    ids.set(id, true);
+  }
+
+  for (const match of html.matchAll(
+    /<[^>]+\baria-labelledby\s*=\s*(["'])(.*?)\1[^>]*>/gi,
+  )) {
+    for (const id of match[2].split(/\s+/).filter(Boolean)) {
+      if (!ids.has(id)) {
+        fail(`${url}: aria-labelledby references missing id "${id}"`);
+      }
+    }
+  }
+
+  const headings = [...html.matchAll(/<h([1-6])\b[^>]*>[\s\S]*?<\/h\1>/gi)].map(
+    (match) => ({
+      level: Number(match[1]),
+      text: textContent(match[0]),
+    }),
+  );
+  const h1s = headings.filter((heading) => heading.level === 1);
+
+  if (h1s.length !== 1) {
+    fail(`${url}: expected exactly one h1, found ${h1s.length}`);
+  }
+
+  for (const heading of headings) {
+    if (!heading.text) {
+      fail(`${url}: empty h${heading.level}`);
+    }
+  }
+
+  for (let index = 1; index < headings.length; index += 1) {
+    const previous = headings[index - 1];
+    const current = headings[index];
+
+    if (current.level - previous.level > 1) {
+      fail(
+        `${url}: heading jumps from h${previous.level} to h${current.level}`,
+      );
+    }
+  }
+
+  for (const tag of fullTags(html, "a")) {
+    const link = attrs(tag);
+    const href = link.href || "";
+
+    if (!href) {
+      fail(`${url}: link is missing href`);
+      continue;
+    }
+
+    if (!hasAccessibleName(tag)) {
+      fail(`${url}: link has no accessible name (${href})`);
+    }
+
+    if (href.startsWith("#!")) {
+      fail(`${url}: hashbang URL found (${href})`);
+    }
+
+    if (href.startsWith("http://")) {
+      fail(`${url}: insecure external link found (${href})`);
+    }
+
+    if (isExternalHttpUrl(href) && link.target === "_blank") {
+      const rel = link.rel || "";
+
+      if (!/\b(noopener|noreferrer)\b/.test(rel)) {
+        fail(
+          `${url}: external new-tab link missing noopener/noreferrer (${href})`,
+        );
+      }
+    }
+  }
+
+  for (const tag of fullTags(html, "button")) {
+    if (!hasAccessibleName(tag)) {
+      fail(`${url}: button has no accessible name`);
+    }
+  }
+
+  auditFormLabels(html, url);
+}
+
+function auditFormLabels(html, url) {
+  const labelTargets = new Set(
+    allTags(html, "label")
+      .map((tag) => attrs(tag).for)
+      .filter(Boolean),
+  );
+  const wrappedLabelTargets = new Set();
+
+  for (const label of fullTags(html, "label")) {
+    const control = label.match(/<(input|textarea|select)\b[^>]*>/i)?.[0];
+
+    if (!control) continue;
+
+    const controlAttributes = attrs(control);
+
+    if (controlAttributes.id) wrappedLabelTargets.add(controlAttributes.id);
+    if (controlAttributes.name) wrappedLabelTargets.add(controlAttributes.name);
+  }
+
+  for (const tag of [
+    ...allTags(html, "input"),
+    ...allTags(html, "textarea"),
+    ...allTags(html, "select"),
+  ]) {
+    const control = attrs(tag);
+    const type = (control.type || "").toLowerCase();
+
+    if (["hidden", "submit", "button"].includes(type)) continue;
+
+    const labelKey = control.id || control.name || "";
+
+    if (
+      !control["aria-label"] &&
+      !control["aria-labelledby"] &&
+      !labelTargets.has(control.id) &&
+      !wrappedLabelTargets.has(labelKey)
+    ) {
+      fail(`${url}: form control has no label (${control.name || control.id})`);
+    }
+  }
 }
 
 function recordUniqueMetadata(index, value, url, label) {
@@ -264,6 +464,8 @@ function auditPage(url, metadataIndex) {
 
   const title = pageTitle(html);
   const description = metaContent(html, "description");
+
+  auditHtmlIntegrity(html, url);
 
   recordUniqueMetadata(metadataIndex.titles, title, url, "title");
   recordUniqueMetadata(
