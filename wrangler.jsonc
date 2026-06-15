@@ -8,4 +8,14 @@
     "binding": "ASSETS",
     "run_worker_first": true,
   },
+  "routes": [
+    {
+      "pattern": "lbsailab.com",
+      "custom_domain": true,
+    },
+    {
+      "pattern": "www.lbsailab.com",
+      "custom_domain": true,
+    },
+  ],
 }

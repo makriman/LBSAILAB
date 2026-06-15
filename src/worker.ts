@@ -322,9 +322,10 @@ function isLongLivedAsset(pathname: string): boolean {
     pathname.startsWith("/_astro/") ||
     pathname.startsWith("/assets/") ||
     pathname.startsWith("/images/") ||
-    pathname.startsWith("/mentors/") ||
+    /^\/mentors\/[^/]+\.(jpg|png|webp|avif)$/.test(pathname) ||
     pathname.startsWith("/favicon/") ||
     /^\/og-[^/]+\.png$/.test(pathname) ||
+    /^\/google-deepmind-logo-[^/]+\.png$/.test(pathname) ||
     pathname === "/og-default.svg" ||
     pathname === "/site.webmanifest"
   );

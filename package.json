@@ -12,6 +12,7 @@
     "check": "astro check",
     "seo:assets": "node scripts/optimize-images.mjs",
     "seo:audit": "node scripts/audit-seo.mjs",
+    "seo:audit:live": "node scripts/audit-live-seo.mjs",
     "seo:images": "node scripts/generate-og-images.mjs",
     "seo:indexnow": "node scripts/submit-indexnow.mjs",
     "deploy": "npm run build && npx wrangler deploy && npm run seo:indexnow",
