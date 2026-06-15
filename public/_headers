@@ -6,46 +6,57 @@
 
 /
   X-Robots-Tag: index, follow, max-snippet:-1, max-image-preview:large, max-video-preview:-1
+  Last-Modified: Tue, 16 Jun 2026 00:00:00 GMT
   Cache-Control: public, max-age=300, must-revalidate
 
 /about/*
   X-Robots-Tag: index, follow, max-snippet:-1, max-image-preview:large, max-video-preview:-1
+  Last-Modified: Tue, 16 Jun 2026 00:00:00 GMT
   Cache-Control: public, max-age=300, must-revalidate
 
 /apply/*
   X-Robots-Tag: index, follow, max-snippet:-1, max-image-preview:large, max-video-preview:-1
+  Last-Modified: Tue, 16 Jun 2026 00:00:00 GMT
   Cache-Control: public, max-age=300, must-revalidate
 
 /batches/*
   X-Robots-Tag: index, follow, max-snippet:-1, max-image-preview:large, max-video-preview:-1
+  Last-Modified: Tue, 16 Jun 2026 00:00:00 GMT
   Cache-Control: public, max-age=300, must-revalidate
 
 /contact/*
   X-Robots-Tag: index, follow, max-snippet:-1, max-image-preview:large, max-video-preview:-1
+  Last-Modified: Tue, 16 Jun 2026 00:00:00 GMT
   Cache-Control: public, max-age=300, must-revalidate
 
 /mentors/
   X-Robots-Tag: index, follow, max-snippet:-1, max-image-preview:large, max-video-preview:-1
+  Last-Modified: Tue, 16 Jun 2026 00:00:00 GMT
   Cache-Control: public, max-age=300, must-revalidate
 
 /sitemap/*
   X-Robots-Tag: index, follow, max-snippet:-1, max-image-preview:large, max-video-preview:-1
+  Last-Modified: Tue, 16 Jun 2026 00:00:00 GMT
   Cache-Control: public, max-age=300, must-revalidate
 
 /image-sitemap.xml
   X-Robots-Tag: index, follow, max-snippet:-1, max-image-preview:large, max-video-preview:-1
+  Last-Modified: Tue, 16 Jun 2026 00:00:00 GMT
   Cache-Control: public, max-age=300, must-revalidate
 
 /feed.xml
   X-Robots-Tag: index, follow, max-snippet:-1, max-image-preview:large, max-video-preview:-1
+  Last-Modified: Tue, 16 Jun 2026 00:00:00 GMT
   Cache-Control: public, max-age=300, must-revalidate
 
 /sitemap-*.xml
   X-Robots-Tag: index, follow, max-snippet:-1, max-image-preview:large, max-video-preview:-1
+  Last-Modified: Tue, 16 Jun 2026 00:00:00 GMT
   Cache-Control: public, max-age=300, must-revalidate
 
 /robots.txt
   X-Robots-Tag: index, follow, max-snippet:-1, max-image-preview:large, max-video-preview:-1
+  Last-Modified: Tue, 16 Jun 2026 00:00:00 GMT
   Cache-Control: public, max-age=300, must-revalidate
 
 /_astro/*

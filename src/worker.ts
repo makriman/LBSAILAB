@@ -37,6 +37,8 @@ const SECURITY_TXT_PATH = "/.well-known/security.txt";
 const INDEXABLE_ROBOTS =
   "index, follow, max-snippet:-1, max-image-preview:large, max-video-preview:-1";
 const NOINDEX_ROBOTS = "noindex, nofollow";
+const SITE_UPDATED_AT = "2026-06-16T00:00:00.000Z";
+const LAST_MODIFIED = new Date(SITE_UPDATED_AT).toUTCString();
 const SHORT_CACHE_CONTROL = "public, max-age=300, must-revalidate";
 const LONG_CACHE_CONTROL = "public, max-age=31536000, immutable";
 const SECURITY_HEADERS = {
@@ -288,6 +290,10 @@ function withSeoHeaders(response: Response, pathname: string): Response {
 
   headers.set("Cache-Control", cacheControlFor(pathname, headers));
 
+  if (shouldSetLastModified(pathname, headers, response.status)) {
+    headers.set("Last-Modified", LAST_MODIFIED);
+  }
+
   return new Response(response.body, {
     status: response.status,
     statusText: response.statusText,
@@ -306,6 +312,22 @@ function cacheControlFor(pathname: string, headers: Headers): string {
   if (isHtmlResponse(headers)) return SHORT_CACHE_CONTROL;
 
   return SHORT_CACHE_CONTROL;
+}
+
+function shouldSetLastModified(
+  pathname: string,
+  headers: Headers,
+  status: number,
+): boolean {
+  if (isLongLivedAsset(pathname)) return false;
+
+  return (
+    status === 404 ||
+    status === 410 ||
+    isHtmlResponse(headers) ||
+    isCrawlerUtilityPath(pathname) ||
+    isNoindexPath(pathname)
+  );
 }
 
 function isNoindexPath(pathname: string): boolean {
@@ -348,6 +370,7 @@ function isHtmlResponse(headers: Headers): boolean {
 function gone(): Response {
   const headers = new Headers({
     "Cache-Control": SHORT_CACHE_CONTROL,
+    "Last-Modified": LAST_MODIFIED,
     "X-Robots-Tag": NOINDEX_ROBOTS,
   });
 
@@ -375,6 +398,7 @@ function indexNowKey(): Response {
   const headers = new Headers({
     "Cache-Control": SHORT_CACHE_CONTROL,
     "Content-Type": "text/plain; charset=utf-8",
+    "Last-Modified": LAST_MODIFIED,
     "X-Robots-Tag": NOINDEX_ROBOTS,
   });
 

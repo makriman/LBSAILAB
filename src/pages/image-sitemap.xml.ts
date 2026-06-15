@@ -1,6 +1,7 @@
 import { getCollection } from "astro:content";
 import {
   DEFAULT_OG_IMAGE,
+  SEO_UPDATED_AT,
   SPRING_BATCH_OG_IMAGE,
   absoluteUrl,
 } from "@utils/seo";
@@ -24,6 +25,7 @@ const escapeXml = (value: string) =>
     .replaceAll(">", "&gt;")
     .replaceAll('"', "&quot;")
     .replaceAll("'", "&apos;");
+const lastModified = new Date(`${SEO_UPDATED_AT}T00:00:00.000Z`).toUTCString();
 
 const imageNode = ({ loc, title, caption }: SitemapImage) => `
     <image:image>
@@ -130,6 +132,7 @@ export async function GET() {
     headers: {
       "Content-Type": "application/xml; charset=utf-8",
       "Cache-Control": "public, max-age=300, must-revalidate",
+      "Last-Modified": lastModified,
       "X-Robots-Tag":
         "index, follow, max-snippet:-1, max-image-preview:large, max-video-preview:-1",
       "Access-Control-Allow-Origin": SITE_URL,

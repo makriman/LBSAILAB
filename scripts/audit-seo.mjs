@@ -15,6 +15,8 @@ const REQUIRED_SITEMAPS = [
 ];
 const INDEXABLE_META_ROBOTS =
   "index,follow,max-snippet:-1,max-image-preview:large,max-video-preview:-1";
+const EXPECTED_UPDATED_AT = "2026-06-16";
+const EXPECTED_LASTMOD = `${EXPECTED_UPDATED_AT}T00:00:00.000Z`;
 
 const failures = [];
 
@@ -394,7 +396,7 @@ function auditSitemap() {
       fail(`Legacy URL leaked into sitemap: ${loc}`);
     }
 
-    if (!/<lastmod>2026-06-15T00:00:00\.000Z<\/lastmod>/.test(sitemap)) {
+    if (!sitemap.includes(`<lastmod>${EXPECTED_LASTMOD}</lastmod>`)) {
       fail("sitemap-0.xml is missing the current lastmod value");
       break;
     }
@@ -448,6 +450,10 @@ function auditCrawlerFiles() {
 
   if (!feed.includes("<feed") || !feed.includes(`${SITE_URL}/feed.xml`)) {
     fail("feed.xml is missing Atom feed markers");
+  }
+
+  if (!feed.includes(`<updated>${EXPECTED_LASTMOD}</updated>`)) {
+    fail("feed.xml is missing the current updated value");
   }
 }
 
@@ -584,7 +590,15 @@ function auditPage(url, metadataIndex) {
 
   for (const [, json] of jsonLdScripts) {
     try {
-      JSON.parse(json);
+      const item = JSON.parse(json);
+
+      if (item?.["@type"] === "WebPage") {
+        assertEqual(
+          item.dateModified,
+          EXPECTED_UPDATED_AT,
+          `${url}: WebPage dateModified`,
+        );
+      }
     } catch (error) {
       fail(`${url}: invalid JSON-LD (${error.message})`);
     }

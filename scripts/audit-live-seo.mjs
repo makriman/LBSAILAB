@@ -12,6 +12,7 @@ const INDEXABLE_ROBOTS =
 const INDEXABLE_META_ROBOTS =
   "index,follow,max-snippet:-1,max-image-preview:large,max-video-preview:-1";
 const NOINDEX_ROBOTS = "noindex, nofollow";
+const EXPECTED_LAST_MODIFIED = "Tue, 16 Jun 2026 00:00:00 GMT";
 const REQUIRED_SECURITY_HEADERS = [
   "content-security-policy",
   "cross-origin-opener-policy",
@@ -324,6 +325,14 @@ function assertShortCache(response, url) {
 
   if (!cacheControl.includes("max-age=300")) {
     fail(`${url}: expected short HTML/utility cache, got "${cacheControl}"`);
+  }
+
+  const lastModified = response.headers.get("last-modified") || "";
+
+  if (lastModified !== EXPECTED_LAST_MODIFIED) {
+    fail(
+      `${url}: expected Last-Modified "${EXPECTED_LAST_MODIFIED}", got "${lastModified || "(missing)"}"`,
+    );
   }
 }
 
@@ -703,6 +712,9 @@ async function auditNoindexAndGone() {
     if (gone.status !== 410) fail(`${url}: expected 410, got ${gone.status}`);
     if ((gone.headers.get("x-robots-tag") || "") !== NOINDEX_ROBOTS) {
       fail(`${url}: expected ${NOINDEX_ROBOTS} X-Robots-Tag`);
+    }
+    if ((gone.headers.get("last-modified") || "") !== EXPECTED_LAST_MODIFIED) {
+      fail(`${url}: expected ${EXPECTED_LAST_MODIFIED} Last-Modified`);
     }
   }
 }

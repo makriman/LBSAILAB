@@ -12,6 +12,7 @@ interface FeedEntry {
 
 const isoDate = (date: string) =>
   new Date(date.length === 10 ? `${date}T00:00:00.000Z` : date).toISOString();
+const lastModified = new Date(`${SEO_UPDATED_AT}T00:00:00.000Z`).toUTCString();
 
 const escapeXml = (value: string) =>
   value
@@ -122,6 +123,7 @@ export async function GET() {
     headers: {
       "Content-Type": "application/atom+xml; charset=utf-8",
       "Cache-Control": "public, max-age=300, must-revalidate",
+      "Last-Modified": lastModified,
       "X-Robots-Tag":
         "index, follow, max-snippet:-1, max-image-preview:large, max-video-preview:-1",
       "Access-Control-Allow-Origin": SITE_URL,
