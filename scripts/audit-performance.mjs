@@ -32,9 +32,14 @@ function allTags(html, tagName) {
 
 function attrs(tag) {
   const attributes = {};
+  const source = tag
+    .replace(/^<[^\s>]+\s*/i, "")
+    .replace(/\/?>$/i, "")
+    .trim();
 
-  for (const match of tag.matchAll(/([\w:-]+)\s*=\s*(["'])(.*?)\2/g)) {
-    attributes[match[1].toLowerCase()] = decodeHtml(match[3]);
+  for (const match of source.matchAll(/([\w:-]+)(?:\s*=\s*(["'])(.*?)\2)?/g)) {
+    attributes[match[1].toLowerCase()] =
+      match[3] === undefined ? "" : decodeHtml(match[3]);
   }
 
   return attributes;
