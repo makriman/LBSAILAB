@@ -33,13 +33,20 @@ const APPLICATIONS_CACHE_TTL_SECONDS = 60 * 60 * 24;
 const CANONICAL_HOST = "lbsailab.com";
 const INDEXNOW_KEY = "5e5bfddcc11447d381079b24b2d1e213";
 const INDEXNOW_KEY_PATH = `/${INDEXNOW_KEY}.txt`;
+const SECURITY_TXT_PATH = "/.well-known/security.txt";
 const INDEXABLE_ROBOTS = "index, follow, max-image-preview:large";
 const NOINDEX_ROBOTS = "noindex, nofollow";
 const SHORT_CACHE_CONTROL = "public, max-age=300, must-revalidate";
 const LONG_CACHE_CONTROL = "public, max-age=31536000, immutable";
 const SECURITY_HEADERS = {
+  "Content-Security-Policy":
+    "default-src 'self'; base-uri 'self'; object-src 'none'; img-src 'self' data:; script-src 'self' 'unsafe-inline'; style-src 'self' 'unsafe-inline'; font-src 'self'; connect-src 'self'; form-action 'self'; frame-ancestors 'none'; upgrade-insecure-requests",
+  "Cross-Origin-Opener-Policy": "same-origin",
+  "Origin-Agent-Cluster": "?1",
   "X-Frame-Options": "DENY",
   "X-Content-Type-Options": "nosniff",
+  "X-DNS-Prefetch-Control": "off",
+  "X-Permitted-Cross-Domain-Policies": "none",
   "Referrer-Policy": "strict-origin-when-cross-origin",
   "Permissions-Policy": "camera=(), microphone=(), geolocation=()",
   "Strict-Transport-Security": "max-age=31536000",
@@ -302,8 +309,9 @@ function cacheControlFor(pathname: string, headers: Headers): string {
 
 function isNoindexPath(pathname: string): boolean {
   const normalizedPath = pathname.toLowerCase();
-  return NOINDEX_PATH_PREFIXES.some((prefix) =>
-    normalizedPath.startsWith(prefix),
+  return (
+    normalizedPath === SECURITY_TXT_PATH ||
+    NOINDEX_PATH_PREFIXES.some((prefix) => normalizedPath.startsWith(prefix))
   );
 }
 

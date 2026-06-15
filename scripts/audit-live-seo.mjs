@@ -10,9 +10,14 @@ const SITE_HOST = SITE.host;
 const INDEXABLE_ROBOTS = "index, follow, max-image-preview:large";
 const NOINDEX_ROBOTS = "noindex, nofollow";
 const REQUIRED_SECURITY_HEADERS = [
+  "content-security-policy",
+  "cross-origin-opener-policy",
+  "origin-agent-cluster",
   "strict-transport-security",
   "x-content-type-options",
+  "x-dns-prefetch-control",
   "x-frame-options",
+  "x-permitted-cross-domain-policies",
   "referrer-policy",
   "permissions-policy",
 ];
@@ -699,6 +704,27 @@ async function auditNoindexAndGone() {
   }
 }
 
+async function auditSecurityText() {
+  const url = `${SITE_ORIGIN}/.well-known/security.txt`;
+  const { response, body } = await text(url, { accept: "text/plain" });
+
+  if (response.status !== 200) {
+    fail(`${url}: expected 200, got ${response.status}`);
+    return;
+  }
+
+  assertSecurityHeaders(response, url);
+  assertShortCache(response, url);
+
+  if ((response.headers.get("x-robots-tag") || "") !== NOINDEX_ROBOTS) {
+    fail(`${url}: expected ${NOINDEX_ROBOTS} X-Robots-Tag`);
+  }
+
+  for (const field of ["Contact:", "Canonical:", "Expires:"]) {
+    if (!body.includes(field)) fail(`${url}: missing ${field}`);
+  }
+}
+
 async function auditReachability(pages) {
   const sitemapPages = new Set(pages);
   const inbound = new Map(pages.map((page) => [page, new Set()]));
@@ -727,6 +753,7 @@ async function auditLiveSeo() {
   await auditRobots();
   const pages = await auditSitemaps();
   await auditFeed();
+  await auditSecurityText();
   await auditRedirects();
   await auditNoindexAndGone();
   await auditReachability(pages);

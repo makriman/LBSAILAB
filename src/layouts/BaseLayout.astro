@@ -60,6 +60,8 @@ const preloadImageUrl = preloadImage
 const pageTitle = title.includes(SITE_NAME) ? title : `${title} | ${SITE_NAME}`;
 const jsonLdItems = Array.isArray(jsonLd) ? jsonLd : jsonLd ? [jsonLd] : [];
 const robotsContent = noindex ? "noindex,nofollow" : robots;
+const googleSiteVerification = import.meta.env.PUBLIC_GOOGLE_SITE_VERIFICATION;
+const bingSiteVerification = import.meta.env.PUBLIC_BING_SITE_VERIFICATION;
 ---
 
 <!doctype html>
@@ -71,6 +73,19 @@ const robotsContent = noindex ? "noindex,nofollow" : robots;
     <title>{pageTitle}</title>
     <meta name="description" content={description} />
     <meta name="robots" content={robotsContent} />
+    {
+      googleSiteVerification && (
+        <meta
+          name="google-site-verification"
+          content={googleSiteVerification}
+        />
+      )
+    }
+    {
+      bingSiteVerification && (
+        <meta name="msvalidate.01" content={bingSiteVerification} />
+      )
+    }
     <meta name="theme-color" content="#17145f" />
     <link rel="canonical" href={canonical} />
     <link rel="alternate" hreflang="en-gb" href={canonical} />
