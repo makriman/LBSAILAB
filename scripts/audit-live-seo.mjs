@@ -1,3 +1,8 @@
+import { lookup as systemLookup, setServers } from "node:dns";
+import { Resolver } from "node:dns/promises";
+import http from "node:http";
+import https from "node:https";
+
 const SITE_URL = process.env.SEO_SITE_URL || "https://lbsailab.com";
 const SITE = new URL(SITE_URL);
 const SITE_ORIGIN = SITE.origin;
@@ -56,6 +61,10 @@ const CANONICAL_REDIRECTS = [
 const GONE_URLS = ["/images/lbs-ai-lab-workshop-hero.png"];
 const failures = [];
 const warnings = [];
+const publicResolver = new Resolver();
+
+setServers(["1.1.1.1", "8.8.8.8"]);
+publicResolver.setServers(["1.1.1.1", "8.8.8.8"]);
 
 function fail(message) {
   failures.push(message);
@@ -172,12 +181,7 @@ async function redirectTrace(url, limit = 6) {
     let response;
 
     try {
-      response = await fetch(current, {
-        redirect: "manual",
-        headers: {
-          "User-Agent": "lbsailab-seo-audit/1.0",
-        },
-      });
+      response = await manualRedirectRequest(current);
     } catch (error) {
       hops.push({
         error: error instanceof Error ? error.message : String(error),
@@ -200,6 +204,79 @@ async function redirectTrace(url, limit = 6) {
 
   fail(`${url}: redirect chain exceeded ${limit} hops`);
   return hops;
+}
+
+async function manualRedirectRequest(url) {
+  const parsed = new URL(url);
+  const transport = parsed.protocol === "http:" ? http : https;
+
+  return new Promise((resolve, reject) => {
+    const request = transport.request(
+      parsed,
+      {
+        headers: {
+          "User-Agent": "lbsailab-seo-audit/1.0",
+        },
+        lookup: publicDnsFallbackLookup,
+        method: "HEAD",
+      },
+      (response) => {
+        response.resume();
+        response.on("end", () => {
+          resolve({
+            headers: {
+              get(name) {
+                const value = response.headers[name.toLowerCase()];
+                if (Array.isArray(value)) return value.join(", ");
+                return value || null;
+              },
+            },
+            status: response.statusCode || 0,
+          });
+        });
+      },
+    );
+
+    request.on("error", reject);
+    request.end();
+  });
+}
+
+async function publicDnsFallbackLookup(hostname, options, callback) {
+  systemLookup(
+    hostname,
+    {
+      family: options?.family || 0,
+      hints: options?.hints || 0,
+    },
+    async (systemError, address, family) => {
+      if (!systemError && address) {
+        lookupCallback(callback, address, family, Boolean(options?.all));
+        return;
+      }
+
+      try {
+        const [publicAddress] = await publicResolver.resolve4(hostname);
+
+        if (!publicAddress) {
+          throw new Error(`No public A record for ${hostname}`);
+        }
+
+        lookupCallback(callback, publicAddress, 4, Boolean(options?.all));
+      } catch (error) {
+        callback(error);
+      }
+    },
+  );
+}
+
+function lookupCallback(callback, address, family, all) {
+  if (all) {
+    callback(null, [{ address, family }]);
+    return;
+  }
+
+  callback(null, address, family);
 }
 
 function assertHeader(response, name, url) {
@@ -668,6 +745,7 @@ async function auditLiveSeo() {
   console.log(
     `Live SEO audit passed for ${pages.length} canonical pages on ${SITE_HOST}.`,
   );
+  process.exit(0);
 }
 
 auditLiveSeo().catch((error) => {
