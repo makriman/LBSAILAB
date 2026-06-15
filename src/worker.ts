@@ -142,7 +142,7 @@ function canonicalRedirectResponse(
     redirectUrl.pathname = legacyDestination.pathname;
     redirectUrl.search = legacyDestination.search || cleanedSearch;
     redirectUrl.hash = legacyDestination.hash;
-    return Response.redirect(redirectUrl.toString(), 301);
+    return permanentRedirect(redirectUrl);
   }
 
   const redirectUrl = canonicalUrl(url);
@@ -159,7 +159,22 @@ function canonicalRedirectResponse(
 
   return redirectUrl.toString() === url.toString()
     ? null
-    : Response.redirect(redirectUrl.toString(), 301);
+    : permanentRedirect(redirectUrl);
+}
+
+function permanentRedirect(url: URL): Response {
+  const headers = new Headers({
+    Location: url.toString(),
+    "Cache-Control": SHORT_CACHE_CONTROL,
+  });
+
+  setHeaders(headers, SECURITY_HEADERS);
+
+  return new Response(null, {
+    status: 301,
+    statusText: "Moved Permanently",
+    headers,
+  });
 }
 
 function canonicalSearch(searchParams: URLSearchParams): string {
@@ -667,8 +682,11 @@ function errorMessage(error: unknown): string {
 }
 
 function json(body: unknown, status = 200): Response {
+  const headers = new Headers(jsonHeaders);
+  setHeaders(headers, SECURITY_HEADERS);
+
   return new Response(JSON.stringify(body), {
     status,
-    headers: jsonHeaders,
+    headers,
   });
 }
