@@ -50,6 +50,7 @@ const NOINDEX_PATH_PREFIXES = [
   "/admin/",
   "/cart/",
   "/checkout/",
+  "/healthz",
   "/internal/",
   "/login/",
   "/private/",
@@ -110,6 +111,7 @@ export default {
 
     if (canonicalRedirect) return canonicalRedirect;
     if (GONE_PATHS.has(url.pathname)) return gone();
+    if (url.pathname === "/healthz") return healthCheck();
 
     if (url.pathname === "/api/applications") {
       if (request.method === "GET") {
@@ -232,6 +234,7 @@ function legacyRedirectDestination(pathname: string): URL | null {
 
 function shouldAddTrailingSlash(pathname: string): boolean {
   if (pathname === "/" || pathname.endsWith("/")) return false;
+  if (pathname === "/healthz") return false;
 
   const lastSegment = pathname.split("/").at(-1) ?? "";
   return !lastSegment.includes(".");
@@ -341,6 +344,17 @@ function gone(): Response {
     statusText: "Gone",
     headers,
   });
+}
+
+function healthCheck(): Response {
+  return json(
+    {
+      ok: true,
+      service: "lbsailab",
+      checkedAt: new Date().toISOString(),
+    },
+    200,
+  );
 }
 
 async function handleCreateApplication(

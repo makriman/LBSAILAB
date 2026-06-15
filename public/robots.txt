@@ -5,6 +5,7 @@ Disallow: /login/
 Disallow: /search/
 Disallow: /cart/
 Disallow: /checkout/
+Disallow: /healthz
 Disallow: /internal/
 Disallow: /private/
 Allow: /
