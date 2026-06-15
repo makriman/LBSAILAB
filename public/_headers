@@ -3,6 +3,29 @@
   X-Content-Type-Options: nosniff
   Referrer-Policy: strict-origin-when-cross-origin
   Permissions-Policy: camera=(), microphone=(), geolocation=()
+
+/
+  X-Robots-Tag: index, follow, max-image-preview:large
+  Cache-Control: public, max-age=300, must-revalidate
+
+/about/*
+  X-Robots-Tag: index, follow, max-image-preview:large
+  Cache-Control: public, max-age=300, must-revalidate
+
+/apply/*
+  X-Robots-Tag: index, follow, max-image-preview:large
+  Cache-Control: public, max-age=300, must-revalidate
+
+/batches/*
+  X-Robots-Tag: index, follow, max-image-preview:large
+  Cache-Control: public, max-age=300, must-revalidate
+
+/contact/*
+  X-Robots-Tag: index, follow, max-image-preview:large
+  Cache-Control: public, max-age=300, must-revalidate
+
+/mentors/
+  X-Robots-Tag: index, follow, max-image-preview:large
   Cache-Control: public, max-age=300, must-revalidate
 
 /_astro/*
@@ -14,10 +37,22 @@
 /images/*
   Cache-Control: public, max-age=31536000, immutable
 
-/mentors/*
+/mentors/*.jpg
+  Cache-Control: public, max-age=31536000, immutable
+
+/mentors/*.png
   Cache-Control: public, max-age=31536000, immutable
 
 /favicon/*
+  Cache-Control: public, max-age=31536000, immutable
+
+/favicon.ico
+  Cache-Control: public, max-age=31536000, immutable
+
+/favicon.svg
+  Cache-Control: public, max-age=31536000, immutable
+
+/google-deepmind-logo-*.png
   Cache-Control: public, max-age=31536000, immutable
 
 /og-*.png
