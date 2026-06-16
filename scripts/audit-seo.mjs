@@ -474,6 +474,44 @@ function normalizePageLink(href, baseUrl) {
   }
 }
 
+function auditCanonicalInternalPageHref(href, sourceUrl) {
+  if (
+    !href ||
+    href.startsWith("#") ||
+    href.startsWith("mailto:") ||
+    href.startsWith("tel:")
+  ) {
+    return;
+  }
+
+  try {
+    const parsed = new URL(decodeHtml(href), sourceUrl);
+
+    if (parsed.origin !== SITE_URL) return;
+    if (parsed.pathname.startsWith("/api/")) return;
+    if (parsed.pathname === "/healthz") return;
+
+    const lastSegment = parsed.pathname.split("/").at(-1) || "";
+    if (lastSegment.includes(".")) return;
+
+    if (parsed.search) {
+      fail(`${sourceUrl}: internal page link has query parameters (${href})`);
+    }
+
+    if (parsed.pathname !== parsed.pathname.toLowerCase()) {
+      fail(`${sourceUrl}: internal page link is not lowercase (${href})`);
+    }
+
+    if (!parsed.pathname.endsWith("/")) {
+      fail(
+        `${sourceUrl}: internal page link is missing trailing slash (${href})`,
+      );
+    }
+  } catch {
+    fail(`${sourceUrl}: internal page link is not a valid URL (${href})`);
+  }
+}
+
 function assertEqual(actual, expected, label) {
   if (actual !== expected) {
     fail(`${label}: expected "${expected}", got "${actual || "(missing)"}"`);
@@ -2835,6 +2873,7 @@ function auditPage(url, metadataIndex, sitemapPages) {
     }
 
     auditAnchorFragmentTarget(url, href, html, sitemapPages);
+    auditCanonicalInternalPageHref(href, url);
 
     const normalized = normalizePageLink(href, url);
 

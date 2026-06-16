@@ -637,6 +637,48 @@ function isCanonicalPageUrl(url) {
   return sameOrigin(url) && parsed.pathname.endsWith("/") && !parsed.search;
 }
 
+function auditCanonicalInternalPageHref(href, sourceUrl) {
+  if (
+    !href ||
+    href.startsWith("#") ||
+    href.startsWith("mailto:") ||
+    href.startsWith("tel:")
+  ) {
+    return;
+  }
+
+  const normalized = normalizeUrl(href, sourceUrl);
+
+  if (!normalized) {
+    fail(`${sourceUrl}: internal page link is not a valid URL (${href})`);
+    return;
+  }
+
+  if (!sameOrigin(normalized)) return;
+
+  const parsed = new URL(normalized);
+
+  if (parsed.pathname.startsWith("/api/")) return;
+  if (parsed.pathname === "/healthz") return;
+
+  const lastSegment = parsed.pathname.split("/").at(-1) || "";
+  if (lastSegment.includes(".")) return;
+
+  if (parsed.search) {
+    fail(`${sourceUrl}: internal page link has query parameters (${href})`);
+  }
+
+  if (parsed.pathname !== parsed.pathname.toLowerCase()) {
+    fail(`${sourceUrl}: internal page link is not lowercase (${href})`);
+  }
+
+  if (!parsed.pathname.endsWith("/")) {
+    fail(
+      `${sourceUrl}: internal page link is missing trailing slash (${href})`,
+    );
+  }
+}
+
 function isLongCachePath(pathname) {
   return LONG_CACHE_PATHS.some((pattern) => pattern.test(pathname));
 }
@@ -1319,6 +1361,8 @@ function extractPageLinks(html, pageUrl, sitemapPages) {
       fail(`${pageUrl}: non-crawlable link href "${href}"`);
       continue;
     }
+
+    auditCanonicalInternalPageHref(href, pageUrl);
 
     const normalized = normalizeUrl(href, pageUrl);
     if (!normalized) continue;
