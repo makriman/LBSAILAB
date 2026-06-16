@@ -412,7 +412,10 @@ function withSeoHeaders(response: Response, pathname: string): Response {
     headers.set("Content-Language", CONTENT_LANGUAGE);
   }
 
-  headers.set("Cache-Control", cacheControlFor(pathname, headers));
+  headers.set(
+    "Cache-Control",
+    cacheControlFor(pathname, headers, response.status),
+  );
 
   if (shouldSetLastModified(pathname, headers, response.status)) {
     headers.set("Last-Modified", LAST_MODIFIED);
@@ -438,7 +441,12 @@ function setHeaders(headers: Headers, values: Record<string, string>): void {
   }
 }
 
-function cacheControlFor(pathname: string, headers: Headers): string {
+function cacheControlFor(
+  pathname: string,
+  headers: Headers,
+  status: number,
+): string {
+  if (status >= 400) return SHORT_CACHE_CONTROL;
   if (isLongLivedAsset(pathname)) return LONG_CACHE_CONTROL;
   if (isHtmlResponse(headers)) return SHORT_CACHE_CONTROL;
 

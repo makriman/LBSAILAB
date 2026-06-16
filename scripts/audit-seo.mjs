@@ -499,6 +499,15 @@ function auditWorkerRetiredPaths() {
   if (!worker.includes("if (GONE_PATHS.has(pathname)) return false;")) {
     fail("Worker should avoid trailing-slash redirects for GONE_PATHS");
   }
+
+  if (
+    !worker.includes("cacheControlFor(pathname, headers, response.status)") ||
+    !worker.includes("if (status >= 400) return SHORT_CACHE_CONTROL;")
+  ) {
+    fail(
+      "Worker should short-cache missing assets and other 4xx/5xx responses",
+    );
+  }
 }
 
 function auditWorkerSeoAccessLogging() {
@@ -725,6 +734,9 @@ function auditSeoMonitorConfig() {
     "checkVitalsEndpoint",
     "connectionType",
     "viewport",
+    "missing-seo-monitor-file.css",
+    "missing-seo-monitor-script.js",
+    "missing-seo-monitor-image.webp",
     "facebookexternalhit",
     "LinkedInBot",
     "Twitterbot",
@@ -739,6 +751,10 @@ function auditSeoMonitorConfig() {
     "assertIndexableHeaders(imageResponse, imageSitemapUrl)",
     "assertShortCache(imageResponse, imageSitemapUrl)",
     "auditDuplicateOriginRedirects(pages)",
+    "auditMissingFileResources",
+    "missing-seo-audit-file.css",
+    "missing-seo-audit-script.js",
+    "missing-seo-audit-image.webp",
     "expected XML content type",
   ]) {
     if (!liveAudit.includes(expected)) {

@@ -469,6 +469,9 @@ async function checkStatus() {
     [`${SITE_ORIGIN}/api/applications`, 200, "GET"],
     [`${SITE_ORIGIN}/api/vitals`, 200, "GET"],
     [`${SITE_ORIGIN}/missing-seo-monitor-page/`, 404, "HEAD"],
+    [`${SITE_ORIGIN}/missing-seo-monitor-file.css`, 404, "HEAD"],
+    [`${SITE_ORIGIN}/missing-seo-monitor-script.js`, 404, "HEAD"],
+    [`${SITE_ORIGIN}/images/missing-seo-monitor-image.webp`, 404, "HEAD"],
   ];
 
   for (const [url, expectedStatus, method] of checks) {

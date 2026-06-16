@@ -2389,6 +2389,41 @@ async function auditMissingPage() {
   }
 }
 
+async function auditMissingFileResources() {
+  for (const path of [
+    "/missing-seo-audit-file.css",
+    "/missing-seo-audit-script.js",
+    "/images/missing-seo-audit-image.webp",
+  ]) {
+    const url = `${SITE_ORIGIN}${path}`;
+    const { response, body } = await text(url);
+
+    if (response.status !== 404) {
+      fail(
+        `${url}: expected missing file resource 404, got ${response.status}`,
+      );
+    }
+
+    assertSecurityHeaders(response, url);
+    assertShortCache(response, url);
+
+    if ((response.headers.get("x-robots-tag") || "") !== NOINDEX_ROBOTS) {
+      fail(`${url}: expected ${NOINDEX_ROBOTS} X-Robots-Tag`);
+    }
+
+    if (
+      body.includes(INDEXABLE_META_ROBOTS) ||
+      /<link\b[^>]*rel=["']canonical["']/i.test(body)
+    ) {
+      fail(`${url}: missing file resource contains indexable page metadata`);
+    }
+
+    if (body.includes("<h1>Page not found</h1>")) {
+      fail(`${url}: missing file resource should not render custom page body`);
+    }
+  }
+}
+
 async function auditErrorDocumentDirect() {
   for (const path of ["/404.html", "/404/"]) {
     const url = `${SITE_ORIGIN}${path}`;
@@ -2597,6 +2632,7 @@ async function auditLiveSeo() {
   await auditDuplicateOriginRedirects(pages);
   await auditNoindexAndGone();
   await auditMissingPage();
+  await auditMissingFileResources();
   await auditErrorDocumentDirect();
   await auditSearchVerificationFiles();
   await auditReachability(pages);
