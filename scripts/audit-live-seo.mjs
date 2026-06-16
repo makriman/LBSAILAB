@@ -1406,9 +1406,7 @@ function auditItemListJsonLd(url, items, sitemapPages) {
   }
 }
 
-function auditHomeJsonLd(url, items) {
-  if (url !== `${SITE_ORIGIN}/`) return;
-
+function auditSiteIdentityJsonLd(url, items) {
   const website = items.find(
     (item) =>
       isJsonLdType(item, "WebSite") &&
@@ -1419,17 +1417,20 @@ function auditHomeJsonLd(url, items) {
       isJsonLdType(item, "EducationalOrganization") &&
       item?.["@id"] === `${SITE_ORIGIN}/#organization`,
   );
-  const navigation = items.find(
-    (item) =>
-      isJsonLdType(item, "SiteNavigationElement") &&
-      item?.["@id"] === `${SITE_ORIGIN}/#site-navigation`,
-  );
 
   if (!website) {
     fail(`${url}: missing WebSite JSON-LD`);
   } else {
+    if (website.name !== "LBS AI Lab") {
+      fail(`${url}: WebSite JSON-LD has wrong name`);
+    }
+
     if (website.url !== `${SITE_ORIGIN}/`) {
       fail(`${url}: WebSite JSON-LD has wrong URL`);
+    }
+
+    if (website.inLanguage !== "en-GB") {
+      fail(`${url}: WebSite JSON-LD should use en-GB`);
     }
 
     if (website.publisher?.["@id"] !== `${SITE_ORIGIN}/#organization`) {
@@ -1469,6 +1470,16 @@ function auditHomeJsonLd(url, items) {
       fail(`${url}: organization JSON-LD missing knowsAbout "${topic}"`);
     }
   }
+}
+
+function auditHomeNavigationJsonLd(url, items) {
+  if (url !== `${SITE_ORIGIN}/`) return;
+
+  const navigation = items.find(
+    (item) =>
+      isJsonLdType(item, "SiteNavigationElement") &&
+      item?.["@id"] === `${SITE_ORIGIN}/#site-navigation`,
+  );
 
   if (!navigation) {
     fail(`${url}: missing SiteNavigationElement JSON-LD`);
@@ -1621,7 +1632,8 @@ function auditJsonLd(url, html, sitemapPages) {
   auditWebPageJsonLd(url, html, items);
   auditBreadcrumbJsonLd(url, items);
   auditItemListJsonLd(url, items, sitemapPages);
-  auditHomeJsonLd(url, items);
+  auditSiteIdentityJsonLd(url, items);
+  auditHomeNavigationJsonLd(url, items);
   auditPartnerJsonLd(url, items);
   auditMentorJsonLd(url, items);
   auditTeamJsonLd(url, html, items);

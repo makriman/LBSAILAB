@@ -1084,14 +1084,36 @@ function auditMentorJsonLd(url, items) {
   }
 }
 
-function auditHomeOrganizationJsonLd(url, items) {
-  if (url !== `${SITE_URL}/`) return;
-
+function auditSiteIdentityJsonLd(url, items) {
   const organization = items.find(
     (item) =>
       item?.["@type"] === "EducationalOrganization" &&
       item?.["@id"] === `${SITE_URL}/#organization`,
   );
+  const website = items.find(
+    (item) =>
+      item?.["@type"] === "WebSite" && item?.["@id"] === `${SITE_URL}/#website`,
+  );
+
+  if (!website) {
+    fail(`${url}: missing WebSite JSON-LD`);
+  } else {
+    if (website.name !== "LBS AI Lab") {
+      fail(`${url}: WebSite JSON-LD has wrong name`);
+    }
+
+    if (website.url !== `${SITE_URL}/`) {
+      fail(`${url}: WebSite JSON-LD has wrong URL`);
+    }
+
+    if (website.inLanguage !== "en-GB") {
+      fail(`${url}: WebSite JSON-LD should use en-GB`);
+    }
+
+    if (website.publisher?.["@id"] !== `${SITE_URL}/#organization`) {
+      fail(`${url}: WebSite JSON-LD missing publisher organization`);
+    }
+  }
 
   if (!organization) {
     fail(`${url}: missing EducationalOrganization JSON-LD`);
@@ -1133,6 +1155,10 @@ function auditHomeOrganizationJsonLd(url, items) {
       fail(`${url}: organization JSON-LD missing knowsAbout "${topic}"`);
     }
   }
+}
+
+function auditHomeNavigationJsonLd(url, items) {
+  if (url !== `${SITE_URL}/`) return;
 
   const navigation = items.find(
     (item) =>
@@ -1713,7 +1739,8 @@ function auditPage(url, metadataIndex) {
 
   auditTeamJsonLd(url, jsonLdItems, html);
   auditMentorJsonLd(url, jsonLdItems);
-  auditHomeOrganizationJsonLd(url, jsonLdItems);
+  auditSiteIdentityJsonLd(url, jsonLdItems);
+  auditHomeNavigationJsonLd(url, jsonLdItems);
 
   for (const tag of allTags(html, "img")) {
     const image = attrs(tag);

@@ -10,12 +10,10 @@ import MentorGrid from "@components/sections/MentorGrid.astro";
 import ApplyCTA from "@components/sections/ApplyCTA.astro";
 import { sortTeamsByBatchList } from "@utils/collections";
 import {
-  organizationJsonLd,
   pageJsonLd,
   siteNavigationJsonLd,
   SPRING_BATCH_OG_IMAGE,
   SPRING_BATCH_OG_IMAGE_ALT,
-  websiteJsonLd,
 } from "@utils/seo";
 
 const [teams, batches, mentors] = await Promise.all([
@@ -39,8 +37,6 @@ const pageTitle = "LBS AI Lab | Build AI products for LBS";
 const pageDescription =
   "LBS AI Lab helps participants build AI products for LBS workflows through an 8-week batch model";
 const jsonLd = [
-  organizationJsonLd(),
-  websiteJsonLd(),
   siteNavigationJsonLd(),
   ...pageJsonLd({
     title: pageTitle,

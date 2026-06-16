@@ -13,7 +13,9 @@ import {
   OG_IMAGE_HEIGHT,
   OG_IMAGE_TYPE,
   OG_IMAGE_WIDTH,
+  organizationJsonLd,
   SEO_UPDATED_AT_ISO,
+  websiteJsonLd,
 } from "@utils/seo";
 
 interface Props {
@@ -60,6 +62,8 @@ const preloadImageUrl = preloadImage
   : undefined;
 const pageTitle = title.includes(SITE_NAME) ? title : `${title} | ${SITE_NAME}`;
 const jsonLdItems = Array.isArray(jsonLd) ? jsonLd : jsonLd ? [jsonLd] : [];
+const siteJsonLdItems = noindex ? [] : [organizationJsonLd(), websiteJsonLd()];
+const allJsonLdItems = [...siteJsonLdItems, ...jsonLdItems];
 const robotsContent = noindex ? "noindex,nofollow" : robots;
 const googleSiteVerification = import.meta.env.PUBLIC_GOOGLE_SITE_VERIFICATION;
 const bingSiteVerification = import.meta.env.PUBLIC_BING_SITE_VERIFICATION;
@@ -165,7 +169,7 @@ const bingSiteVerification = import.meta.env.PUBLIC_BING_SITE_VERIFICATION;
     <meta name="twitter:image" content={ogImage} />
     <meta name="twitter:image:alt" content={imageAlt} />
     {
-      jsonLdItems.map((item) => (
+      allJsonLdItems.map((item) => (
         <script
           is:inline
           type="application/ld+json"
