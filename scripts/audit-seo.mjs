@@ -566,6 +566,8 @@ function auditSeoMonitorConfig() {
     "checkCertificates",
     "checkHttpProtocols",
     "checkVitalsEndpoint",
+    "connectionType",
+    "viewport",
   ]) {
     if (!monitor.includes(expected)) {
       fail(`SEO monitor is missing ${expected}`);
@@ -591,6 +593,8 @@ function auditSeoLogAnalyzer() {
     "EXPECTED_INDEXABLE_ROBOTS",
     "SEVERE_VITAL_LIMITS",
     "auditVitalsPercentiles",
+    "vitalsByConnection",
+    "vitalsByViewport",
     "p75",
     "SEO log analysis passed",
   ]) {
@@ -611,12 +615,15 @@ function auditSeoLogAnalyzer() {
       type: "seo-access",
     }),
     JSON.stringify({
+      connectionType: "4g",
       metrics: [
         { name: "LCP", value: 1200 },
         { name: "CLS", value: 0.02 },
       ],
       path: "/",
+      saveData: false,
       type: "web-vitals",
+      viewport: "mobile",
     }),
   ].join("\n");
   const badLogs = JSON.stringify({
@@ -630,6 +637,7 @@ function auditSeoLogAnalyzer() {
   });
   const badVitalsLogs = [
     JSON.stringify({
+      connectionType: "3g",
       metrics: [
         { name: "LCP", value: 1200 },
         { name: "LCP", value: 2600 },
@@ -638,6 +646,7 @@ function auditSeoLogAnalyzer() {
       ],
       path: "/",
       type: "web-vitals",
+      viewport: "mobile",
     }),
   ].join("\n");
   const good = spawnSync(process.execPath, [analyzerPath], {
@@ -656,7 +665,9 @@ function auditSeoLogAnalyzer() {
   if (
     good.status !== 0 ||
     !good.stdout.includes("SEO log analysis passed") ||
-    !good.stdout.includes('"p75"')
+    !good.stdout.includes('"p75"') ||
+    !good.stdout.includes("Vitals by viewport") ||
+    !good.stdout.includes("Vitals by connection")
   ) {
     fail(
       `SEO log analyzer did not pass valid sample logs: ${good.stderr || good.stdout}`,
@@ -1701,7 +1712,10 @@ function auditVitalsMonitor(url, html) {
     "LCP",
     "CLS",
     "INP",
+    "connectionType",
     "navigationType",
+    "saveData",
+    "viewport",
     "visibilityState",
   ]) {
     if (!monitor.includes(expected)) {

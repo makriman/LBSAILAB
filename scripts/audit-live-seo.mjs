@@ -1138,7 +1138,10 @@ function assertPageMetadata(html, url) {
     "LCP",
     "CLS",
     "INP",
+    "connectionType",
     "navigationType",
+    "saveData",
+    "viewport",
     "visibilityState",
   ]) {
     if (!vitalsMonitors[0][0].includes(expected)) {
@@ -2110,6 +2113,7 @@ async function auditNoindexAndGone() {
 
   const vitalsPost = await fetch(vitalsUrl, {
     body: JSON.stringify({
+      connectionType: "4g",
       metrics: [
         { name: "TTFB", value: 120 },
         { name: "FCP", value: 700 },
@@ -2119,6 +2123,8 @@ async function auditNoindexAndGone() {
       ],
       navigationType: "navigate",
       path: "/seo-audit",
+      saveData: false,
+      viewport: "desktop",
       visibilityState: "hidden",
     }),
     headers: {

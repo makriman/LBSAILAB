@@ -195,10 +195,25 @@ const bingSiteVerification = import.meta.env.PUBLIC_BING_SITE_VERIFICATION;
         const metrics = new Map();
         const observers = [];
         let sent = false;
+        const connection =
+          navigator.connection ||
+          navigator.mozConnection ||
+          navigator.webkitConnection;
 
         const remember = (name, value) => {
           if (!Number.isFinite(value) || value < 0) return;
           metrics.set(name, Math.round(value * 1000) / 1000);
+        };
+
+        const viewportClass = () => {
+          const width = Math.max(
+            document.documentElement?.clientWidth || 0,
+            window.innerWidth || 0,
+          );
+
+          if (width < 768) return "mobile";
+          if (width < 1024) return "tablet";
+          return "desktop";
         };
 
         const observe = (options, each) => {
@@ -257,7 +272,10 @@ const bingSiteVerification = import.meta.env.PUBLIC_BING_SITE_VERIFICATION;
 
           const body = JSON.stringify({
             path: window.location.pathname,
+            connectionType: connection?.effectiveType || "unknown",
             navigationType: navigationEntry?.type || "navigate",
+            saveData: Boolean(connection?.saveData),
+            viewport: viewportClass(),
             visibilityState: document.visibilityState,
             metrics: [...metrics].map(([name, value]) => ({ name, value })),
           });

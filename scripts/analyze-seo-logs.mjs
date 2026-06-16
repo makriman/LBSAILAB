@@ -142,6 +142,12 @@ function canonicalPathIssue(path) {
   return "";
 }
 
+function knownValue(value, allowedValues, fallback = "unknown") {
+  return typeof value === "string" && allowedValues.includes(value)
+    ? value
+    : fallback;
+}
+
 function analyzeSeoAccess(log, summary) {
   const status = Number(log.status);
   const path = typeof log.path === "string" ? log.path : "/";
@@ -184,11 +190,44 @@ function analyzeSeoAccess(log, summary) {
   if (pathIssue) warn(`${path}: ${pathIssue}`);
 }
 
+function rememberVital(collection, name, value) {
+  collection[name] ||= {
+    count: 0,
+    max: Number.NEGATIVE_INFINITY,
+    sum: 0,
+    values: [],
+  };
+
+  collection[name].count += 1;
+  collection[name].max = Math.max(collection[name].max, value);
+  collection[name].sum += value;
+  collection[name].values.push(value);
+}
+
 function analyzeWebVitals(log, summary) {
   const path = typeof log.path === "string" ? log.path : "/";
   const metrics = Array.isArray(log.metrics) ? log.metrics : [];
+  const viewport = knownValue(log.viewport, [
+    "desktop",
+    "mobile",
+    "tablet",
+    "unknown",
+  ]);
+  const connectionType = knownValue(log.connectionType, [
+    "2g",
+    "3g",
+    "4g",
+    "slow-2g",
+    "unknown",
+  ]);
 
   summary.webVitals += 1;
+  summary.viewportCounts[viewport] =
+    (summary.viewportCounts[viewport] || 0) + 1;
+  summary.connectionTypes[connectionType] =
+    (summary.connectionTypes[connectionType] || 0) + 1;
+  summary.vitalsByViewport[viewport] ||= {};
+  summary.vitalsByConnection[connectionType] ||= {};
 
   for (const metric of metrics) {
     const name = typeof metric.name === "string" ? metric.name : "";
@@ -196,16 +235,9 @@ function analyzeWebVitals(log, summary) {
 
     if (!Number.isFinite(value)) continue;
 
-    summary.vitals[name] ||= {
-      count: 0,
-      max: Number.NEGATIVE_INFINITY,
-      sum: 0,
-      values: [],
-    };
-    summary.vitals[name].count += 1;
-    summary.vitals[name].max = Math.max(summary.vitals[name].max, value);
-    summary.vitals[name].sum += value;
-    summary.vitals[name].values.push(value);
+    rememberVital(summary.vitals, name, value);
+    rememberVital(summary.vitalsByViewport[viewport], name, value);
+    rememberVital(summary.vitalsByConnection[connectionType], name, value);
 
     if (value > SEVERE_VITAL_LIMITS[name]) {
       fail(`${path} logged severe ${name} ${value}`);
@@ -227,8 +259,8 @@ function percentile(values, percentileRank) {
   return sorted[index];
 }
 
-function auditVitalsPercentiles(summary) {
-  for (const [name, metric] of Object.entries(summary.vitals)) {
+function auditVitalsCollection(collection, label) {
+  for (const [name, metric] of Object.entries(collection)) {
     const p75 = percentile(metric.values, 75);
 
     if (p75 === null) continue;
@@ -236,20 +268,38 @@ function auditVitalsPercentiles(summary) {
     metric.p75 = p75;
 
     if (p75 > SEVERE_VITAL_LIMITS[name]) {
-      fail(`web-vitals p75 ${name} ${p75} is severe`);
+      fail(`${label}p75 ${name} ${p75} is severe`);
     } else if (p75 > NEEDS_IMPROVEMENT_VITAL_LIMITS[name]) {
-      warn(`web-vitals p75 ${name} ${p75} needs improvement`);
+      warn(`${label}p75 ${name} ${p75} needs improvement`);
     }
+  }
+}
+
+function auditVitalsPercentiles(summary) {
+  auditVitalsCollection(summary.vitals, "web-vitals ");
+
+  for (const [viewport, vitals] of Object.entries(summary.vitalsByViewport)) {
+    auditVitalsCollection(vitals, `web-vitals ${viewport} `);
+  }
+
+  for (const [connectionType, vitals] of Object.entries(
+    summary.vitalsByConnection,
+  )) {
+    auditVitalsCollection(vitals, `web-vitals ${connectionType} `);
   }
 }
 
 function analyze(logs) {
   const summary = {
+    connectionTypes: {},
     crawlers: {},
     paths: {},
     seoAccess: 0,
     statusBuckets: {},
     vitals: {},
+    vitalsByConnection: {},
+    vitalsByViewport: {},
+    viewportCounts: {},
     webVitals: 0,
   };
 
@@ -267,9 +317,9 @@ function analyze(logs) {
   return summary;
 }
 
-function printableSummary(summary) {
-  const vitals = Object.fromEntries(
-    Object.entries(summary.vitals).map(([name, metric]) => [
+function printableVitals(collection) {
+  return Object.fromEntries(
+    Object.entries(collection).map(([name, metric]) => [
       name,
       {
         average: Number((metric.sum / metric.count).toFixed(3)),
@@ -279,13 +329,30 @@ function printableSummary(summary) {
       },
     ]),
   );
+}
+
+function printableGroupedVitals(groups) {
+  return Object.fromEntries(
+    Object.entries(groups).map(([group, vitals]) => [
+      group,
+      printableVitals(vitals),
+    ]),
+  );
+}
+
+function printableSummary(summary) {
+  const vitals = printableVitals(summary.vitals);
 
   return {
+    connectionTypes: summary.connectionTypes,
     crawlers: summary.crawlers,
     paths: summary.paths,
     seoAccess: summary.seoAccess,
     statusBuckets: summary.statusBuckets,
     vitals,
+    vitalsByConnection: printableGroupedVitals(summary.vitalsByConnection),
+    vitalsByViewport: printableGroupedVitals(summary.vitalsByViewport),
+    viewportCounts: summary.viewportCounts,
     warnings,
     webVitals: summary.webVitals,
   };
@@ -310,6 +377,18 @@ function main() {
 
     if (Object.keys(report.vitals).length) {
       console.log(`Vitals: ${JSON.stringify(report.vitals)}`);
+    }
+
+    if (Object.keys(report.vitalsByViewport).length) {
+      console.log(
+        `Vitals by viewport: ${JSON.stringify(report.vitalsByViewport)}`,
+      );
+    }
+
+    if (Object.keys(report.vitalsByConnection).length) {
+      console.log(
+        `Vitals by connection: ${JSON.stringify(report.vitalsByConnection)}`,
+      );
     }
   }
 

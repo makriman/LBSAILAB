@@ -668,6 +668,7 @@ async function checkImageIndexingHeaders() {
 async function checkVitalsEndpoint() {
   const url = `${SITE_ORIGIN}/api/vitals`;
   const body = JSON.stringify({
+    connectionType: "4g",
     metrics: [
       { name: "TTFB", value: 120 },
       { name: "FCP", value: 700 },
@@ -677,6 +678,8 @@ async function checkVitalsEndpoint() {
     ],
     navigationType: "navigate",
     path: "/seo-monitor",
+    saveData: false,
+    viewport: "desktop",
     visibilityState: "hidden",
   });
   const response = await requestStatus(url, "POST", body, {

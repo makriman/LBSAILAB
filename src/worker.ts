@@ -22,12 +22,15 @@ interface GitHubFile {
 }
 
 interface WebVitalsPayload {
+  connectionType?: unknown;
   metrics?: Array<{
     name?: unknown;
     value?: unknown;
   }>;
   navigationType?: unknown;
   path?: unknown;
+  saveData?: unknown;
+  viewport?: unknown;
   visibilityState?: unknown;
 }
 
@@ -63,7 +66,7 @@ const SHORT_CACHE_CONTROL = "public, max-age=300, must-revalidate";
 const LONG_CACHE_CONTROL = "public, max-age=31536000, immutable";
 const SECURITY_HEADERS = {
   "Content-Security-Policy":
-    "default-src 'self'; base-uri 'self'; object-src 'none'; img-src 'self' data:; script-src 'self' 'sha256-gjeSSMIXG9BbI3JOaYbZjuKjgLQWtyZzrKeJWWpTW5w=' 'sha256-hOeIS+zI+pi2hvQgqdLeHjnvLrtBFskwEPrfv8fVKks=' 'sha256-7N/6kzpAEcU9XVA3Q1vOiFuNNeInJvanrCIhejjujMY=' https://static.cloudflareinsights.com; script-src-attr 'none'; style-src 'self' 'unsafe-inline'; font-src 'self'; connect-src 'self' https://cloudflareinsights.com; form-action 'self'; frame-ancestors 'none'; upgrade-insecure-requests",
+    "default-src 'self'; base-uri 'self'; object-src 'none'; img-src 'self' data:; script-src 'self' 'sha256-gjeSSMIXG9BbI3JOaYbZjuKjgLQWtyZzrKeJWWpTW5w=' 'sha256-2VsAOLriGmzau9euyTar/WJk/JxKiuqkiONHcwQ2igg=' 'sha256-7N/6kzpAEcU9XVA3Q1vOiFuNNeInJvanrCIhejjujMY=' https://static.cloudflareinsights.com; script-src-attr 'none'; style-src 'self' 'unsafe-inline'; font-src 'self'; connect-src 'self' https://cloudflareinsights.com; form-action 'self'; frame-ancestors 'none'; upgrade-insecure-requests",
   "Cross-Origin-Opener-Policy": "same-origin",
   "Origin-Agent-Cluster": "?1",
   "X-Frame-Options": "DENY",
@@ -707,10 +710,13 @@ async function handleVitals(request: Request): Promise<Response> {
   if (metrics.length) {
     console.log(
       JSON.stringify({
+        connectionType: sanitizeConnectionType(payload.connectionType),
         metrics,
         navigationType: sanitizeNavigationType(payload.navigationType),
         path: sanitizePath(payload.path),
+        saveData: sanitizeSaveData(payload.saveData),
         type: "web-vitals",
+        viewport: sanitizeViewport(payload.viewport),
         visibilityState: sanitizeVisibilityState(payload.visibilityState),
       }),
     );
@@ -752,6 +758,24 @@ function sanitizeNavigationType(value: unknown): string {
   return ["back_forward", "navigate", "prerender", "reload"].includes(type)
     ? type
     : "navigate";
+}
+
+function sanitizeConnectionType(value: unknown): string {
+  const type = typeof value === "string" ? value : "unknown";
+  return ["slow-2g", "2g", "3g", "4g", "unknown"].includes(type)
+    ? type
+    : "unknown";
+}
+
+function sanitizeSaveData(value: unknown): boolean {
+  return value === true;
+}
+
+function sanitizeViewport(value: unknown): string {
+  const viewport = typeof value === "string" ? value : "unknown";
+  return ["mobile", "tablet", "desktop", "unknown"].includes(viewport)
+    ? viewport
+    : "unknown";
 }
 
 function sanitizeVisibilityState(value: unknown): string {
