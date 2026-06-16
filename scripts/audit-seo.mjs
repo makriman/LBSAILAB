@@ -1,5 +1,6 @@
 import { existsSync, readFileSync, readdirSync } from "node:fs";
 import { createHash } from "node:crypto";
+import { spawnSync } from "node:child_process";
 import path from "node:path";
 import { fileURLToPath } from "node:url";
 
@@ -511,6 +512,79 @@ function auditSeoMonitorConfig() {
     if (!monitor.includes(expected)) {
       fail(`SEO monitor is missing ${expected}`);
     }
+  }
+}
+
+function auditSeoLogAnalyzer() {
+  const packageJson = readFileSync(path.join(ROOT, "package.json"), "utf8");
+  const analyzerPath = path.join(ROOT, "scripts", "analyze-seo-logs.mjs");
+  const analyzer = readFileSync(analyzerPath, "utf8");
+
+  if (
+    !packageJson.includes('"seo:logs": "node scripts/analyze-seo-logs.mjs"')
+  ) {
+    fail("package.json is missing the seo:logs script");
+  }
+
+  for (const expected of [
+    "seo-access",
+    "web-vitals",
+    "crawler-facing",
+    "EXPECTED_INDEXABLE_ROBOTS",
+    "SEVERE_VITAL_LIMITS",
+    "SEO log analysis passed",
+  ]) {
+    if (!analyzer.includes(expected)) {
+      fail(`SEO log analyzer is missing ${expected}`);
+    }
+  }
+
+  const goodLogs = [
+    JSON.stringify({
+      cacheControl: "public, max-age=300, must-revalidate",
+      contentType: "text/html",
+      crawler: "Googlebot",
+      path: "/batches/spring-2026/",
+      robots:
+        "index, follow, max-snippet:-1, max-image-preview:large, max-video-preview:-1",
+      status: 200,
+      type: "seo-access",
+    }),
+    JSON.stringify({
+      metrics: [
+        { name: "LCP", value: 1200 },
+        { name: "CLS", value: 0.02 },
+      ],
+      path: "/",
+      type: "web-vitals",
+    }),
+  ].join("\n");
+  const badLogs = JSON.stringify({
+    cacheControl: "public, max-age=300, must-revalidate",
+    contentType: "text/html",
+    crawler: "Googlebot",
+    path: "/missing-page/",
+    robots: "noindex, nofollow",
+    status: 404,
+    type: "seo-access",
+  });
+  const good = spawnSync(process.execPath, [analyzerPath], {
+    encoding: "utf8",
+    input: goodLogs,
+  });
+  const bad = spawnSync(process.execPath, [analyzerPath], {
+    encoding: "utf8",
+    input: badLogs,
+  });
+
+  if (good.status !== 0 || !good.stdout.includes("SEO log analysis passed")) {
+    fail(
+      `SEO log analyzer did not pass valid sample logs: ${good.stderr || good.stdout}`,
+    );
+  }
+
+  if (bad.status === 0 || !bad.stderr.includes("crawler-facing 404")) {
+    fail("SEO log analyzer did not fail crawler-facing 404 sample logs");
   }
 }
 
@@ -1702,6 +1776,7 @@ function audit() {
   auditWorkerDiscoveryRedirects();
   auditExternalPerformanceMonitorConfig();
   auditSeoMonitorConfig();
+  auditSeoLogAnalyzer();
 
   const pages = auditSitemap();
   const metadataIndex = {
