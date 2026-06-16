@@ -472,6 +472,12 @@ async function checkRedirects() {
     [`http://${SITE_HOST}/`, `${SITE_ORIGIN}/`],
     [`http://www.${SITE_HOST}/`, `${SITE_ORIGIN}/`],
     [`${SITE_ORIGIN}/index.html`, `${SITE_ORIGIN}/`],
+    [`${SITE_ORIGIN}/sitemap.xml`, `${SITE_ORIGIN}/sitemap-index.xml`],
+    [`${SITE_ORIGIN}/feed`, `${SITE_ORIGIN}/feed.xml`],
+    [`${SITE_ORIGIN}/rss`, `${SITE_ORIGIN}/feed.xml`],
+    [`${SITE_ORIGIN}/rss.xml`, `${SITE_ORIGIN}/feed.xml`],
+    [`${SITE_ORIGIN}/atom`, `${SITE_ORIGIN}/feed.xml`],
+    [`${SITE_ORIGIN}/atom.xml`, `${SITE_ORIGIN}/feed.xml`],
     [`${SITE_ORIGIN}/about/index.html`, `${SITE_ORIGIN}/about/`],
     [
       `${SITE_ORIGIN}/batches/spring-2026/wayfinder/index.html`,

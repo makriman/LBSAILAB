@@ -147,6 +147,12 @@ const LEGACY_URLS = [
 const CANONICAL_REDIRECTS = [
   [`http://${SITE_HOST}/about`, `${SITE_ORIGIN}/about/`],
   [`https://www.${SITE_HOST}/about`, `${SITE_ORIGIN}/about/`],
+  [`${SITE_ORIGIN}/sitemap.xml`, `${SITE_ORIGIN}/sitemap-index.xml`],
+  [`${SITE_ORIGIN}/feed`, `${SITE_ORIGIN}/feed.xml`],
+  [`${SITE_ORIGIN}/rss`, `${SITE_ORIGIN}/feed.xml`],
+  [`${SITE_ORIGIN}/rss.xml`, `${SITE_ORIGIN}/feed.xml`],
+  [`${SITE_ORIGIN}/atom`, `${SITE_ORIGIN}/feed.xml`],
+  [`${SITE_ORIGIN}/atom.xml`, `${SITE_ORIGIN}/feed.xml`],
   [`${SITE_ORIGIN}/About`, `${SITE_ORIGIN}/about/`],
   [`${SITE_ORIGIN}/index.html`, `${SITE_ORIGIN}/`],
   [`${SITE_ORIGIN}/about/index.html`, `${SITE_ORIGIN}/about/`],

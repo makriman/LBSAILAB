@@ -425,6 +425,23 @@ function auditWorkerSeoAccessLogging() {
   }
 }
 
+function auditWorkerDiscoveryRedirects() {
+  const worker = readFileSync(path.join(ROOT, "src", "worker.ts"), "utf8");
+
+  for (const [source, target] of [
+    ["/sitemap.xml", "/sitemap-index.xml"],
+    ["/feed", "/feed.xml"],
+    ["/rss", "/feed.xml"],
+    ["/rss.xml", "/feed.xml"],
+    ["/atom", "/feed.xml"],
+    ["/atom.xml", "/feed.xml"],
+  ]) {
+    if (!worker.includes(`["${source}", "${target}"]`)) {
+      fail(`Worker discovery redirects missing ${source} to ${target}`);
+    }
+  }
+}
+
 function auditExternalPerformanceMonitorConfig() {
   const packageJson = readFileSync(path.join(ROOT, "package.json"), "utf8");
   const workflow = readFileSync(
@@ -1650,6 +1667,7 @@ function audit() {
   auditErrorDocument();
   auditWorkerRetiredPaths();
   auditWorkerSeoAccessLogging();
+  auditWorkerDiscoveryRedirects();
   auditExternalPerformanceMonitorConfig();
   auditSeoMonitorConfig();
 

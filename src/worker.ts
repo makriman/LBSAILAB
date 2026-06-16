@@ -107,6 +107,12 @@ const SEO_CRAWLER_USER_AGENTS = [
 ];
 const LEGACY_REDIRECTS = new Map([
   ["/home", "/"],
+  ["/sitemap.xml", "/sitemap-index.xml"],
+  ["/feed", "/feed.xml"],
+  ["/rss", "/feed.xml"],
+  ["/rss.xml", "/feed.xml"],
+  ["/atom", "/feed.xml"],
+  ["/atom.xml", "/feed.xml"],
   ["/cohort", "/batches/"],
   ["/cohorts", "/batches/"],
   ["/cohort-01", "/batches/spring-2026/"],
