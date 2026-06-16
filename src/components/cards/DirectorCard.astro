@@ -18,7 +18,7 @@ const director = {
     href={director.profileUrl}
     aria-label={`Open ${director.name} profile`}
     target="_blank"
-    rel="noreferrer"
+    rel="noopener noreferrer"
   >
     <img
       src={director.image}
@@ -35,7 +35,7 @@ const director = {
     <p class="director-role">{director.role}</p>
     <p>{director.focus}</p>
     <div class="director-links">
-      <a href={director.profileUrl} target="_blank" rel="noreferrer">
+      <a href={director.profileUrl} target="_blank" rel="noopener noreferrer">
         LBS profile
       </a>
     </div>

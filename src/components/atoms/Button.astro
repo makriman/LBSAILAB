@@ -18,7 +18,7 @@ const {
   class:list={["button", `button-${variant}`, `button-${size}`]}
   href={href}
   target={external ? "_blank" : undefined}
-  rel={external ? "noreferrer" : undefined}
+  rel={external ? "noopener noreferrer" : undefined}
 >
   <span><slot /></span>
   <span class="button-icon" aria-hidden="true">-></span>

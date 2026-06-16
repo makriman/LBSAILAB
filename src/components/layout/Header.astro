@@ -61,7 +61,12 @@ const currentPath = Astro.url.pathname;
           })
         }
       </ul>
-      <a class="dsai-link" href={DSAI_URL} target="_blank" rel="noreferrer">
+      <a
+        class="dsai-link"
+        href={DSAI_URL}
+        target="_blank"
+        rel="noopener noreferrer"
+      >
         DSAI Initiative
       </a>
       <Button href="/apply/" variant="primary" size="sm"

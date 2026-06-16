@@ -64,7 +64,7 @@ const year = new Date().getFullYear();
       <nav aria-label="Institution links" class="institution-links">
         {
           institutionLinks.map((link) => (
-            <a href={link.href} target="_blank" rel="noreferrer">
+            <a href={link.href} target="_blank" rel="noopener noreferrer">
               {link.label}
             </a>
           ))
@@ -75,7 +75,7 @@ const year = new Date().getFullYear();
         <span>Social</span>
         {
           socialLinks.map((link) => (
-            <a href={link.href} target="_blank" rel="noreferrer">
+            <a href={link.href} target="_blank" rel="noopener noreferrer">
               {link.label}
             </a>
           ))
@@ -91,7 +91,11 @@ const year = new Date().getFullYear();
             <a
               href={link.href}
               target={link.href.startsWith("http") ? "_blank" : undefined}
-              rel={link.href.startsWith("http") ? "noreferrer" : undefined}
+              rel={
+                link.href.startsWith("http")
+                  ? "noopener noreferrer"
+                  : undefined
+              }
             >
               {link.label}
             </a>

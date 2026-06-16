@@ -567,7 +567,8 @@ function extractPageLinks(html, pageUrl, sitemapPages) {
   const sameOriginNonPages = new Set();
 
   for (const tag of allTags(html, "a")) {
-    const href = attrs(tag).href || "";
+    const link = attrs(tag);
+    const href = link.href || "";
 
     if (!href || href.startsWith("mailto:") || href.startsWith("tel:"))
       continue;
@@ -580,6 +581,17 @@ function extractPageLinks(html, pageUrl, sitemapPages) {
     if (!normalized) continue;
 
     if (!sameOrigin(normalized)) {
+      const rel = link.rel || "";
+
+      if (
+        link.target === "_blank" &&
+        (!/\bnoopener\b/.test(rel) || !/\bnoreferrer\b/.test(rel))
+      ) {
+        fail(
+          `${pageUrl}: external new-tab link missing noopener noreferrer (${normalized})`,
+        );
+      }
+
       externalLinks.add(normalized);
       continue;
     }

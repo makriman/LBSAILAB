@@ -323,9 +323,9 @@ function auditHtmlIntegrity(html, url) {
     if (isExternalHttpUrl(href) && link.target === "_blank") {
       const rel = link.rel || "";
 
-      if (!/\b(noopener|noreferrer)\b/.test(rel)) {
+      if (!/\bnoopener\b/.test(rel) || !/\bnoreferrer\b/.test(rel)) {
         fail(
-          `${url}: external new-tab link missing noopener/noreferrer (${href})`,
+          `${url}: external new-tab link missing noopener noreferrer (${href})`,
         );
       }
     }

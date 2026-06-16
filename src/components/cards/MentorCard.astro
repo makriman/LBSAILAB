@@ -34,7 +34,11 @@ const { mentor } = Astro.props;
     {mentor.data.focus && <p class="mentor-focus">{mentor.data.focus}</p>}
     {
       mentor.data.linkedinUrl && (
-        <a href={mentor.data.linkedinUrl} target="_blank" rel="noreferrer">
+        <a
+          href={mentor.data.linkedinUrl}
+          target="_blank"
+          rel="noopener noreferrer"
+        >
           Profile
         </a>
       )
