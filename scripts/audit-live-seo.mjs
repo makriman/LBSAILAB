@@ -14,7 +14,15 @@ const INDEXABLE_META_ROBOTS =
   "index,follow,max-snippet:-1,max-image-preview:large,max-video-preview:-1";
 const NOINDEX_ROBOTS = "noindex, nofollow";
 const EXPECTED_LAST_MODIFIED = "Tue, 16 Jun 2026 00:00:00 GMT";
+const EXPECTED_DATE_MODIFIED = "2026-06-16";
 const EXPECTED_UPDATED_TIME = "2026-06-16T00:00:00.000Z";
+const EXPECTED_ORGANIZATION_TOPICS = [
+  "AI product development",
+  "AI-assisted application development",
+  "London Business School workflows",
+  "Product prototyping",
+  "Applied AI education",
+];
 const REQUIRED_SECURITY_HEADERS = [
   "content-security-policy",
   "cross-origin-opener-policy",
@@ -282,6 +290,12 @@ function normalizeUrl(url, base = SITE_ORIGIN) {
 
 function sameOrigin(url) {
   return new URL(url).origin === SITE_ORIGIN;
+}
+
+function isJsonLdType(item, type) {
+  const itemType = item?.["@type"];
+
+  return Array.isArray(itemType) ? itemType.includes(type) : itemType === type;
 }
 
 function isCanonicalPageUrl(url) {
@@ -978,6 +992,423 @@ function assertCanonicalLinkHeader(response, url) {
   }
 }
 
+function parseJsonLdItems(html, url) {
+  const items = [];
+  const tags = fullTags(html, "script").filter((tag) => {
+    const openTag = tag.match(/^<script\b[^>]*>/i)?.[0] || tag;
+    const attributes = attrs(openTag);
+
+    return (attributes.type || "").toLowerCase() === "application/ld+json";
+  });
+
+  if (!tags.length) {
+    fail(`${url}: missing JSON-LD`);
+    return items;
+  }
+
+  for (const tag of tags) {
+    const json = tag
+      .replace(/^<script\b[^>]*>/i, "")
+      .replace(/<\/script>$/i, "");
+
+    try {
+      const parsed = JSON.parse(json);
+      const parsedItems = Array.isArray(parsed) ? parsed : [parsed];
+
+      for (const item of parsedItems) {
+        if (Array.isArray(item?.["@graph"])) {
+          items.push(...item["@graph"]);
+        } else {
+          items.push(item);
+        }
+      }
+    } catch (error) {
+      fail(`${url}: invalid JSON-LD (${error.message})`);
+    }
+  }
+
+  for (const item of items) {
+    if (item?.["@context"] && item["@context"] !== "https://schema.org") {
+      fail(`${url}: JSON-LD uses unexpected @context ${item["@context"]}`);
+    }
+
+    if (!item?.["@type"]) {
+      fail(`${url}: JSON-LD item is missing @type`);
+    }
+  }
+
+  return items;
+}
+
+function auditBreadcrumbJsonLd(url, items) {
+  const breadcrumb = items.find((item) => isJsonLdType(item, "BreadcrumbList"));
+
+  if (!breadcrumb) {
+    fail(`${url}: missing BreadcrumbList JSON-LD`);
+    return;
+  }
+
+  const elements = Array.isArray(breadcrumb.itemListElement)
+    ? breadcrumb.itemListElement
+    : [];
+
+  if (!elements.length) {
+    fail(`${url}: BreadcrumbList is empty`);
+    return;
+  }
+
+  elements.forEach((entry, index) => {
+    if (entry?.["@type"] !== "ListItem") {
+      fail(`${url}: breadcrumb entry ${index + 1} is not a ListItem`);
+    }
+
+    if (entry?.position !== index + 1) {
+      fail(`${url}: breadcrumb entry ${index + 1} has wrong position`);
+    }
+
+    if (!entry?.name) {
+      fail(`${url}: breadcrumb entry ${index + 1} is missing name`);
+    }
+
+    const itemUrl = normalizeUrl(entry?.item || "", url);
+
+    if (!itemUrl || !sameOrigin(itemUrl)) {
+      fail(`${url}: breadcrumb entry ${index + 1} is not same-origin`);
+    }
+  });
+
+  const first = elements[0];
+  const last = elements.at(-1);
+
+  if (normalizeUrl(first?.item || "", url) !== `${SITE_ORIGIN}/`) {
+    fail(`${url}: breadcrumb should start at site home`);
+  }
+
+  if (normalizeUrl(last?.item || "", url) !== url) {
+    fail(`${url}: breadcrumb should end at canonical page URL`);
+  }
+}
+
+function auditWebPageJsonLd(url, html, items) {
+  const webPage = items.find(
+    (item) =>
+      isJsonLdType(item, "WebPage") &&
+      item?.["@id"] === `${url}#webpage` &&
+      item?.url === url,
+  );
+
+  if (!webPage) {
+    fail(`${url}: missing canonical WebPage JSON-LD`);
+    return;
+  }
+
+  if (!webPage.name) fail(`${url}: WebPage JSON-LD missing name`);
+
+  const description = metaContent(html, "description");
+
+  if (webPage.description !== description) {
+    fail(`${url}: WebPage description does not match meta description`);
+  }
+
+  if (webPage.inLanguage !== "en-GB") {
+    fail(`${url}: WebPage inLanguage should be en-GB`);
+  }
+
+  if (webPage.isPartOf?.["@id"] !== `${SITE_ORIGIN}/#website`) {
+    fail(`${url}: WebPage missing site relationship`);
+  }
+
+  if (webPage.about?.["@id"] !== `${SITE_ORIGIN}/#organization`) {
+    fail(`${url}: WebPage missing organization relationship`);
+  }
+
+  if (webPage.dateModified !== EXPECTED_DATE_MODIFIED) {
+    fail(`${url}: WebPage dateModified does not match site update time`);
+  }
+
+  const ogImage = metaContent(html, "og:image");
+
+  if (webPage.primaryImageOfPage?.url !== ogImage) {
+    fail(`${url}: WebPage primary image does not match og:image`);
+  }
+
+  if (
+    webPage.primaryImageOfPage?.width !== 1200 ||
+    webPage.primaryImageOfPage?.height !== 630
+  ) {
+    fail(`${url}: WebPage primary image dimensions should be 1200x630`);
+  }
+}
+
+function auditItemListJsonLd(url, items, sitemapPages) {
+  const itemLists = items.filter((item) => isJsonLdType(item, "ItemList"));
+
+  for (const itemList of itemLists) {
+    const elements = Array.isArray(itemList.itemListElement)
+      ? itemList.itemListElement
+      : [];
+
+    if (!itemList.name) {
+      fail(`${url}: ItemList JSON-LD missing name`);
+    }
+
+    if (!elements.length) {
+      fail(`${url}: ItemList JSON-LD is empty`);
+      continue;
+    }
+
+    elements.forEach((entry, index) => {
+      if (entry?.["@type"] !== "ListItem") {
+        fail(`${url}: ItemList entry ${index + 1} is not a ListItem`);
+      }
+
+      if (entry?.position !== index + 1) {
+        fail(`${url}: ItemList entry ${index + 1} has wrong position`);
+      }
+
+      const entryUrl = normalizeUrl(entry?.url || entry?.item?.url || "", url);
+
+      if (!entryUrl) {
+        fail(`${url}: ItemList entry ${index + 1} missing URL`);
+      } else if (sameOrigin(entryUrl) && !sitemapPages.has(entryUrl)) {
+        fail(`${url}: ItemList entry ${entryUrl} is not in the sitemap`);
+      }
+    });
+  }
+
+  const pathname = new URL(url).pathname;
+
+  if (["/batches/", "/batches/spring-2026/"].includes(pathname)) {
+    const teamList = itemLists.find((item) =>
+      /Batch teams/i.test(item.name || ""),
+    );
+    const elements = Array.isArray(teamList?.itemListElement)
+      ? teamList.itemListElement
+      : [];
+
+    if (elements.length !== 9) {
+      fail(
+        `${url}: expected 9 teams in batch ItemList, found ${elements.length}`,
+      );
+    }
+  }
+
+  if (pathname === "/mentors/") {
+    const mentorList = itemLists.find(
+      (item) => item.name === "LBS AI Lab mentors",
+    );
+    const elements = Array.isArray(mentorList?.itemListElement)
+      ? mentorList.itemListElement
+      : [];
+
+    if (elements.length !== 5) {
+      fail(
+        `${url}: expected 5 people in mentors ItemList, found ${elements.length}`,
+      );
+    }
+  }
+}
+
+function auditHomeJsonLd(url, items) {
+  if (url !== `${SITE_ORIGIN}/`) return;
+
+  const website = items.find(
+    (item) =>
+      isJsonLdType(item, "WebSite") &&
+      item?.["@id"] === `${SITE_ORIGIN}/#website`,
+  );
+  const organization = items.find(
+    (item) =>
+      isJsonLdType(item, "EducationalOrganization") &&
+      item?.["@id"] === `${SITE_ORIGIN}/#organization`,
+  );
+
+  if (!website) {
+    fail(`${url}: missing WebSite JSON-LD`);
+  } else {
+    if (website.url !== `${SITE_ORIGIN}/`) {
+      fail(`${url}: WebSite JSON-LD has wrong URL`);
+    }
+
+    if (website.publisher?.["@id"] !== `${SITE_ORIGIN}/#organization`) {
+      fail(`${url}: WebSite JSON-LD missing publisher organization`);
+    }
+  }
+
+  if (!organization) {
+    fail(`${url}: missing EducationalOrganization JSON-LD`);
+    return;
+  }
+
+  if (organization.url !== `${SITE_ORIGIN}/`) {
+    fail(`${url}: organization JSON-LD has wrong URL`);
+  }
+
+  if (
+    organization.logo?.url !== `${SITE_ORIGIN}/favicon/apple-touch-icon.png`
+  ) {
+    fail(`${url}: organization JSON-LD missing canonical logo`);
+  }
+
+  if (organization.logo?.width !== 180 || organization.logo?.height !== 180) {
+    fail(`${url}: organization logo JSON-LD should include dimensions`);
+  }
+
+  if (organization.image?.url !== `${SITE_ORIGIN}/og-default.png`) {
+    fail(`${url}: organization JSON-LD missing social image`);
+  }
+
+  const topics = Array.isArray(organization.knowsAbout)
+    ? organization.knowsAbout
+    : [];
+
+  for (const topic of EXPECTED_ORGANIZATION_TOPICS) {
+    if (!topics.includes(topic)) {
+      fail(`${url}: organization JSON-LD missing knowsAbout "${topic}"`);
+    }
+  }
+}
+
+function auditPartnerJsonLd(url, items) {
+  const pathname = new URL(url).pathname;
+
+  if (!["/batches/", "/batches/spring-2026/"].includes(pathname)) return;
+
+  const partner = items.find(
+    (item) =>
+      isJsonLdType(item, "Organization") &&
+      item?.["@id"] === "https://deepmind.google/#organization",
+  );
+
+  if (!partner) {
+    fail(`${url}: missing Google DeepMind partner Organization JSON-LD`);
+    return;
+  }
+
+  if (
+    partner.name !== "Google DeepMind" ||
+    partner.url !== "https://deepmind.google/"
+  ) {
+    fail(`${url}: invalid Google DeepMind partner JSON-LD`);
+  }
+}
+
+function auditMentorJsonLd(url, items) {
+  if (new URL(url).pathname !== "/mentors/") return;
+
+  const people = items.filter((item) => isJsonLdType(item, "Person"));
+
+  if (people.length !== 5) {
+    fail(
+      `${url}: expected 5 mentor Person JSON-LD nodes, found ${people.length}`,
+    );
+  }
+
+  for (const person of people) {
+    if (!person.name || !person.description || !person.jobTitle) {
+      fail(`${url}: mentor Person JSON-LD missing profile fields`);
+    }
+
+    if (!person.sameAs?.startsWith("https://")) {
+      fail(`${url}: mentor Person JSON-LD missing HTTPS sameAs`);
+    }
+
+    if (person.worksFor?.["@id"] !== `${SITE_ORIGIN}/#organization`) {
+      fail(`${url}: mentor Person JSON-LD missing worksFor`);
+    }
+
+    if (person.affiliation?.["@id"] !== `${SITE_ORIGIN}/#organization`) {
+      fail(`${url}: mentor Person JSON-LD missing affiliation`);
+    }
+
+    if (
+      !normalizeUrl(person.image || "", url)?.startsWith(
+        `${SITE_ORIGIN}/mentors/`,
+      )
+    ) {
+      fail(`${url}: mentor Person JSON-LD missing same-origin image`);
+    }
+  }
+}
+
+function isTeamPageUrl(url) {
+  return /^\/batches\/spring-2026\/[^/]+\/$/.test(new URL(url).pathname);
+}
+
+function auditTeamJsonLd(url, html, items) {
+  if (!isTeamPageUrl(url)) return;
+
+  const team = items.find(
+    (item) =>
+      isJsonLdType(item, "Organization") &&
+      item?.["@id"] === `${url}#team` &&
+      item?.url === url,
+  );
+
+  if (!team) {
+    fail(`${url}: missing team Organization JSON-LD`);
+    return;
+  }
+
+  if (!team.name || !team.description || !team.knowsAbout) {
+    fail(`${url}: team Organization JSON-LD missing core fields`);
+  }
+
+  if (team.parentOrganization?.["@id"] !== `${SITE_ORIGIN}/#organization`) {
+    fail(`${url}: team Organization JSON-LD missing parent organization`);
+  }
+
+  const members = Array.isArray(team.member) ? team.member : [];
+
+  if (!members.length) {
+    fail(`${url}: team Organization JSON-LD missing members`);
+  }
+
+  for (const member of members) {
+    if (!isJsonLdType(member, "Person") || !member.name || !member.jobTitle) {
+      fail(`${url}: invalid team member Person JSON-LD`);
+    }
+  }
+
+  const prototype = items.find(
+    (item) =>
+      isJsonLdType(item, "CreativeWork") &&
+      item?.["@id"] === `${url}#prototype`,
+  );
+  const hasProductLink = html.includes("Open prototype");
+
+  if (hasProductLink && !prototype) {
+    fail(`${url}: missing prototype CreativeWork JSON-LD`);
+    return;
+  }
+
+  if (!hasProductLink && prototype) {
+    fail(`${url}: prototype CreativeWork JSON-LD present without product link`);
+  }
+
+  if (!prototype) return;
+
+  if (!prototype.url?.startsWith("https://")) {
+    fail(`${url}: prototype CreativeWork JSON-LD missing HTTPS URL`);
+  }
+
+  if (prototype.creator?.["@id"] !== `${url}#team`) {
+    fail(`${url}: prototype CreativeWork JSON-LD missing team creator`);
+  }
+}
+
+function auditJsonLd(url, html, sitemapPages) {
+  const items = parseJsonLdItems(html, url);
+
+  auditWebPageJsonLd(url, html, items);
+  auditBreadcrumbJsonLd(url, items);
+  auditItemListJsonLd(url, items, sitemapPages);
+  auditHomeJsonLd(url, items);
+  auditPartnerJsonLd(url, items);
+  auditMentorJsonLd(url, items);
+  auditTeamJsonLd(url, html, items);
+}
+
 function auditScriptHygiene(html, pageUrl) {
   for (const tag of allTags(html, "script")) {
     const script = attrs(tag);
@@ -1023,6 +1454,7 @@ async function auditPage(url, sitemapPages, inbound, assetUrls, socialImages) {
   assertShortCache(response, url);
   assertCanonicalLinkHeader(response, url);
   assertPageMetadata(body, url);
+  auditJsonLd(url, body, sitemapPages);
   auditScriptHygiene(body, url);
 
   const { links, assets, externalLinks, sameOriginNonPages } = extractPageLinks(
