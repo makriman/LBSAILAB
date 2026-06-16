@@ -508,6 +508,10 @@ function auditWorkerRetiredPaths() {
       "Worker should short-cache missing assets and other 4xx/5xx responses",
     );
   }
+
+  if (!worker.includes("if (status >= 400) return true;")) {
+    fail("Worker should set Last-Modified on 4xx/5xx responses");
+  }
 }
 
 function auditWorkerSeoAccessLogging() {

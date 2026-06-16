@@ -458,11 +458,10 @@ function shouldSetLastModified(
   headers: Headers,
   status: number,
 ): boolean {
+  if (status >= 400) return true;
   if (isLongLivedAsset(pathname)) return false;
 
   return (
-    status === 404 ||
-    status === 410 ||
     isHtmlResponse(headers) ||
     isCrawlerUtilityPath(pathname) ||
     isNoindexPath(pathname)
