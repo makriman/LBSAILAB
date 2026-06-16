@@ -872,6 +872,8 @@ function auditSeoMonitorConfig() {
     "assertShortCache(imageResponse, imageSitemapUrl)",
     "auditFeedCanonicalEntries",
     "auditJsonLdGraphHygiene",
+    "manifestRedirects",
+    "../public/_redirects",
     "auditDuplicateOriginRedirects(pages)",
     "auditMissingFileResources",
     "missing-seo-audit-file.css",

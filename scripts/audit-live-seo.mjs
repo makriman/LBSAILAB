@@ -1,6 +1,7 @@
 import { lookup as systemLookup, setServers } from "node:dns";
 import { createHash } from "node:crypto";
 import { Resolver } from "node:dns/promises";
+import { readFileSync } from "node:fs";
 import http from "node:http";
 import https from "node:https";
 
@@ -11,6 +12,7 @@ const SITE_HOST = SITE.host;
 const GOOGLE_SITE_VERIFICATION_FILE = (
   process.env.GOOGLE_SITE_VERIFICATION_FILE || ""
 ).trim();
+const REDIRECTS_FILE = new URL("../public/_redirects", import.meta.url);
 const BING_SITE_VERIFICATION_TOKEN = (
   process.env.BING_SITE_VERIFICATION_TOKEN || ""
 ).trim();
@@ -2456,6 +2458,42 @@ async function auditRedirects() {
     const source = `${SITE_ORIGIN}${path}`;
     await auditRedirectTarget(source, expected);
   }
+
+  for (const { source, target } of manifestRedirects()) {
+    await auditRedirectTarget(source, target);
+  }
+}
+
+function manifestRedirects() {
+  const redirects = [];
+  const manifest = readFileSync(REDIRECTS_FILE, "utf8");
+
+  for (const [index, rawLine] of manifest.split(/\r?\n/).entries()) {
+    const line = rawLine.trim();
+
+    if (!line || line.startsWith("#")) continue;
+
+    const [source, target, status = "301"] = line.split(/\s+/);
+
+    if (!source || !target) {
+      fail(`public/_redirects line ${index + 1}: missing source or target`);
+      continue;
+    }
+
+    if (status !== "301") {
+      fail(`public/_redirects line ${index + 1}: expected 301, got ${status}`);
+      continue;
+    }
+
+    if (source.includes(":") || target.includes(":")) continue;
+
+    redirects.push({
+      source: new URL(source, SITE_ORIGIN).toString(),
+      target: new URL(target, SITE_ORIGIN).toString(),
+    });
+  }
+
+  return redirects;
 }
 
 async function auditRedirectTarget(source, expected) {
