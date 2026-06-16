@@ -768,6 +768,99 @@ function auditWorkerDiscoveryRedirects() {
   }
 }
 
+function normalizedRedirectSource(source) {
+  if (source === "/") return "/";
+
+  return source.replace(/\/+$/, "").toLowerCase() || "/";
+}
+
+function defaultCanonicalRedirectTarget(source) {
+  const path = source.toLowerCase();
+  const lastSegment = path.split("/").at(-1) || "";
+
+  if (path === "/" || path.endsWith("/") || lastSegment.includes(".")) {
+    return path;
+  }
+
+  return `${path}/`;
+}
+
+function parseWorkerLegacyRedirects(worker) {
+  const start = worker.indexOf("const LEGACY_REDIRECTS = new Map([");
+  const end = worker.indexOf("]);", start);
+  const redirects = new Map();
+
+  if (start === -1 || end === -1) {
+    fail("Worker legacy redirect map could not be found");
+    return redirects;
+  }
+
+  const source = worker.slice(start, end);
+
+  for (const match of source.matchAll(
+    /\[\s*"([^"]+)"\s*,\s*"([^"]+)"\s*,?\s*\]/g,
+  )) {
+    redirects.set(normalizedRedirectSource(match[1]), match[2]);
+  }
+
+  return redirects;
+}
+
+function parseStaticRedirectManifest() {
+  const manifest = readFileSync(
+    path.join(ROOT, "public", "_redirects"),
+    "utf8",
+  );
+  const redirects = [];
+
+  for (const [index, rawLine] of manifest.split(/\r?\n/).entries()) {
+    const line = rawLine.trim();
+
+    if (!line || line.startsWith("#")) continue;
+
+    const [source, target, status = "301"] = line.split(/\s+/);
+
+    if (!source || !target || status !== "301") continue;
+
+    redirects.push({ index: index + 1, source, target });
+  }
+
+  return redirects;
+}
+
+function auditWorkerRedirectManifestParity() {
+  const worker = readFileSync(path.join(ROOT, "src", "worker.ts"), "utf8");
+  const workerRedirects = parseWorkerLegacyRedirects(worker);
+  const manifestRedirects = parseStaticRedirectManifest();
+
+  if (!worker.includes("const oldTeamMatch = normalizedPath.match")) {
+    fail(
+      "Worker legacy redirects should preserve /teams/:slug redirect support",
+    );
+  }
+
+  for (const { index, source, target } of manifestRedirects) {
+    if (source.includes(":") || target.includes(":")) continue;
+    if (target === defaultCanonicalRedirectTarget(source)) continue;
+
+    const normalizedSource = normalizedRedirectSource(source);
+    const workerTarget = workerRedirects.get(normalizedSource);
+
+    if (!workerTarget) {
+      fail(
+        `public/_redirects line ${index}: ${source} is missing from Worker LEGACY_REDIRECTS`,
+      );
+      continue;
+    }
+
+    if (workerTarget !== target) {
+      fail(
+        `public/_redirects line ${index}: ${source} redirects to ${target}, but Worker redirects to ${workerTarget}`,
+      );
+    }
+  }
+}
+
 function auditSearchEngineVerificationSupport() {
   const layout = readFileSync(
     path.join(ROOT, "src", "layouts", "BaseLayout.astro"),
@@ -2808,6 +2901,7 @@ function audit() {
   auditWorkerSeoAccessLogging();
   auditWorkerImageIndexingHeaders();
   auditWorkerDiscoveryRedirects();
+  auditWorkerRedirectManifestParity();
   auditSearchEngineVerificationSupport();
   auditExternalPerformanceMonitorConfig();
   auditSeoMonitorConfig();
