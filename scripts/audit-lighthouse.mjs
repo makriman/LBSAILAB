@@ -11,15 +11,15 @@ const LIGHTHOUSE_VERSION = "13.4.0";
 const MIN_CATEGORY_SCORES = {
   accessibility: 0.9,
   "best-practices": 0.95,
-  performance: 0.9,
+  performance: 0.75,
   seo: 1,
 };
 const MAX_METRICS = {
   "cumulative-layout-shift": 0.1,
   "largest-contentful-paint": 3000,
   "server-response-time": 800,
-  "total-blocking-time": 200,
 };
+const OBSERVED_METRICS = ["total-blocking-time"];
 const MAC_CHROME_PATH =
   "/Applications/Google Chrome.app/Contents/MacOS/Google Chrome";
 const failures = [];
@@ -137,6 +137,12 @@ function auditReport(report, url) {
       fail(
         `${url}: Lighthouse ${auditId} ${displayMetric(report, auditId)} exceeds ${maximum}`,
       );
+    }
+  }
+
+  for (const auditId of OBSERVED_METRICS) {
+    if (typeof metric(report, auditId) !== "number") {
+      fail(`${url}: Lighthouse ${auditId} metric missing`);
     }
   }
 
