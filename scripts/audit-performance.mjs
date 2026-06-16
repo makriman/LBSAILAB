@@ -454,7 +454,6 @@ async function auditUtilityCompression() {
     `${SITE_ORIGIN}/sitemap-index.xml`,
     `${SITE_ORIGIN}/sitemap-0.xml`,
     `${SITE_ORIGIN}/image-sitemap.xml`,
-    `${SITE_ORIGIN}/feed.xml`,
     `${SITE_ORIGIN}/llms.txt`,
     `${SITE_ORIGIN}/llms-full.txt`,
   ]) {

@@ -155,11 +155,7 @@ const jsonHeaders = {
 export default {
   async fetch(request: Request, env: Env): Promise<Response> {
     const url = new URL(request.url);
-    const response = withCrawlerUtilityCompression(
-      request,
-      url,
-      await handleRequest(request, env, url),
-    );
+    const response = await handleRequest(request, env, url);
 
     logSeoAccess(request, url, response);
 
@@ -429,79 +425,6 @@ function withSeoHeaders(response: Response, pathname: string): Response {
     statusText: response.statusText,
     headers,
   });
-}
-
-function withCrawlerUtilityCompression(
-  request: Request,
-  url: URL,
-  response: Response,
-): Response {
-  if (!shouldGzipCrawlerUtility(request, url.pathname, response)) {
-    return response;
-  }
-
-  const headers = new Headers(response.headers);
-  headers.set("Content-Encoding", "gzip");
-  appendVary(headers, "Accept-Encoding");
-  headers.delete("Content-Length");
-  headers.delete("ETag");
-
-  return new Response(
-    response.body?.pipeThrough(new CompressionStream("gzip")) ?? null,
-    {
-      headers,
-      status: response.status,
-      statusText: response.statusText,
-    },
-  );
-}
-
-function shouldGzipCrawlerUtility(
-  request: Request,
-  pathname: string,
-  response: Response,
-): boolean {
-  if (request.method !== "GET") return false;
-  if (response.status !== 200 || !response.body) return false;
-  if (response.headers.has("Content-Encoding")) return false;
-  if (!/\bgzip\b/i.test(request.headers.get("Accept-Encoding") || "")) {
-    return false;
-  }
-  if (!isCrawlerUtilityPath(pathname)) return false;
-
-  return isCompressibleCrawlerUtilityType(
-    response.headers.get("Content-Type") || "",
-  );
-}
-
-function isCompressibleCrawlerUtilityType(contentType: string): boolean {
-  const type = contentType.split(";")[0]?.trim().toLowerCase() || "";
-
-  return (
-    type.startsWith("text/") ||
-    type === "application/xml" ||
-    type === "application/atom+xml"
-  );
-}
-
-function appendVary(headers: Headers, value: string): void {
-  const existing = headers.get("Vary");
-
-  if (!existing) {
-    headers.set("Vary", value);
-    return;
-  }
-
-  if (
-    existing
-      .split(",")
-      .map((item) => item.trim().toLowerCase())
-      .includes(value.toLowerCase())
-  ) {
-    return;
-  }
-
-  headers.set("Vary", `${existing}, ${value}`);
 }
 
 function setHeaders(headers: Headers, values: Record<string, string>): void {
