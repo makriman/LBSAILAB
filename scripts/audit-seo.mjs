@@ -789,6 +789,59 @@ function auditWorkerImageIndexingHeaders() {
   }
 }
 
+function auditApplicationsApiHygiene() {
+  const worker = readFileSync(path.join(ROOT, "src", "worker.ts"), "utf8");
+  const liveAudit = readFileSync(
+    path.join(ROOT, "scripts", "audit-live-seo.mjs"),
+    "utf8",
+  );
+
+  for (const expected of [
+    "MAX_APPLICATION_PAYLOAD_BYTES",
+    'return json({ error: "Please submit the form again." }, 413)',
+    "if (asString(body.website))",
+    "return json({ ok: true }, 202)",
+    "if (!env.GITHUB_TOKEN)",
+  ]) {
+    if (!worker.includes(expected)) {
+      fail(`Worker applications API hygiene is missing ${expected}`);
+    }
+  }
+
+  const handlerStart = worker.indexOf("async function handleCreateApplication");
+  const payloadCheck = worker.indexOf(
+    "contentLength > MAX_APPLICATION_PAYLOAD_BYTES",
+    handlerStart,
+  );
+  const bodyParse = worker.indexOf("body = (await request.json())", handlerStart);
+  const honeypotCheck = worker.indexOf("if (asString(body.website))", handlerStart);
+  const tokenCheck = worker.indexOf("if (!env.GITHUB_TOKEN)", handlerStart);
+
+  if (handlerStart === -1) {
+    fail("Worker applications API handler could not be found");
+  }
+
+  if (payloadCheck === -1 || bodyParse === -1 || payloadCheck > bodyParse) {
+    fail("Worker applications API should cap payload size before JSON parsing");
+  }
+
+  if (honeypotCheck === -1 || tokenCheck === -1 || honeypotCheck > tokenCheck) {
+    fail(
+      "Worker applications API should absorb honeypot submissions before backend configuration checks",
+    );
+  }
+
+  for (const expected of [
+    "assertNoindexNoStoreJsonApiResponse",
+    "auditApplicationsApiNoindex",
+    "expected honeypot POST 202",
+  ]) {
+    if (!liveAudit.includes(expected)) {
+      fail(`Live SEO applications API audit is missing ${expected}`);
+    }
+  }
+}
+
 function auditWorkerDiscoveryRedirects() {
   const worker = readFileSync(path.join(ROOT, "src", "worker.ts"), "utf8");
 
@@ -2961,6 +3014,7 @@ function audit() {
   auditWorkerRetiredPaths();
   auditWorkerSeoAccessLogging();
   auditWorkerImageIndexingHeaders();
+  auditApplicationsApiHygiene();
   auditWorkerDiscoveryRedirects();
   auditWorkerRedirectManifestParity();
   auditSearchEngineVerificationSupport();

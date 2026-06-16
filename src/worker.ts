@@ -52,6 +52,7 @@ const END_MARKER = "<!-- APPLICATIONS:END -->";
 const APPLICATION_RE = /<!-- application:(.*?) -->/gs;
 const APPLICATIONS_CACHE_KEY_VERSION = "2026-05-23-prefill-csv-submissions";
 const APPLICATIONS_CACHE_TTL_SECONDS = 60 * 60 * 24;
+const MAX_APPLICATION_PAYLOAD_BYTES = 8192;
 const MAX_VITALS_PAYLOAD_BYTES = 4096;
 const CANONICAL_HOST = "lbsailab.com";
 const INDEXNOW_KEY = "5e5bfddcc11447d381079b24b2d1e213";
@@ -722,14 +723,10 @@ async function handleCreateApplication(
   request: Request,
   env: Env,
 ): Promise<Response> {
-  if (!env.GITHUB_TOKEN) {
-    return json(
-      {
-        error:
-          "Applications are not configured yet. Add GITHUB_TOKEN to the Worker environment.",
-      },
-      503,
-    );
+  const contentLength = Number(request.headers.get("Content-Length") || "0");
+
+  if (contentLength > MAX_APPLICATION_PAYLOAD_BYTES) {
+    return json({ error: "Please submit the form again." }, 413);
   }
 
   let body: Record<string, unknown>;
@@ -741,6 +738,16 @@ async function handleCreateApplication(
 
   if (asString(body.website)) {
     return json({ ok: true }, 202);
+  }
+
+  if (!env.GITHUB_TOKEN) {
+    return json(
+      {
+        error:
+          "Applications are not configured yet. Add GITHUB_TOKEN to the Worker environment.",
+      },
+      503,
+    );
   }
 
   const submission = validateSubmission(body);

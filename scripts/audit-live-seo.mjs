@@ -984,6 +984,31 @@ function assertShortCache(response, url) {
   }
 }
 
+function assertNoindexNoStoreJsonApiResponse(response, url) {
+  const robots = response.headers.get("x-robots-tag") || "";
+  const cacheControl = response.headers.get("cache-control") || "";
+  const contentType = response.headers.get("content-type") || "";
+  const linkHeader = response.headers.get("link") || "";
+
+  assertSecurityHeaders(response, url);
+
+  if (robots !== NOINDEX_ROBOTS) {
+    fail(`${url}: expected ${NOINDEX_ROBOTS} X-Robots-Tag`);
+  }
+
+  if (!/no-store/i.test(cacheControl)) {
+    fail(`${url}: expected no-store cache`);
+  }
+
+  if (!contentType.includes("application/json")) {
+    fail(`${url}: expected JSON content type, got "${contentType}"`);
+  }
+
+  if (/\brel=["']?canonical\b/i.test(linkHeader)) {
+    fail(`${url}: API response must not include a canonical Link header`);
+  }
+}
+
 function assertLongCache(response, url) {
   const cacheControl = response.headers.get("cache-control") || "";
 
@@ -2783,6 +2808,53 @@ async function auditNoindexAndGone() {
   }
 }
 
+async function auditApplicationsApiNoindex() {
+  const applicationsUrl = `${SITE_ORIGIN}/api/applications`;
+  const { response: applicationsGet, body } = await text(applicationsUrl, {
+    accept: "application/json",
+  });
+
+  if (applicationsGet.status !== 200) {
+    fail(`${applicationsUrl}: expected GET 200, got ${applicationsGet.status}`);
+  }
+
+  assertNoindexNoStoreJsonApiResponse(applicationsGet, applicationsUrl);
+
+  try {
+    const parsed = JSON.parse(body);
+
+    if (!Array.isArray(parsed.applications)) {
+      fail(`${applicationsUrl}: expected applications array in GET response`);
+    }
+  } catch {
+    fail(`${applicationsUrl}: GET response is not valid JSON`);
+  }
+
+  const honeypotPost = await fetch(applicationsUrl, {
+    body: JSON.stringify({
+      consent: true,
+      course: "SEO audit",
+      email: "seo-audit@example.com",
+      idea: "Crawler hygiene verification",
+      name: "SEO audit",
+      website: "https://example.com",
+    }),
+    headers: {
+      "Content-Type": "application/json",
+      "User-Agent": "lbsailab-seo-audit/1.0",
+    },
+    method: "POST",
+  });
+
+  if (honeypotPost.status !== 202) {
+    fail(
+      `${applicationsUrl}: expected honeypot POST 202, got ${honeypotPost.status}`,
+    );
+  }
+
+  assertNoindexNoStoreJsonApiResponse(honeypotPost, applicationsUrl);
+}
+
 async function auditMissingPage() {
   const url = `${SITE_ORIGIN}/missing-seo-audit-page/`;
   const { response, body } = await text(url, { accept: "text/html" });
@@ -3074,6 +3146,7 @@ async function auditLiveSeo() {
   await auditCanonicalDuplicateRedirects(pages);
   await auditDuplicateOriginRedirects(pages);
   await auditNoindexAndGone();
+  await auditApplicationsApiNoindex();
   await auditMissingPage();
   await auditMissingFileResources();
   await auditErrorDocumentDirect();
