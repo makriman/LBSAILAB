@@ -63,6 +63,10 @@ const COMPRESSED_TEXT_PATHS = [
   "/sitemap-0.xml",
   "/image-sitemap.xml",
 ];
+const CRAWLER_USER_AGENTS = [
+  "Mozilla/5.0 AppleWebKit/537.36 (KHTML, like Gecko; compatible; Googlebot/2.1; +https://www.google.com/bot.html)",
+  "Mozilla/5.0 AppleWebKit/537.36 (KHTML, like Gecko; compatible; bingbot/2.0; +http://www.bing.com/bingbot.htm)",
+];
 const failures = [];
 const resolver = new Resolver();
 
@@ -524,6 +528,25 @@ async function checkDiscoveryFiles() {
   }
 }
 
+async function checkCrawlerCompatibility() {
+  for (const userAgent of CRAWLER_USER_AGENTS) {
+    for (const path of ["/", "/robots.txt", "/sitemap-index.xml"]) {
+      const url = `${SITE_ORIGIN}${path}`;
+      const response = await requestStatus(url, "HEAD", "", {
+        "User-Agent": userAgent,
+      });
+
+      if (response.status !== 200) {
+        fail(`${url}: crawler user-agent expected 200, got ${response.status}`);
+      }
+
+      if (path === "/") {
+        expectHeader(response, url, "x-robots-tag", "index, follow");
+      }
+    }
+  }
+}
+
 async function checkCdnAndCompression() {
   for (const path of COMPRESSED_TEXT_PATHS) {
     const url = `${SITE_ORIGIN}${path}`;
@@ -586,6 +609,7 @@ async function monitorSeo() {
   await checkNoindex();
   await checkGone();
   await checkDiscoveryFiles();
+  await checkCrawlerCompatibility();
   await checkCdnAndCompression();
   await checkVitalsEndpoint();
 

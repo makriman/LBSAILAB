@@ -31,6 +31,13 @@ interface WebVitalsPayload {
   visibilityState?: unknown;
 }
 
+interface RequestWithCloudflareContext extends Request {
+  cf?: {
+    colo?: unknown;
+    country?: unknown;
+  };
+}
+
 const DEFAULT_BRANCH = "main";
 const DEFAULT_REPO = "makriman/LBSAILAB";
 const DEFAULT_SUBMISSIONS_PATH = "data/application-submissions.md";
@@ -85,6 +92,19 @@ const NOINDEX_PATH_PREFIXES = [
   "/private/",
   "/search/",
 ];
+const SEO_CRAWLER_USER_AGENTS = [
+  { label: "Googlebot-Image", pattern: /\bgooglebot-image\b/i },
+  { label: "Googlebot", pattern: /\bgooglebot\b/i },
+  { label: "Bingbot", pattern: /\bbingbot\b/i },
+  { label: "DuckDuckBot", pattern: /\bduckduckbot\b/i },
+  { label: "YandexBot", pattern: /\byandexbot\b/i },
+  { label: "Baiduspider", pattern: /\bbaiduspider\b/i },
+  { label: "Applebot", pattern: /\bapplebot\b/i },
+  { label: "FacebookExternalHit", pattern: /\bfacebookexternalhit\b/i },
+  { label: "LinkedInBot", pattern: /\blinkedinbot\b/i },
+  { label: "Twitterbot", pattern: /\btwitterbot\b/i },
+  { label: "GenericBot", pattern: /\b(?:bot|crawler|spider|slurp)\b/i },
+];
 const LEGACY_REDIRECTS = new Map([
   ["/home", "/"],
   ["/cohort", "/batches/"],
@@ -125,50 +145,62 @@ const jsonHeaders = {
 export default {
   async fetch(request: Request, env: Env): Promise<Response> {
     const url = new URL(request.url);
-    const canonicalRedirect = canonicalRedirectResponse(request, url);
+    const response = await handleRequest(request, env, url);
 
-    if (canonicalRedirect) return canonicalRedirect;
-    if (GONE_PATHS.has(url.pathname)) return gone();
-    if (url.pathname === INDEXNOW_KEY_PATH) return indexNowKey();
-    if (url.pathname === "/healthz") return healthCheck();
-    if (ERROR_DOCUMENT_PATHS.has(url.pathname)) {
-      return withSeoHeaders(
-        await errorDocumentResponse(request, env, 200),
-        url.pathname,
-      );
-    }
+    logSeoAccess(request, url, response);
 
-    if (url.pathname === "/api/applications") {
-      if (request.method === "GET") {
-        return handleListApplications(env);
-      }
-
-      if (request.method === "POST") {
-        return handleCreateApplication(request, env);
-      }
-
-      return json({ error: "Method not allowed" }, 405);
-    }
-
-    if (url.pathname === "/api/vitals") {
-      if (request.method === "POST") {
-        return handleVitals(request);
-      }
-
-      if (["GET", "HEAD"].includes(request.method)) {
-        return json({ ok: true, service: "web-vitals" }, 200);
-      }
-
-      return noContent(405, { Allow: "GET, HEAD, POST" });
-    }
-
-    const assetResponse = await env.ASSETS.fetch(request);
-    return withSeoHeaders(
-      await notFoundPageResponse(request, env, assetResponse, url.pathname),
-      url.pathname,
-    );
+    return response;
   },
 };
+
+async function handleRequest(
+  request: Request,
+  env: Env,
+  url: URL,
+): Promise<Response> {
+  const canonicalRedirect = canonicalRedirectResponse(request, url);
+
+  if (canonicalRedirect) return canonicalRedirect;
+  if (GONE_PATHS.has(url.pathname)) return gone();
+  if (url.pathname === INDEXNOW_KEY_PATH) return indexNowKey();
+  if (url.pathname === "/healthz") return healthCheck();
+  if (ERROR_DOCUMENT_PATHS.has(url.pathname)) {
+    return withSeoHeaders(
+      await errorDocumentResponse(request, env, 200),
+      url.pathname,
+    );
+  }
+
+  if (url.pathname === "/api/applications") {
+    if (request.method === "GET") {
+      return handleListApplications(env);
+    }
+
+    if (request.method === "POST") {
+      return handleCreateApplication(request, env);
+    }
+
+    return json({ error: "Method not allowed" }, 405);
+  }
+
+  if (url.pathname === "/api/vitals") {
+    if (request.method === "POST") {
+      return handleVitals(request);
+    }
+
+    if (["GET", "HEAD"].includes(request.method)) {
+      return json({ ok: true, service: "web-vitals" }, 200);
+    }
+
+    return noContent(405, { Allow: "GET, HEAD, POST" });
+  }
+
+  const assetResponse = await env.ASSETS.fetch(request);
+  return withSeoHeaders(
+    await notFoundPageResponse(request, env, assetResponse, url.pathname),
+    url.pathname,
+  );
+}
 
 function canonicalRedirectResponse(
   request: Request,
@@ -450,6 +482,47 @@ function isCrawlerUtilityPath(pathname: string): boolean {
     pathname === "/sitemap-index.xml" ||
     /^\/sitemap-\d+\.xml$/.test(pathname)
   );
+}
+
+function crawlerLabel(userAgent: string): string | null {
+  for (const crawler of SEO_CRAWLER_USER_AGENTS) {
+    if (crawler.pattern.test(userAgent)) return crawler.label;
+  }
+
+  return null;
+}
+
+function logSeoAccess(request: Request, url: URL, response: Response): void {
+  const userAgent = request.headers.get("User-Agent") || "";
+  const crawler = crawlerLabel(userAgent);
+  const shouldLog =
+    Boolean(crawler) ||
+    response.status >= 500 ||
+    (response.status >= 400 && isCrawlerUtilityPath(url.pathname));
+
+  if (!shouldLog) return;
+
+  const cf = (request as RequestWithCloudflareContext).cf;
+
+  console.log(
+    JSON.stringify({
+      cacheControl: response.headers.get("Cache-Control") || null,
+      cfColo: sanitizeCfValue(cf?.colo),
+      cfCountry: sanitizeCfValue(cf?.country),
+      contentType:
+        response.headers.get("Content-Type")?.split(";")[0]?.trim() || null,
+      crawler,
+      method: request.method,
+      path: sanitizePath(url.pathname),
+      robots: response.headers.get("X-Robots-Tag") || null,
+      status: response.status,
+      type: "seo-access",
+    }),
+  );
+}
+
+function sanitizeCfValue(value: unknown): string | null {
+  return typeof value === "string" && value ? value.slice(0, 32) : null;
 }
 
 function isLongLivedAsset(pathname: string): boolean {

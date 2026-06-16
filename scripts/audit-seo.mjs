@@ -404,6 +404,27 @@ function auditWorkerRetiredPaths() {
   }
 }
 
+function auditWorkerSeoAccessLogging() {
+  const worker = readFileSync(path.join(ROOT, "src", "worker.ts"), "utf8");
+
+  for (const expected of [
+    "SEO_CRAWLER_USER_AGENTS",
+    'type: "seo-access"',
+    "response.status >= 500",
+    'response.headers.get("Cache-Control")',
+    'response.headers.get("X-Robots-Tag")',
+    "Googlebot",
+    "Bingbot",
+    "DuckDuckBot",
+    "LinkedInBot",
+    "sanitizePath(url.pathname)",
+  ]) {
+    if (!worker.includes(expected)) {
+      fail(`Worker SEO access logging is missing ${expected}`);
+    }
+  }
+}
+
 function auditWorkerCsp(pages) {
   const csp = workerContentSecurityPolicy();
   const scriptSrc = cspDirective(csp, "script-src");
@@ -1566,6 +1587,7 @@ function audit() {
   auditManifestAndIcons();
   auditErrorDocument();
   auditWorkerRetiredPaths();
+  auditWorkerSeoAccessLogging();
 
   const pages = auditSitemap();
   const metadataIndex = {
