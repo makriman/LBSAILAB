@@ -486,6 +486,41 @@ function auditWorkerDiscoveryRedirects() {
   }
 }
 
+function auditSearchEngineVerificationSupport() {
+  const layout = readFileSync(
+    path.join(ROOT, "src", "layouts", "BaseLayout.astro"),
+    "utf8",
+  );
+  const worker = readFileSync(path.join(ROOT, "src", "worker.ts"), "utf8");
+
+  for (const expected of [
+    "PUBLIC_GOOGLE_SITE_VERIFICATION",
+    'name="google-site-verification"',
+    "PUBLIC_BING_SITE_VERIFICATION",
+    'name="msvalidate.01"',
+  ]) {
+    if (!layout.includes(expected)) {
+      fail(`BaseLayout search verification support is missing ${expected}`);
+    }
+  }
+
+  for (const expected of [
+    "GOOGLE_SITE_VERIFICATION_FILE",
+    "BING_SITE_VERIFICATION_TOKEN",
+    'const BING_SITE_AUTH_PATH = "/BingSiteAuth.xml"',
+    "google-site-verification:",
+    "<users>",
+    "function siteVerificationGoogleFileName",
+    "function siteVerificationToken",
+    "X-Robots-Tag",
+    "NOINDEX_ROBOTS",
+  ]) {
+    if (!worker.includes(expected)) {
+      fail(`Worker search verification support is missing ${expected}`);
+    }
+  }
+}
+
 function auditExternalPerformanceMonitorConfig() {
   const packageJson = readFileSync(path.join(ROOT, "package.json"), "utf8");
   const workflow = readFileSync(
@@ -2105,6 +2140,7 @@ function audit() {
   auditWorkerSeoAccessLogging();
   auditWorkerImageIndexingHeaders();
   auditWorkerDiscoveryRedirects();
+  auditSearchEngineVerificationSupport();
   auditExternalPerformanceMonitorConfig();
   auditSeoMonitorConfig();
   auditSeoLogAnalyzer();

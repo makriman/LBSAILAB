@@ -6,6 +6,8 @@ interface Env {
   GITHUB_REPO?: string;
   GITHUB_SUBMISSIONS_PATH?: string;
   GITHUB_TOKEN?: string;
+  GOOGLE_SITE_VERIFICATION_FILE?: string;
+  BING_SITE_VERIFICATION_TOKEN?: string;
 }
 
 interface ApplicationSubmission {
@@ -55,6 +57,7 @@ const CANONICAL_HOST = "lbsailab.com";
 const INDEXNOW_KEY = "5e5bfddcc11447d381079b24b2d1e213";
 const INDEXNOW_KEY_PATH = `/${INDEXNOW_KEY}.txt`;
 const SECURITY_TXT_PATH = "/.well-known/security.txt";
+const BING_SITE_AUTH_PATH = "/BingSiteAuth.xml";
 const ERROR_DOCUMENT_PATHS = new Set(["/404.html", "/404/"]);
 const INDEXABLE_ROBOTS =
   "index, follow, max-snippet:-1, max-image-preview:large, max-video-preview:-1";
@@ -171,6 +174,8 @@ async function handleRequest(
   const canonicalRedirect = canonicalRedirectResponse(request, url);
 
   if (canonicalRedirect) return canonicalRedirect;
+  const verificationResponse = siteVerificationResponse(url, env);
+  if (verificationResponse) return verificationResponse;
   if (GONE_PATHS.has(url.pathname)) return gone();
   if (url.pathname === INDEXNOW_KEY_PATH) return indexNowKey();
   if (url.pathname === "/healthz") return healthCheck();
@@ -629,6 +634,67 @@ function healthCheck(): Response {
     },
     200,
   );
+}
+
+function siteVerificationResponse(url: URL, env: Env): Response | null {
+  const googleFileName = siteVerificationGoogleFileName(
+    env.GOOGLE_SITE_VERIFICATION_FILE,
+  );
+
+  if (googleFileName && url.pathname === `/${googleFileName}`) {
+    return verificationText(`google-site-verification: ${googleFileName}\n`);
+  }
+
+  const bingToken = siteVerificationToken(env.BING_SITE_VERIFICATION_TOKEN);
+
+  if (bingToken && url.pathname === BING_SITE_AUTH_PATH) {
+    return verificationXml(
+      `<?xml version="1.0"?>\n<users>\n  <user>${bingToken}</user>\n</users>\n`,
+    );
+  }
+
+  return null;
+}
+
+function siteVerificationGoogleFileName(value: unknown): string | null {
+  if (typeof value !== "string") return null;
+
+  const fileName = value.trim();
+
+  return /^google[a-z0-9_-]+\.html$/i.test(fileName) ? fileName : null;
+}
+
+function siteVerificationToken(value: unknown): string | null {
+  if (typeof value !== "string") return null;
+
+  const token = value.trim();
+
+  return /^[a-z0-9_-]{8,160}$/i.test(token) ? token : null;
+}
+
+function verificationText(body: string): Response {
+  return verificationResponse(body, "text/plain; charset=utf-8");
+}
+
+function verificationXml(body: string): Response {
+  return verificationResponse(body, "application/xml; charset=utf-8");
+}
+
+function verificationResponse(body: string, contentType: string): Response {
+  const headers = new Headers({
+    "Cache-Control": SHORT_CACHE_CONTROL,
+    "Content-Language": CONTENT_LANGUAGE,
+    "Content-Type": contentType,
+    "Last-Modified": LAST_MODIFIED,
+    "X-Robots-Tag": NOINDEX_ROBOTS,
+  });
+
+  setHeaders(headers, SECURITY_HEADERS);
+
+  return new Response(body, {
+    status: 200,
+    headers,
+  });
 }
 
 function indexNowKey(): Response {

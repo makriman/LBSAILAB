@@ -68,6 +68,19 @@ npx wrangler secret put GITHUB_SUBMISSIONS_PATH
 
 Defaults are `makriman/LBSAILAB`, `main`, and `data/application-submissions.md`.
 
+Search engine ownership verification can be enabled without changing visible
+site copy:
+
+```sh
+npx wrangler secret put GOOGLE_SITE_VERIFICATION_FILE
+npx wrangler secret put BING_SITE_VERIFICATION_TOKEN
+```
+
+`GOOGLE_SITE_VERIFICATION_FILE` should be the full Google verification file
+name, for example `googleabc123.html`. The Worker will serve that path with the
+exact `google-site-verification:` body Google expects. `BING_SITE_VERIFICATION_TOKEN`
+serves `/BingSiteAuth.xml` for Bing Webmaster Tools.
+
 ## Content
 
 Primary content lives in:
