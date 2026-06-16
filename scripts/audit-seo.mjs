@@ -14,6 +14,43 @@ const REQUIRED_SITEMAPS = [
   `${SITE_URL}/image-sitemap.xml`,
   `${SITE_URL}/feed.xml`,
 ];
+const REQUIRED_MANIFEST_ICONS = [
+  {
+    src: "/favicon/favicon-16x16.png",
+    sizes: "16x16",
+    type: "image/png",
+    width: 16,
+    height: 16,
+  },
+  {
+    src: "/favicon/favicon-32x32.png",
+    sizes: "32x32",
+    type: "image/png",
+    width: 32,
+    height: 32,
+  },
+  {
+    src: "/favicon/apple-touch-icon.png",
+    sizes: "180x180",
+    type: "image/png",
+    width: 180,
+    height: 180,
+  },
+  {
+    src: "/favicon/icon-192.png",
+    sizes: "192x192",
+    type: "image/png",
+    width: 192,
+    height: 192,
+  },
+  {
+    src: "/favicon/icon-512.png",
+    sizes: "512x512",
+    type: "image/png",
+    width: 512,
+    height: 512,
+  },
+];
 const INDEXABLE_META_ROBOTS =
   "index,follow,max-snippet:-1,max-image-preview:large,max-video-preview:-1";
 const EXPECTED_UPDATED_AT = "2026-06-16";
@@ -41,6 +78,30 @@ function readDist(relativePath) {
   }
 
   return readFileSync(fullPath, "utf8");
+}
+
+function readDistBuffer(relativePath) {
+  const fullPath = path.join(DIST, relativePath);
+
+  if (!existsSync(fullPath)) {
+    fail(`Missing dist/${relativePath}`);
+    return Buffer.alloc(0);
+  }
+
+  return readFileSync(fullPath);
+}
+
+function pngDimensions(bytes) {
+  const signature = bytes.subarray(0, 8).toString("hex");
+
+  if (signature !== "89504e470d0a1a0a" || bytes.length < 24) {
+    return null;
+  }
+
+  return {
+    height: bytes.readUInt32BE(20),
+    width: bytes.readUInt32BE(16),
+  };
 }
 
 function distFiles(directory = DIST) {
@@ -1026,6 +1087,71 @@ function auditCrawlerFiles() {
   }
 }
 
+function auditManifestAndIcons() {
+  let manifest;
+
+  try {
+    manifest = JSON.parse(readDist("site.webmanifest"));
+  } catch (error) {
+    fail(`site.webmanifest is invalid JSON (${error.message})`);
+    return;
+  }
+
+  assertEqual(manifest.name, "LBS AI Lab", "manifest name");
+  assertEqual(manifest.short_name, "LBS AI Lab", "manifest short_name");
+  assertTruthy(manifest.description, "manifest description");
+  assertEqual(manifest.start_url, "/", "manifest start_url");
+  assertEqual(manifest.display, "standalone", "manifest display");
+  assertEqual(manifest.theme_color, "#17145f", "manifest theme_color");
+  assertEqual(
+    manifest.background_color,
+    "#fbfaf7",
+    "manifest background_color",
+  );
+
+  if (!Array.isArray(manifest.icons)) {
+    fail("site.webmanifest icons must be an array");
+    return;
+  }
+
+  for (const expected of REQUIRED_MANIFEST_ICONS) {
+    const icon = manifest.icons.find(
+      (candidate) =>
+        candidate.src === expected.src &&
+        candidate.sizes === expected.sizes &&
+        candidate.type === expected.type,
+    );
+
+    if (!icon) {
+      fail(`site.webmanifest missing icon ${expected.src}`);
+      continue;
+    }
+
+    const bytes = readDistBuffer(expected.src.replace(/^\//, ""));
+    const dimensions = pngDimensions(bytes);
+
+    if (!dimensions) {
+      fail(`${expected.src}: manifest icon is not a valid PNG`);
+      continue;
+    }
+
+    if (
+      dimensions.width !== expected.width ||
+      dimensions.height !== expected.height
+    ) {
+      fail(
+        `${expected.src}: manifest icon dimensions expected ${expected.width}x${expected.height}, got ${dimensions.width}x${dimensions.height}`,
+      );
+    }
+  }
+
+  for (const icon of manifest.icons) {
+    if (!icon.src?.startsWith("/favicon/")) {
+      fail(`site.webmanifest icon should be same-origin favicon asset`);
+    }
+  }
+}
+
 function auditErrorDocument() {
   const html = readDist("404.html");
 
@@ -1183,6 +1309,47 @@ function auditPage(url, metadataIndex) {
     "LBS AI Lab",
     `${url}: apple-mobile-web-app-title`,
   );
+
+  const manifestLinks = linkAttrs(html, "manifest");
+  const iconLinks = linkAttrs(html, "icon");
+  const appleTouchIcons = linkAttrs(html, "apple-touch-icon");
+
+  if (
+    manifestLinks.length !== 1 ||
+    manifestLinks[0].href !== "/site.webmanifest"
+  ) {
+    fail(`${url}: missing canonical web app manifest link`);
+  }
+
+  if (
+    !iconLinks.some(
+      (link) => link.href === "/favicon.svg" && link.type === "image/svg+xml",
+    )
+  ) {
+    fail(`${url}: missing SVG favicon link`);
+  }
+
+  if (
+    !iconLinks.some(
+      (link) =>
+        link.href === "/favicon/favicon-32x32.png" &&
+        link.type === "image/png" &&
+        link.sizes === "32x32",
+    )
+  ) {
+    fail(`${url}: missing 32x32 PNG favicon link`);
+  }
+
+  if (
+    !appleTouchIcons.some(
+      (link) =>
+        link.href === "/favicon/apple-touch-icon.png" &&
+        link.sizes === "180x180",
+    )
+  ) {
+    fail(`${url}: missing apple touch icon link`);
+  }
+
   assertEqual(metaContent(html, "og:type"), "website", `${url}: og:type`);
   assertEqual(metaContent(html, "og:locale"), "en_GB", `${url}: og:locale`);
   assertEqual(
@@ -1374,6 +1541,7 @@ function audit() {
 
   auditRobots();
   auditCrawlerFiles();
+  auditManifestAndIcons();
   auditErrorDocument();
 
   const pages = auditSitemap();

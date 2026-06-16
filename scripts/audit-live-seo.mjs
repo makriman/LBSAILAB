@@ -43,6 +43,43 @@ const REQUIRED_SITEMAPS = [
   `${SITE_ORIGIN}/image-sitemap.xml`,
   `${SITE_ORIGIN}/feed.xml`,
 ];
+const REQUIRED_MANIFEST_ICONS = [
+  {
+    src: "/favicon/favicon-16x16.png",
+    sizes: "16x16",
+    type: "image/png",
+    width: 16,
+    height: 16,
+  },
+  {
+    src: "/favicon/favicon-32x32.png",
+    sizes: "32x32",
+    type: "image/png",
+    width: 32,
+    height: 32,
+  },
+  {
+    src: "/favicon/apple-touch-icon.png",
+    sizes: "180x180",
+    type: "image/png",
+    width: 180,
+    height: 180,
+  },
+  {
+    src: "/favicon/icon-192.png",
+    sizes: "192x192",
+    type: "image/png",
+    width: 192,
+    height: 192,
+  },
+  {
+    src: "/favicon/icon-512.png",
+    sizes: "512x512",
+    type: "image/png",
+    width: 512,
+    height: 512,
+  },
+];
 const DUPLICATE_ORIGINS = (
   process.env.SEO_DUPLICATE_ORIGINS ||
   "https://lbsailab.zahra-moghadasi.workers.dev"
@@ -55,6 +92,7 @@ const LONG_CACHE_PATHS = [
   /^\/images\//,
   /^\/mentors\/.*\.(jpg|png)$/i,
   /^\/favicon\//,
+  /^\/favicon\.(?:ico|svg)$/i,
   /^\/og-[^/]+\.png$/,
   /^\/google-deepmind-logo-[^/]+\.png$/,
   /^\/site\.webmanifest$/,
@@ -793,6 +831,9 @@ function extractPageLinks(html, pageUrl, sitemapPages) {
 function assertPageMetadata(html, url) {
   const canonicalLinks = linkAttrs(html, "canonical");
   const alternates = linkAttrs(html, "alternate");
+  const manifestLinks = linkAttrs(html, "manifest");
+  const iconLinks = linkAttrs(html, "icon");
+  const appleTouchIcons = linkAttrs(html, "apple-touch-icon");
   const canonical = canonicalLinks[0]?.href || "";
 
   if (canonicalLinks.length !== 1) {
@@ -802,6 +843,42 @@ function assertPageMetadata(html, url) {
   if (canonical !== url) fail(`${url}: canonical mismatch "${canonical}"`);
   if (metaContent(html, "robots") !== INDEXABLE_META_ROBOTS) {
     fail(`${url}: meta robots is missing indexable preview directives`);
+  }
+
+  if (
+    manifestLinks.length !== 1 ||
+    manifestLinks[0].href !== "/site.webmanifest"
+  ) {
+    fail(`${url}: missing canonical web app manifest link`);
+  }
+
+  if (
+    !iconLinks.some(
+      (link) => link.href === "/favicon.svg" && link.type === "image/svg+xml",
+    )
+  ) {
+    fail(`${url}: missing SVG favicon link`);
+  }
+
+  if (
+    !iconLinks.some(
+      (link) =>
+        link.href === "/favicon/favicon-32x32.png" &&
+        link.type === "image/png" &&
+        link.sizes === "32x32",
+    )
+  ) {
+    fail(`${url}: missing 32x32 PNG favicon link`);
+  }
+
+  if (
+    !appleTouchIcons.some(
+      (link) =>
+        link.href === "/favicon/apple-touch-icon.png" &&
+        link.sizes === "180x180",
+    )
+  ) {
+    fail(`${url}: missing apple touch icon link`);
   }
 
   for (const required of [
@@ -1038,6 +1115,95 @@ async function auditImageSitemapAssets(imageUrls) {
 
   for (const url of uniqueImageUrls) {
     await auditImageResource(url);
+  }
+}
+
+async function auditWebManifest() {
+  const url = `${SITE_ORIGIN}/site.webmanifest`;
+  const { response, body } = await text(url, {
+    accept: "application/manifest+json,application/json",
+  });
+  const contentType = response.headers.get("content-type") || "";
+  let manifest;
+
+  if (response.status !== 200) {
+    fail(`${url}: expected 200, got ${response.status}`);
+    return;
+  }
+
+  assertSecurityHeaders(response, url);
+  assertLongCache(response, url);
+
+  if (
+    !contentType.includes("application/manifest+json") &&
+    !contentType.includes("application/json")
+  ) {
+    fail(`${url}: expected manifest JSON content type, got "${contentType}"`);
+  }
+
+  try {
+    manifest = JSON.parse(body);
+  } catch (error) {
+    fail(`${url}: invalid manifest JSON (${error.message})`);
+    return;
+  }
+
+  if (manifest.name !== "LBS AI Lab") fail(`${url}: invalid manifest name`);
+  if (manifest.short_name !== "LBS AI Lab") {
+    fail(`${url}: invalid manifest short_name`);
+  }
+  if (!manifest.description) fail(`${url}: missing manifest description`);
+  if (manifest.start_url !== "/") fail(`${url}: invalid manifest start_url`);
+  if (manifest.display !== "standalone") {
+    fail(`${url}: invalid manifest display`);
+  }
+  if (manifest.theme_color !== "#17145f") {
+    fail(`${url}: invalid manifest theme_color`);
+  }
+  if (manifest.background_color !== "#fbfaf7") {
+    fail(`${url}: invalid manifest background_color`);
+  }
+
+  if (!Array.isArray(manifest.icons)) {
+    fail(`${url}: manifest icons must be an array`);
+    return;
+  }
+
+  for (const expected of REQUIRED_MANIFEST_ICONS) {
+    const icon = manifest.icons.find(
+      (candidate) =>
+        candidate.src === expected.src &&
+        candidate.sizes === expected.sizes &&
+        candidate.type === expected.type,
+    );
+
+    if (!icon) {
+      fail(`${url}: missing icon ${expected.src}`);
+      continue;
+    }
+
+    const iconUrl = new URL(icon.src, SITE_ORIGIN).toString();
+    const resource = await auditImageResource(iconUrl, {
+      contentType: "image/png",
+    });
+
+    if (!resource) continue;
+
+    const dimensions = pngDimensions(resource.body);
+
+    if (!dimensions) {
+      fail(`${iconUrl}: manifest icon is not a valid PNG`);
+      continue;
+    }
+
+    if (
+      dimensions.width !== expected.width ||
+      dimensions.height !== expected.height
+    ) {
+      fail(
+        `${iconUrl}: manifest icon dimensions expected ${expected.width}x${expected.height}, got ${dimensions.width}x${dimensions.height}`,
+      );
+    }
   }
 }
 
@@ -1339,6 +1505,7 @@ async function auditLiveSeo() {
   await auditFeed();
   await auditDiscoveryFiles(pages);
   await auditImageSitemapAssets(imageUrls);
+  await auditWebManifest();
   await auditSecurityText();
   await auditRedirects();
   await auditNoindexAndGone();

@@ -454,6 +454,8 @@ function isLongLivedAsset(pathname: string): boolean {
     pathname.startsWith("/images/") ||
     /^\/mentors\/[^/]+\.(jpg|png|webp|avif)$/.test(pathname) ||
     pathname.startsWith("/favicon/") ||
+    pathname === "/favicon.ico" ||
+    pathname === "/favicon.svg" ||
     /^\/og-[^/]+\.png$/.test(pathname) ||
     /^\/google-deepmind-logo-[^/]+\.png$/.test(pathname) ||
     pathname === "/lbs-logo.svg" ||
