@@ -15,7 +15,14 @@ const DUPLICATE_ORIGINS = (
   .split(",")
   .map((origin) => origin.trim().replace(/\/+$/, ""))
   .filter((origin) => origin && origin !== SITE_ORIGIN);
-const PUBLIC_DNS_SERVERS = ["1.1.1.1", "8.8.8.8"];
+const PUBLIC_DNS_SERVERS = [
+  { label: "Cloudflare", server: "1.1.1.1" },
+  { label: "Google", server: "8.8.8.8" },
+];
+const DNS_RECORD_TYPES = [
+  { label: "A", method: "resolve4" },
+  { label: "AAAA", method: "resolve6" },
+];
 const MIN_CERT_VALID_DAYS = 30;
 const CANONICAL_PATHS = [
   "/",
@@ -70,7 +77,7 @@ const CRAWLER_USER_AGENTS = [
 const failures = [];
 const resolver = new Resolver();
 
-resolver.setServers(PUBLIC_DNS_SERVERS);
+resolver.setServers(PUBLIC_DNS_SERVERS.map(({ server }) => server));
 
 function fail(message) {
   failures.push(message);
@@ -85,11 +92,63 @@ async function publicARecords(hostname) {
   }
 }
 
-async function checkDns() {
-  for (const hostname of [SITE_HOST, `www.${SITE_HOST}`]) {
-    const records = await publicARecords(hostname);
+async function publicDnsRecords(hostname, dnsServer, recordType) {
+  const lookupResolver = new Resolver();
+  lookupResolver.setServers([dnsServer.server]);
 
-    if (!records.length) fail(`${hostname}: no public A records`);
+  try {
+    return await lookupResolver[recordType.method](hostname);
+  } catch (error) {
+    fail(
+      `${hostname}: ${recordType.label} lookup failed on ${dnsServer.label} DNS (${error.code || error.message})`,
+    );
+    return [];
+  }
+}
+
+function recordsEqual(left, right) {
+  return (
+    left.length === right.length &&
+    left.toSorted().every((record, index) => record === right.toSorted()[index])
+  );
+}
+
+async function checkDns() {
+  for (const dnsServer of PUBLIC_DNS_SERVERS) {
+    for (const recordType of DNS_RECORD_TYPES) {
+      const apexRecords = await publicDnsRecords(
+        SITE_HOST,
+        dnsServer,
+        recordType,
+      );
+      const wwwRecords = await publicDnsRecords(
+        `www.${SITE_HOST}`,
+        dnsServer,
+        recordType,
+      );
+
+      if (!apexRecords.length) {
+        fail(
+          `${SITE_HOST}: no public ${recordType.label} records on ${dnsServer.label} DNS`,
+        );
+      }
+
+      if (!wwwRecords.length) {
+        fail(
+          `www.${SITE_HOST}: no public ${recordType.label} records on ${dnsServer.label} DNS`,
+        );
+      }
+
+      if (
+        apexRecords.length &&
+        wwwRecords.length &&
+        !recordsEqual(apexRecords, wwwRecords)
+      ) {
+        fail(
+          `${dnsServer.label} DNS: ${SITE_HOST} and www.${SITE_HOST} ${recordType.label} records differ`,
+        );
+      }
+    }
   }
 }
 

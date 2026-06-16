@@ -465,6 +465,28 @@ function auditExternalPerformanceMonitorConfig() {
   }
 }
 
+function auditSeoMonitorConfig() {
+  const monitor = readFileSync(
+    path.join(ROOT, "scripts", "monitor-seo.mjs"),
+    "utf8",
+  );
+
+  for (const expected of [
+    "Cloudflare",
+    "Google",
+    "resolve4",
+    "resolve6",
+    "recordsEqual(apexRecords, wwwRecords)",
+    "checkCertificates",
+    "checkHttpProtocols",
+    "checkVitalsEndpoint",
+  ]) {
+    if (!monitor.includes(expected)) {
+      fail(`SEO monitor is missing ${expected}`);
+    }
+  }
+}
+
 function auditWorkerCsp(pages) {
   const csp = workerContentSecurityPolicy();
   const scriptSrc = cspDirective(csp, "script-src");
@@ -1629,6 +1651,7 @@ function audit() {
   auditWorkerRetiredPaths();
   auditWorkerSeoAccessLogging();
   auditExternalPerformanceMonitorConfig();
+  auditSeoMonitorConfig();
 
   const pages = auditSitemap();
   const metadataIndex = {
