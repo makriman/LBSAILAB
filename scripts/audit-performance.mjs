@@ -99,6 +99,24 @@ function cacheControl(response) {
   return response.headers.get("cache-control") || "";
 }
 
+function auditEdgeDelivery(response, url) {
+  const server = response.headers.get("server") || "";
+  const altSvc = response.headers.get("alt-svc") || "";
+  const cacheStatus = response.headers.get("cf-cache-status") || "";
+
+  if (server !== "cloudflare") {
+    fail(`${url}: expected Cloudflare server header, got "${server}"`);
+  }
+
+  if (!altSvc.includes("h3")) {
+    fail(`${url}: expected HTTP/3 alt-svc advertisement, got "${altSvc}"`);
+  }
+
+  if (!cacheStatus) {
+    fail(`${url}: missing Cloudflare cache status header`);
+  }
+}
+
 async function fetchText(url, accept = "*/*") {
   const startedAt = performance.now();
   const response = await fetch(url, {
@@ -282,6 +300,8 @@ async function auditStylesheet(url) {
     return 0;
   }
 
+  auditEdgeDelivery(response, url);
+
   if (!contentType.includes("text/css")) {
     fail(`${url}: expected text/css, got ${contentType}`);
   }
@@ -315,6 +335,8 @@ async function auditImage(url) {
     return;
   }
 
+  auditEdgeDelivery(response, url);
+
   if (!contentType.startsWith("image/")) {
     fail(`${url}: expected image content type, got ${contentType}`);
   }
@@ -337,6 +359,8 @@ async function auditFont(url) {
     return;
   }
 
+  auditEdgeDelivery(response, url);
+
   if (!contentType.includes("font") && !contentType.includes("octet-stream")) {
     fail(`${url}: expected font content type, got ${contentType}`);
   }
@@ -358,6 +382,8 @@ async function auditPage(pageUrl) {
     fail(`${pageUrl}: expected 200, got ${response.status}`);
     return;
   }
+
+  auditEdgeDelivery(response, pageUrl);
 
   if (!contentType.includes("text/html")) {
     fail(`${pageUrl}: expected text/html, got ${contentType}`);
@@ -425,10 +451,21 @@ async function auditPage(pageUrl) {
 async function auditUtilityCompression() {
   for (const url of [
     `${SITE_ORIGIN}/robots.txt`,
+    `${SITE_ORIGIN}/sitemap-index.xml`,
     `${SITE_ORIGIN}/sitemap-0.xml`,
+    `${SITE_ORIGIN}/image-sitemap.xml`,
+    `${SITE_ORIGIN}/llms.txt`,
+    `${SITE_ORIGIN}/llms-full.txt`,
   ]) {
     const { response } = await fetchText(url);
     const type = response.headers.get("content-type") || "";
+
+    if (response.status !== 200) {
+      fail(`${url}: crawler utility expected 200, got ${response.status}`);
+      continue;
+    }
+
+    auditEdgeDelivery(response, url);
 
     if (isTextLike(url, type) && !contentEncoding(response)) {
       fail(`${url}: text crawler utility is not compressed`);

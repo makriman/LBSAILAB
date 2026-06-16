@@ -184,6 +184,7 @@ async function get(url, options = {}) {
       headers: {
         "User-Agent": "lbsailab-seo-audit/1.0",
         Accept: options.accept || "*/*",
+        "Accept-Encoding": options.acceptEncoding || "identity",
       },
     });
   } catch (error) {

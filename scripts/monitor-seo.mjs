@@ -49,6 +49,16 @@ const NOINDEX_PATHS = [
   "/404/",
   "/missing-seo-monitor-page/",
 ];
+const COMPRESSED_TEXT_PATHS = [
+  "/",
+  "/about/",
+  "/llms.txt",
+  "/llms-full.txt",
+  "/robots.txt",
+  "/sitemap-index.xml",
+  "/sitemap-0.xml",
+  "/image-sitemap.xml",
+];
 const failures = [];
 const resolver = new Resolver();
 
@@ -205,6 +215,13 @@ async function requestStatus(url, method = "HEAD", body = "", headers = {}) {
   }
 }
 
+async function requestCompressed(url) {
+  return requestStatus(url, "GET", "", {
+    Accept: "*/*",
+    "Accept-Encoding": "br, gzip",
+  });
+}
+
 async function publicDnsFallbackLookup(hostname, options, callback) {
   systemLookup(
     hostname,
@@ -247,6 +264,14 @@ function expectHeader(response, url, name, expected) {
 
   if (!value.includes(expected)) {
     fail(`${url}: expected ${name} to include "${expected}", got "${value}"`);
+  }
+}
+
+function expectHeaderPresent(response, url, name) {
+  const value = response.headers.get(name) || "";
+
+  if (!value) {
+    fail(`${url}: expected ${name} header to be present`);
   }
 }
 
@@ -429,6 +454,32 @@ async function checkDiscoveryFiles() {
   }
 }
 
+async function checkCdnAndCompression() {
+  for (const path of COMPRESSED_TEXT_PATHS) {
+    const url = `${SITE_ORIGIN}${path}`;
+    const response = await requestCompressed(url);
+
+    if (response.status !== 200) {
+      fail(`${url}: expected compressed resource 200, got ${response.status}`);
+      continue;
+    }
+
+    expectHeader(response, url, "server", "cloudflare");
+    expectHeader(response, url, "alt-svc", "h3");
+    expectHeaderPresent(response, url, "cf-cache-status");
+
+    const contentEncoding = response.headers.get("content-encoding") || "";
+
+    if (!/\b(?:br|gzip)\b/i.test(contentEncoding)) {
+      fail(
+        `${url}: expected br or gzip content-encoding, got "${contentEncoding || "(missing)"}"`,
+      );
+    }
+
+    expectHeader(response, url, "cache-control", "max-age=300");
+  }
+}
+
 async function checkVitalsEndpoint() {
   const url = `${SITE_ORIGIN}/api/vitals`;
   const body = JSON.stringify({
@@ -460,6 +511,7 @@ async function monitorSeo() {
   await checkNoindex();
   await checkGone();
   await checkDiscoveryFiles();
+  await checkCdnAndCompression();
   await checkVitalsEndpoint();
 
   if (failures.length) {
