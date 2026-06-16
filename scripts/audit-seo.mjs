@@ -590,6 +590,8 @@ function auditSeoLogAnalyzer() {
     "crawler-facing",
     "EXPECTED_INDEXABLE_ROBOTS",
     "SEVERE_VITAL_LIMITS",
+    "auditVitalsPercentiles",
+    "p75",
     "SEO log analysis passed",
   ]) {
     if (!analyzer.includes(expected)) {
@@ -626,6 +628,18 @@ function auditSeoLogAnalyzer() {
     status: 404,
     type: "seo-access",
   });
+  const badVitalsLogs = [
+    JSON.stringify({
+      metrics: [
+        { name: "LCP", value: 1200 },
+        { name: "LCP", value: 2600 },
+        { name: "LCP", value: 4200 },
+        { name: "LCP", value: 4300 },
+      ],
+      path: "/",
+      type: "web-vitals",
+    }),
+  ].join("\n");
   const good = spawnSync(process.execPath, [analyzerPath], {
     encoding: "utf8",
     input: goodLogs,
@@ -634,8 +648,16 @@ function auditSeoLogAnalyzer() {
     encoding: "utf8",
     input: badLogs,
   });
+  const badVitals = spawnSync(process.execPath, [analyzerPath], {
+    encoding: "utf8",
+    input: badVitalsLogs,
+  });
 
-  if (good.status !== 0 || !good.stdout.includes("SEO log analysis passed")) {
+  if (
+    good.status !== 0 ||
+    !good.stdout.includes("SEO log analysis passed") ||
+    !good.stdout.includes('"p75"')
+  ) {
     fail(
       `SEO log analyzer did not pass valid sample logs: ${good.stderr || good.stdout}`,
     );
@@ -643,6 +665,13 @@ function auditSeoLogAnalyzer() {
 
   if (bad.status === 0 || !bad.stderr.includes("crawler-facing 404")) {
     fail("SEO log analyzer did not fail crawler-facing 404 sample logs");
+  }
+
+  if (
+    badVitals.status === 0 ||
+    !badVitals.stderr.includes("web-vitals p75 LCP")
+  ) {
+    fail("SEO log analyzer did not fail severe p75 vitals sample logs");
   }
 }
 

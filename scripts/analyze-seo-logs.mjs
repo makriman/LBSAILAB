@@ -200,15 +200,45 @@ function analyzeWebVitals(log, summary) {
       count: 0,
       max: Number.NEGATIVE_INFINITY,
       sum: 0,
+      values: [],
     };
     summary.vitals[name].count += 1;
     summary.vitals[name].max = Math.max(summary.vitals[name].max, value);
     summary.vitals[name].sum += value;
+    summary.vitals[name].values.push(value);
 
     if (value > SEVERE_VITAL_LIMITS[name]) {
       fail(`${path} logged severe ${name} ${value}`);
     } else if (value > NEEDS_IMPROVEMENT_VITAL_LIMITS[name]) {
       warn(`${path} logged needs-improvement ${name} ${value}`);
+    }
+  }
+}
+
+function percentile(values, percentileRank) {
+  if (!values.length) return null;
+
+  const sorted = [...values].sort((left, right) => left - right);
+  const index = Math.min(
+    sorted.length - 1,
+    Math.max(0, Math.ceil((percentileRank / 100) * sorted.length) - 1),
+  );
+
+  return sorted[index];
+}
+
+function auditVitalsPercentiles(summary) {
+  for (const [name, metric] of Object.entries(summary.vitals)) {
+    const p75 = percentile(metric.values, 75);
+
+    if (p75 === null) continue;
+
+    metric.p75 = p75;
+
+    if (p75 > SEVERE_VITAL_LIMITS[name]) {
+      fail(`web-vitals p75 ${name} ${p75} is severe`);
+    } else if (p75 > NEEDS_IMPROVEMENT_VITAL_LIMITS[name]) {
+      warn(`web-vitals p75 ${name} ${p75} needs improvement`);
     }
   }
 }
@@ -228,6 +258,8 @@ function analyze(logs) {
     if (log.type === "web-vitals") analyzeWebVitals(log, summary);
   }
 
+  auditVitalsPercentiles(summary);
+
   if (!summary.seoAccess && !summary.webVitals) {
     fail("No seo-access or web-vitals records found in the supplied logs");
   }
@@ -243,6 +275,7 @@ function printableSummary(summary) {
         average: Number((metric.sum / metric.count).toFixed(3)),
         count: metric.count,
         max: Number(metric.max.toFixed(3)),
+        p75: Number(metric.p75.toFixed(3)),
       },
     ]),
   );
