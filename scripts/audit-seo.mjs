@@ -1128,6 +1128,8 @@ function auditSeoMonitorConfig() {
 
 function auditSeoLogAnalyzer() {
   const packageJson = readFileSync(path.join(ROOT, "package.json"), "utf8");
+  const wrangler = readFileSync(path.join(ROOT, "wrangler.jsonc"), "utf8");
+  const worker = readFileSync(path.join(ROOT, "src", "worker.ts"), "utf8");
   const analyzerPath = path.join(ROOT, "scripts", "analyze-seo-logs.mjs");
   const analyzer = readFileSync(analyzerPath, "utf8");
 
@@ -1135,6 +1137,26 @@ function auditSeoLogAnalyzer() {
     !packageJson.includes('"seo:logs": "node scripts/analyze-seo-logs.mjs"')
   ) {
     fail("package.json is missing the seo:logs script");
+  }
+
+  if (!/"observability"\s*:\s*\{[\s\S]*"enabled"\s*:\s*true/.test(wrangler)) {
+    fail("wrangler.jsonc must enable Worker observability for SEO logs");
+  }
+
+  if (!/"head_sampling_rate"\s*:\s*1/.test(wrangler)) {
+    fail("wrangler.jsonc must keep full observability sampling for SEO logs");
+  }
+
+  for (const expected of [
+    "function logSeoAccess",
+    'type: "seo-access"',
+    'type: "web-vitals"',
+    "crawlerLabel(userAgent)",
+    "console.log(",
+  ]) {
+    if (!worker.includes(expected)) {
+      fail(`Worker SEO observability is missing ${expected}`);
+    }
   }
 
   for (const expected of [
