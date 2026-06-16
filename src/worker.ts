@@ -400,6 +400,8 @@ function isCrawlerUtilityPath(pathname: string): boolean {
     pathname === "/robots.txt" ||
     pathname === "/feed.xml" ||
     pathname === "/image-sitemap.xml" ||
+    pathname === "/llms.txt" ||
+    pathname === "/llms-full.txt" ||
     pathname === "/sitemap-index.xml" ||
     /^\/sitemap-\d+\.xml$/.test(pathname)
   );

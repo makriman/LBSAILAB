@@ -485,6 +485,80 @@ async function auditFeed() {
   }
 }
 
+async function auditDiscoveryFiles(pages) {
+  const discoveryFiles = [
+    [`${SITE_ORIGIN}/llms.txt`, "short"],
+    [`${SITE_ORIGIN}/llms-full.txt`, "full"],
+  ];
+
+  for (const [url, kind] of discoveryFiles) {
+    const { response, body } = await text(url, { accept: "text/plain" });
+    const contentType = response.headers.get("content-type") || "";
+
+    if (response.status !== 200) {
+      fail(`${url}: expected 200, got ${response.status}`);
+      continue;
+    }
+
+    assertSecurityHeaders(response, url);
+    assertIndexableHeaders(response, url);
+    assertShortCache(response, url);
+
+    if (!contentType.includes("text/plain")) {
+      fail(`${url}: expected text/plain content type, got "${contentType}"`);
+    }
+
+    for (const expected of [
+      "# LBS AI Lab",
+      `${SITE_ORIGIN}/`,
+      `${SITE_ORIGIN}/about/`,
+      `${SITE_ORIGIN}/batches/`,
+      `${SITE_ORIGIN}/batches/spring-2026/`,
+      `${SITE_ORIGIN}/mentors/`,
+      `${SITE_ORIGIN}/feed.xml`,
+      "Google DeepMind",
+    ]) {
+      if (!body.includes(expected)) {
+        fail(`${url}: missing ${expected}`);
+      }
+    }
+
+    if (/\/(?:cohorts?|teams)(?:\/|$)/i.test(body)) {
+      fail(`${url}: includes a legacy Cohort or Team URL`);
+    }
+
+    if (/\bmailto:|[a-z0-9._%+-]+@london\.edu\b/i.test(body)) {
+      fail(`${url}: should not expose email contact data`);
+    }
+
+    const teamPages = pages.filter((page) =>
+      /\/batches\/spring-2026\/[^/]+\/$/.test(new URL(page).pathname),
+    );
+
+    for (const teamPage of teamPages) {
+      if (!body.includes(teamPage)) {
+        fail(`${url}: missing Spring 2026 team page ${teamPage}`);
+      }
+    }
+
+    if (kind === "full") {
+      for (const expected of [
+        "Kostis Christodoulou",
+        "London Eats Pal",
+        "Wayfinder",
+        "Zentra",
+        `${SITE_ORIGIN}/llms.txt`,
+        `${SITE_ORIGIN}/llms-full.txt`,
+        `${SITE_ORIGIN}/sitemap-index.xml`,
+      ]) {
+        if (!body.includes(expected)) {
+          fail(`${url}: missing ${expected}`);
+        }
+      }
+    }
+  }
+}
+
 function extractPageLinks(html, pageUrl, sitemapPages) {
   const links = new Set();
   const assets = new Set();
@@ -981,6 +1055,7 @@ async function auditLiveSeo() {
   await auditRobots();
   const pages = await auditSitemaps();
   await auditFeed();
+  await auditDiscoveryFiles(pages);
   await auditSecurityText();
   await auditRedirects();
   await auditNoindexAndGone();

@@ -695,6 +695,8 @@ function auditRobots() {
 function auditCrawlerFiles() {
   const imageSitemap = readDist("image-sitemap.xml");
   const feed = readDist("feed.xml");
+  const llms = readDist("llms.txt");
+  const llmsFull = readDist("llms-full.txt");
   const key = readDist(INDEXNOW_KEY_FILE).trim();
 
   assertEqual(key, INDEXNOW_KEY, "IndexNow key file");
@@ -722,6 +724,58 @@ function auditCrawlerFiles() {
 
   if (!feed.includes(`<updated>${EXPECTED_LASTMOD}</updated>`)) {
     fail("feed.xml is missing the current updated value");
+  }
+
+  for (const [fileName, content] of [
+    ["llms.txt", llms],
+    ["llms-full.txt", llmsFull],
+  ]) {
+    for (const expected of [
+      "# LBS AI Lab",
+      `${SITE_URL}/`,
+      `${SITE_URL}/about/`,
+      `${SITE_URL}/batches/`,
+      `${SITE_URL}/batches/spring-2026/`,
+      `${SITE_URL}/mentors/`,
+      `${SITE_URL}/feed.xml`,
+      "Google DeepMind",
+    ]) {
+      if (!content.includes(expected)) {
+        fail(`${fileName} is missing ${expected}`);
+      }
+    }
+
+    if (/\/(?:cohorts?|teams)(?:\/|$)/i.test(content)) {
+      fail(`${fileName} includes a legacy Cohort or Team URL`);
+    }
+
+    if (/\bmailto:|[a-z0-9._%+-]+@london\.edu\b/i.test(content)) {
+      fail(`${fileName} should not expose email contact data`);
+    }
+  }
+
+  const teamUrls = distFiles()
+    .map(pageUrlForFile)
+    .filter((url) => /\/batches\/spring-2026\/[^/]+\/$/.test(url || ""));
+
+  for (const teamUrl of teamUrls) {
+    if (!llms.includes(teamUrl) || !llmsFull.includes(teamUrl)) {
+      fail(`AI discovery files are missing team URL ${teamUrl}`);
+    }
+  }
+
+  for (const expected of [
+    "Kostis Christodoulou",
+    "London Eats Pal",
+    "Wayfinder",
+    "Zentra",
+    `${SITE_URL}/llms.txt`,
+    `${SITE_URL}/llms-full.txt`,
+    `${SITE_URL}/sitemap-index.xml`,
+  ]) {
+    if (!llmsFull.includes(expected)) {
+      fail(`llms-full.txt is missing ${expected}`);
+    }
   }
 }
 

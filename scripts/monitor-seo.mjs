@@ -305,6 +305,8 @@ async function checkStatus() {
     [`${SITE_ORIGIN}/sitemap-0.xml`, 200, "HEAD"],
     [`${SITE_ORIGIN}/image-sitemap.xml`, 200, "HEAD"],
     [`${SITE_ORIGIN}/feed.xml`, 200, "HEAD"],
+    [`${SITE_ORIGIN}/llms.txt`, 200, "HEAD"],
+    [`${SITE_ORIGIN}/llms-full.txt`, 200, "HEAD"],
     [`${SITE_ORIGIN}/.well-known/security.txt`, 200, "HEAD"],
     [`${SITE_ORIGIN}/404.html`, 200, "HEAD"],
     [`${SITE_ORIGIN}/404/`, 200, "HEAD"],
@@ -416,6 +418,17 @@ async function checkGone() {
   }
 }
 
+async function checkDiscoveryFiles() {
+  for (const path of ["/llms.txt", "/llms-full.txt"]) {
+    const url = `${SITE_ORIGIN}${path}`;
+    const response = await requestStatus(url);
+
+    expectHeader(response, url, "content-type", "text/plain");
+    expectHeader(response, url, "x-robots-tag", "index, follow");
+    expectHeader(response, url, "cache-control", "max-age=300");
+  }
+}
+
 async function checkVitalsEndpoint() {
   const url = `${SITE_ORIGIN}/api/vitals`;
   const body = JSON.stringify({
@@ -446,6 +459,7 @@ async function monitorSeo() {
   await checkCanonicalUrlsDoNotRedirect();
   await checkNoindex();
   await checkGone();
+  await checkDiscoveryFiles();
   await checkVitalsEndpoint();
 
   if (failures.length) {

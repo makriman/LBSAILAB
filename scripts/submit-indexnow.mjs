@@ -10,6 +10,7 @@ const INDEXNOW_KEY = "5e5bfddcc11447d381079b24b2d1e213";
 const INDEXNOW_KEY_LOCATION = `${SITE_URL}/${INDEXNOW_KEY}.txt`;
 const INDEXNOW_ENDPOINT =
   process.env.INDEXNOW_ENDPOINT || "https://api.indexnow.org/indexnow";
+const DISCOVERY_URLS = [`${SITE_URL}/llms.txt`, `${SITE_URL}/llms-full.txt`];
 const DRY_RUN =
   process.argv.includes("--dry-run") || process.env.INDEXNOW_DRY_RUN === "1";
 
@@ -30,12 +31,14 @@ function extractLocs(xml) {
 }
 
 function canonicalUrls() {
-  return extractLocs(readDist("sitemap-0.xml")).filter((loc) => {
+  const urls = extractLocs(readDist("sitemap-0.xml")).filter((loc) => {
     const url = new URL(loc);
     return (
       url.origin === SITE_URL && !/\/(cohorts?|teams)(\/|$)/.test(url.pathname)
     );
   });
+
+  return [...new Set([...urls, ...DISCOVERY_URLS])];
 }
 
 async function submitIndexNow() {
