@@ -2653,6 +2653,16 @@ function auditPage(url, metadataIndex, sitemapPages) {
 
       if (item?.["@type"] === "WebPage") {
         assertEqual(
+          item.publisher?.["@id"],
+          `${SITE_URL}/#organization`,
+          `${url}: WebPage publisher`,
+        );
+        assertEqual(
+          item.copyrightHolder?.["@id"],
+          `${SITE_URL}/#organization`,
+          `${url}: WebPage copyrightHolder`,
+        );
+        assertEqual(
           item.dateModified,
           EXPECTED_UPDATED_AT,
           `${url}: WebPage dateModified`,

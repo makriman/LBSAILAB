@@ -186,6 +186,12 @@ export function webPageJsonLd({
     about: {
       "@id": `${SITE_URL}/#organization`,
     },
+    publisher: {
+      "@id": `${SITE_URL}/#organization`,
+    },
+    copyrightHolder: {
+      "@id": `${SITE_URL}/#organization`,
+    },
     primaryImageOfPage: {
       "@type": "ImageObject",
       url: absoluteUrl(image),

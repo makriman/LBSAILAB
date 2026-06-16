@@ -1873,6 +1873,14 @@ function auditWebPageJsonLd(url, html, items) {
     fail(`${url}: WebPage missing organization relationship`);
   }
 
+  if (webPage.publisher?.["@id"] !== `${SITE_ORIGIN}/#organization`) {
+    fail(`${url}: WebPage missing publisher organization`);
+  }
+
+  if (webPage.copyrightHolder?.["@id"] !== `${SITE_ORIGIN}/#organization`) {
+    fail(`${url}: WebPage missing copyright holder organization`);
+  }
+
   if (webPage.dateModified !== EXPECTED_DATE_MODIFIED) {
     fail(`${url}: WebPage dateModified does not match site update time`);
   }
