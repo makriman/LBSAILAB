@@ -496,6 +496,26 @@ function auditExternalPerformanceMonitorConfig() {
     fail("seo:production should include CrUX Core Web Vitals monitoring");
   }
 
+  if (
+    !packageJson.includes(
+      '"seo:live": "npm run seo:monitor && npm run seo:audit:live"',
+    )
+  ) {
+    fail("package.json is missing the seo:live production smoke script");
+  }
+
+  if (!packageJson.includes('"seo:production": "npm run seo:live')) {
+    fail("seo:production should reuse the live SEO smoke suite");
+  }
+
+  if (!workflow.includes("Run live SEO smoke suite")) {
+    fail("SEO workflow should run the live SEO smoke suite on main pushes");
+  }
+
+  if (!workflow.includes("run: npm run seo:live")) {
+    fail("SEO workflow should call npm run seo:live");
+  }
+
   if (!workflow.includes("timeout-minutes: 25")) {
     fail("SEO workflow timeout should allow external performance monitoring");
   }
