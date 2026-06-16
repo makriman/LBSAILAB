@@ -10,11 +10,11 @@ const DEFAULT_PATHS = ["/", "/batches/spring-2026/", "/mentors/"];
 const LIGHTHOUSE_VERSION = "13.4.0";
 const LIGHTHOUSE_ATTEMPTS = Number(process.env.LIGHTHOUSE_ATTEMPTS || "2");
 const MIN_CATEGORY_SCORES = {
+  performance: 0.9,
   accessibility: 0.9,
   "best-practices": 0.95,
   seo: 1,
 };
-const OBSERVED_CATEGORIES = ["performance"];
 const MAX_METRICS = {
   "cumulative-layout-shift": 0.1,
   "largest-contentful-paint": 3000,
@@ -38,6 +38,30 @@ function auditUrls() {
   return (urls.length ? urls : DEFAULT_PATHS).map((url) =>
     new URL(url, SITE_ORIGIN).toString(),
   );
+}
+
+function auditProfiles() {
+  const requestedProfiles = (process.env.LIGHTHOUSE_PROFILES || "")
+    .split(",")
+    .map((profile) => profile.trim().toLowerCase())
+    .filter(Boolean);
+  const profiles = requestedProfiles.length
+    ? requestedProfiles
+    : ["mobile", "desktop"];
+
+  return [...new Set(profiles)].map((profile) => {
+    if (profile === "desktop") {
+      return {
+        args: ["--preset=desktop"],
+        name: "desktop",
+      };
+    }
+
+    return {
+      args: [],
+      name: "mobile",
+    };
+  });
 }
 
 function lighthouseEnv() {
@@ -83,11 +107,12 @@ function run(command, args) {
   });
 }
 
-async function runLighthouse(url, outputPath) {
+async function runLighthouse(url, outputPath, profile) {
   await run("npx", [
     "--yes",
     `lighthouse@${LIGHTHOUSE_VERSION}`,
     url,
+    ...profile.args,
     "--quiet",
     "--only-categories=performance,accessibility,best-practices,seo",
     "--chrome-flags=--headless=new --no-sandbox --disable-dev-shm-usage",
@@ -115,12 +140,7 @@ function auditReport(report, url, attemptLabel = "") {
   const summary = [];
   const recordFailure = (message) => reportFailures.push(message);
 
-  const categories = [
-    ...Object.keys(MIN_CATEGORY_SCORES),
-    ...OBSERVED_CATEGORIES,
-  ];
-
-  for (const category of categories) {
+  for (const category of Object.keys(MIN_CATEGORY_SCORES)) {
     const actual = score(report, category);
     const percentage = Math.round((actual ?? 0) * 100);
 
@@ -174,35 +194,38 @@ function auditReport(report, url, attemptLabel = "") {
 
 async function auditLighthouse() {
   const temporaryDirectory = await mkdtemp(join(tmpdir(), "lbs-lighthouse-"));
+  const profiles = auditProfiles();
 
   try {
     for (const [urlIndex, url] of auditUrls().entries()) {
-      let finalFailures = [];
+      for (const [profileIndex, profile] of profiles.entries()) {
+        let finalFailures = [];
 
-      for (let attempt = 1; attempt <= LIGHTHOUSE_ATTEMPTS; attempt += 1) {
-        const outputPath = join(
-          temporaryDirectory,
-          `report-${urlIndex}-${attempt}.json`,
-        );
-        const report = await runLighthouse(url, outputPath);
-        const attemptFailures = auditReport(
-          report,
-          url,
-          LIGHTHOUSE_ATTEMPTS > 1 ? ` attempt ${attempt}` : "",
-        );
-
-        finalFailures = attemptFailures;
-
-        if (!attemptFailures.length) break;
-
-        if (attempt < LIGHTHOUSE_ATTEMPTS) {
-          console.warn(
-            `${url}: retrying Lighthouse after ${attemptFailures.length} failed check(s)`,
+        for (let attempt = 1; attempt <= LIGHTHOUSE_ATTEMPTS; attempt += 1) {
+          const outputPath = join(
+            temporaryDirectory,
+            `report-${urlIndex}-${profileIndex}-${attempt}.json`,
           );
-        }
-      }
+          const report = await runLighthouse(url, outputPath, profile);
+          const attemptFailures = auditReport(
+            report,
+            url,
+            ` ${profile.name}${LIGHTHOUSE_ATTEMPTS > 1 ? ` attempt ${attempt}` : ""}`,
+          );
 
-      for (const failure of finalFailures) fail(failure);
+          finalFailures = attemptFailures;
+
+          if (!attemptFailures.length) break;
+
+          if (attempt < LIGHTHOUSE_ATTEMPTS) {
+            console.warn(
+              `${url} ${profile.name}: retrying Lighthouse after ${attemptFailures.length} failed check(s)`,
+            );
+          }
+        }
+
+        for (const failure of finalFailures) fail(failure);
+      }
     }
   } finally {
     await rm(temporaryDirectory, { force: true, recursive: true });
