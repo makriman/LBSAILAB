@@ -8,8 +8,47 @@ const SITE_URL = process.env.SEO_SITE_URL || "https://lbsailab.com";
 const SITE = new URL(SITE_URL);
 const SITE_ORIGIN = SITE.origin;
 const SITE_HOST = SITE.host;
+const DUPLICATE_ORIGINS = (
+  process.env.SEO_DUPLICATE_ORIGINS ||
+  "https://lbsailab.zahra-moghadasi.workers.dev"
+)
+  .split(",")
+  .map((origin) => origin.trim().replace(/\/+$/, ""))
+  .filter((origin) => origin && origin !== SITE_ORIGIN);
 const PUBLIC_DNS_SERVERS = ["1.1.1.1", "8.8.8.8"];
 const MIN_CERT_VALID_DAYS = 30;
+const CANONICAL_PATHS = [
+  "/",
+  "/about/",
+  "/apply/",
+  "/batches/",
+  "/batches/spring-2026/",
+  "/batches/spring-2026/london-eats-pal/",
+  "/batches/spring-2026/wayfinder/",
+  "/contact/",
+  "/mentors/",
+  "/sitemap/",
+];
+const GONE_PATHS = [
+  "/images/lbs-ai-lab-workshop-hero.png",
+  "/mentors/rhea-bisaria.png",
+];
+const NOINDEX_PATHS = [
+  "/healthz",
+  "/api/applications",
+  "/api/vitals",
+  "/admin/",
+  "/login/",
+  "/search/",
+  "/cart/",
+  "/checkout/",
+  "/internal/",
+  "/private/",
+  "/.well-known/security.txt",
+  "/404.html",
+  "/404/",
+  "/missing-seo-monitor-page/",
+];
 const failures = [];
 const resolver = new Resolver();
 
@@ -211,6 +250,53 @@ function expectHeader(response, url, name, expected) {
   }
 }
 
+async function expectStatus(url, expectedStatus, method = "HEAD") {
+  const response = await requestStatus(url, method);
+
+  if (response.status !== expectedStatus) {
+    fail(`${url}: expected ${expectedStatus}, got ${response.status}`);
+  }
+
+  if (response.status >= 500) {
+    fail(`${url}: returned 5xx status ${response.status}`);
+  }
+
+  return response;
+}
+
+async function expectRedirect(source, target) {
+  const response = await requestStatus(source);
+  const location = response.headers.get("location")
+    ? new URL(response.headers.get("location"), source).toString()
+    : "";
+
+  if (response.status !== 301) {
+    fail(`${source}: expected 301 redirect, got ${response.status}`);
+  }
+
+  if (location !== target) {
+    fail(
+      `${source}: expected redirect to ${target}, got ${location || "(none)"}`,
+    );
+  }
+
+  if (location) {
+    const targetWithoutHash = new URL(location);
+    targetWithoutHash.hash = "";
+    const targetResponse = await requestStatus(targetWithoutHash.toString());
+
+    if (targetResponse.status !== 200) {
+      fail(
+        `${source}: redirect target ${targetWithoutHash.toString()} expected 200, got ${targetResponse.status}`,
+      );
+    }
+
+    if (targetResponse.headers.get("location")) {
+      fail(`${source}: redirect target should not redirect again`);
+    }
+  }
+}
+
 async function checkStatus() {
   const checks = [
     [`${SITE_ORIGIN}/`, 200, "HEAD"],
@@ -225,68 +311,107 @@ async function checkStatus() {
     [`${SITE_ORIGIN}/healthz`, 200, "HEAD"],
     [`${SITE_ORIGIN}/api/applications`, 200, "GET"],
     [`${SITE_ORIGIN}/api/vitals`, 200, "GET"],
-    [`${SITE_ORIGIN}/images/lbs-ai-lab-workshop-hero.png`, 410, "HEAD"],
     [`${SITE_ORIGIN}/missing-seo-monitor-page/`, 404, "HEAD"],
   ];
 
   for (const [url, expectedStatus, method] of checks) {
-    const response = await requestStatus(url, method);
-
-    if (response.status !== expectedStatus) {
-      fail(`${url}: expected ${expectedStatus}, got ${response.status}`);
-    }
-
-    if (response.status >= 500) {
-      fail(`${url}: returned 5xx status ${response.status}`);
-    }
+    await expectStatus(url, expectedStatus, method);
   }
 }
 
 async function checkRedirects() {
   const redirects = [
+    [`http://${SITE_HOST}/`, `${SITE_ORIGIN}/`],
+    [`http://www.${SITE_HOST}/`, `${SITE_ORIGIN}/`],
     [`http://${SITE_HOST}/about`, `${SITE_ORIGIN}/about/`],
+    [`http://www.${SITE_HOST}/About?utm_source=test`, `${SITE_ORIGIN}/about/`],
     [`https://www.${SITE_HOST}/about`, `${SITE_ORIGIN}/about/`],
+    [
+      `https://www.${SITE_HOST}/Batches/Spring-2026`,
+      `${SITE_ORIGIN}/batches/spring-2026/`,
+    ],
+    [`${SITE_ORIGIN}/About`, `${SITE_ORIGIN}/about/`],
     [`${SITE_ORIGIN}/about`, `${SITE_ORIGIN}/about/`],
+    [
+      `${SITE_ORIGIN}/batches/spring-2026/Wayfinder`,
+      `${SITE_ORIGIN}/batches/spring-2026/wayfinder/`,
+    ],
+    [
+      `${SITE_ORIGIN}/about?utm_source=test&gclid=test`,
+      `${SITE_ORIGIN}/about/`,
+    ],
     [`${SITE_ORIGIN}/about?preview=true&foo=bar`, `${SITE_ORIGIN}/about/`],
     [`${SITE_ORIGIN}/cohorts`, `${SITE_ORIGIN}/batches/`],
+    [`${SITE_ORIGIN}/COHORTS/COHORT-01`, `${SITE_ORIGIN}/batches/spring-2026/`],
+    [`${SITE_ORIGIN}/cohorts/cohort-01`, `${SITE_ORIGIN}/batches/spring-2026/`],
+    [`${SITE_ORIGIN}/cohorts/cohort-02`, `${SITE_ORIGIN}/batches/#autumn-2026`],
+    [`${SITE_ORIGIN}/teams`, `${SITE_ORIGIN}/batches/spring-2026/`],
+    [
+      `${SITE_ORIGIN}/teams/cafe-smart`,
+      `${SITE_ORIGIN}/batches/spring-2026/london-eats-pal/`,
+    ],
+    [
+      `${SITE_ORIGIN}/teams/campus-collective`,
+      `${SITE_ORIGIN}/batches/spring-2026/london-eats-pal/`,
+    ],
+    [
+      `${SITE_ORIGIN}/batches/spring-2026/campus-collective`,
+      `${SITE_ORIGIN}/batches/spring-2026/london-eats-pal/`,
+    ],
     [
       `${SITE_ORIGIN}/teams/wayfinders`,
       `${SITE_ORIGIN}/batches/spring-2026/wayfinder/`,
     ],
+    [
+      `${SITE_ORIGIN}/teams/wayfinder`,
+      `${SITE_ORIGIN}/batches/spring-2026/wayfinder/`,
+    ],
+    [
+      `${SITE_ORIGIN}/teams/ems-plus-plus`,
+      `${SITE_ORIGIN}/batches/spring-2026/ems-plus-plus/`,
+    ],
+    ...DUPLICATE_ORIGINS.flatMap((origin) => [
+      [`${origin}/`, `${SITE_ORIGIN}/`],
+      [`${origin}/About?utm_source=test`, `${SITE_ORIGIN}/about/`],
+      [
+        `${origin}/Batches/Spring-2026/Wayfinder?preview=true`,
+        `${SITE_ORIGIN}/batches/spring-2026/wayfinder/`,
+      ],
+    ]),
   ];
 
   for (const [source, target] of redirects) {
-    const response = await requestStatus(source);
-    const location = response.headers.get("location")
-      ? new URL(response.headers.get("location"), source).toString()
-      : "";
+    await expectRedirect(source, target);
+  }
+}
 
-    if (response.status !== 301) {
-      fail(`${source}: expected 301 redirect, got ${response.status}`);
-    }
+async function checkCanonicalUrlsDoNotRedirect() {
+  for (const path of CANONICAL_PATHS) {
+    const url = `${SITE_ORIGIN}${path}`;
+    const response = await expectStatus(url, 200);
 
-    if (location !== target) {
-      fail(
-        `${source}: expected redirect to ${target}, got ${location || "(none)"}`,
-      );
+    if (response.headers.get("location")) {
+      fail(`${url}: canonical URL unexpectedly returned a redirect location`);
     }
   }
 }
 
 async function checkNoindex() {
-  for (const url of [
-    `${SITE_ORIGIN}/healthz`,
-    `${SITE_ORIGIN}/api/applications`,
-    `${SITE_ORIGIN}/api/vitals`,
-    `${SITE_ORIGIN}/.well-known/security.txt`,
-    `${SITE_ORIGIN}/404.html`,
-    `${SITE_ORIGIN}/404/`,
-    `${SITE_ORIGIN}/missing-seo-monitor-page/`,
-  ]) {
+  for (const path of NOINDEX_PATHS) {
+    const url = `${SITE_ORIGIN}${path}`;
     const response = await requestStatus(
       url,
       url.endsWith("/api/applications") ? "GET" : "HEAD",
     );
+    expectHeader(response, url, "x-robots-tag", "noindex");
+  }
+}
+
+async function checkGone() {
+  for (const path of GONE_PATHS) {
+    const url = `${SITE_ORIGIN}${path}`;
+    const response = await expectStatus(url, 410);
+
     expectHeader(response, url, "x-robots-tag", "noindex");
   }
 }
@@ -318,7 +443,9 @@ async function monitorSeo() {
   await checkCertificates();
   await checkStatus();
   await checkRedirects();
+  await checkCanonicalUrlsDoNotRedirect();
   await checkNoindex();
+  await checkGone();
   await checkVitalsEndpoint();
 
   if (failures.length) {
