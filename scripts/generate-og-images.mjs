@@ -1,15 +1,25 @@
 import { spawn } from "node:child_process";
-import { access, constants, mkdir, rm, writeFile } from "node:fs/promises";
+import {
+  access,
+  constants,
+  mkdir,
+  readFile,
+  readdir,
+  rm,
+  writeFile,
+} from "node:fs/promises";
 import { dirname, join } from "node:path";
 import { fileURLToPath } from "node:url";
+import { load } from "js-yaml";
 
 const __dirname = dirname(fileURLToPath(import.meta.url));
 const rootDir = join(__dirname, "..");
 const publicDir = join(rootDir, "public");
+const teamsDir = join(rootDir, "src", "content", "teams");
 const width = 1200;
 const height = 630;
 
-const cards = [
+const baseCards = [
   {
     file: "og-default.png",
     eyebrow: "London Business School / Data Science & AI Initiative",
@@ -43,6 +53,71 @@ const textLines = (lines, x, y, size, weight, family, fill, lineHeight) =>
         `<text x="${x}" y="${y + index * lineHeight}" font-family="${family}" font-size="${size}" font-weight="${weight}" fill="${fill}">${escapeXml(line)}</text>`,
     )
     .join("");
+
+const wrapText = (text, maxCharacters, maxLines) => {
+  const words = text.split(/\s+/).filter(Boolean);
+  const lines = [];
+
+  for (const word of words) {
+    const current = lines.at(-1);
+
+    if (!current) {
+      lines.push(word);
+      continue;
+    }
+
+    if (`${current} ${word}`.length <= maxCharacters) {
+      lines[lines.length - 1] = `${current} ${word}`;
+      continue;
+    }
+
+    if (lines.length < maxLines) {
+      lines.push(word);
+      continue;
+    }
+
+    lines[lines.length - 1] = `${current}...`;
+    break;
+  }
+
+  return lines;
+};
+
+const standalonePhrase = (text) => text.replace(/\.$/, "");
+
+const parseTeamFrontmatter = (source, file) => {
+  const match = source.match(/^---\n([\s\S]*?)\n---/);
+
+  if (!match) {
+    throw new Error(`${file} is missing YAML frontmatter`);
+  }
+
+  return load(match[1]);
+};
+
+const loadTeamCards = async () => {
+  const files = (await readdir(teamsDir))
+    .filter((file) => file.endsWith(".md") || file.endsWith(".mdx"))
+    .sort();
+
+  const cards = await Promise.all(
+    files.map(async (file) => {
+      const source = await readFile(join(teamsDir, file), "utf8");
+      const data = parseTeamFrontmatter(source, file);
+      const displayName = data.displayName || data.name;
+
+      return {
+        file: `og-team-${data.slug}.png`,
+        eyebrow: `${data.batchLabel} / LBS AI Lab`,
+        title: wrapText(displayName, 18, 2),
+        body: wrapText(standalonePhrase(data.tagline), 52, 2),
+        footer: `lbsailab.com/batches/spring-2026/${data.slug}`,
+      };
+    }),
+  );
+
+  return cards;
+};
 
 const makeCard = ({
   eyebrow,
@@ -136,6 +211,8 @@ const renderPng = async (svg, outputPath) => {
 };
 
 await mkdir(publicDir, { recursive: true });
+
+const cards = [...baseCards, ...(await loadTeamCards())];
 
 await Promise.all(
   cards.map(async (card) => {

@@ -364,6 +364,28 @@ function isTeamPage(url) {
   return /^https:\/\/lbsailab\.com\/batches\/spring-2026\/[^/]+\/$/.test(url);
 }
 
+function teamSlugFromUrl(url) {
+  return url.match(/\/batches\/spring-2026\/([^/]+)\/$/)?.[1] || "";
+}
+
+function auditTeamSocialImage(url, html) {
+  if (!isTeamPage(url)) return;
+
+  const slug = teamSlugFromUrl(url);
+  const expectedImage = `${SITE_URL}/og-team-${slug}.png`;
+
+  assertEqual(metaContent(html, "og:image"), expectedImage, `${url}: og:image`);
+  assertEqual(
+    metaContent(html, "twitter:image"),
+    expectedImage,
+    `${url}: twitter:image`,
+  );
+
+  if (!existsSync(path.join(DIST, `og-team-${slug}.png`))) {
+    fail(`${url}: generated team Open Graph image is missing`);
+  }
+}
+
 function auditTeamJsonLd(url, items, html) {
   if (!isTeamPage(url)) return;
 
@@ -516,6 +538,13 @@ function auditCrawlerFiles() {
     if (/\/images\/lbs-ai-lab-workshop-hero\.png$/.test(url.pathname)) {
       fail("Image sitemap references the retired PNG hero source");
     }
+
+    if (
+      url.origin === SITE_URL &&
+      !existsSync(path.join(DIST, decodeURIComponent(url.pathname.slice(1))))
+    ) {
+      fail(`Image sitemap references missing file: ${imageUrl}`);
+    }
   }
 
   if (!feed.includes("<feed") || !feed.includes(`${SITE_URL}/feed.xml`)) {
@@ -638,6 +667,7 @@ function auditPage(url, metadataIndex) {
     metaContent(html, "twitter:image:alt"),
     `${url}: twitter:image:alt`,
   );
+  auditTeamSocialImage(url, html);
 
   if (
     !alternates.some((link) => link.hreflang === "en-gb" && link.href === url)

@@ -20,6 +20,10 @@ export const OG_IMAGE_WIDTH = 1200;
 export const OG_IMAGE_HEIGHT = 630;
 export const OG_IMAGE_TYPE = "image/png";
 
+export function teamOgImage(slug: string) {
+  return `/og-team-${slug}.png`;
+}
+
 export type JsonLd = Record<string, unknown>;
 
 export interface BreadcrumbItem {

@@ -2,7 +2,7 @@
 import { getCollection } from "astro:content";
 import BaseLayout from "@layouts/BaseLayout.astro";
 import TeamDetail from "@components/sections/TeamDetail.astro";
-import { DEFAULT_OG_IMAGE, pageJsonLd, teamProfileJsonLd } from "@utils/seo";
+import { pageJsonLd, teamOgImage, teamProfileJsonLd } from "@utils/seo";
 
 export async function getStaticPaths() {
   const teams = await getCollection("teams");
@@ -19,10 +19,10 @@ const pageTitle =
   team.data.seoTitle ?? `${team.data.displayName} | Spring 2026 Batch`;
 const pageDescription = team.data.seoDescription ?? team.data.tagline;
 const pagePath = `/batches/spring-2026/${team.data.slug}/`;
-const pageImage = team.data.seoImage ?? DEFAULT_OG_IMAGE;
+const pageImage = team.data.seoImage ?? teamOgImage(team.data.slug);
 const pageImageAlt =
   team.data.seoImageAlt ??
-  `${team.data.displayName} profile in the LBS AI Lab Spring 2026 Batch`;
+  `${team.data.displayName} social share card for the LBS AI Lab Spring 2026 Batch`;
 const jsonLd = [
   ...pageJsonLd({
     title: pageTitle,

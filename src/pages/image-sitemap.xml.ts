@@ -1,9 +1,9 @@
 import { getCollection } from "astro:content";
 import {
-  DEFAULT_OG_IMAGE,
   SEO_UPDATED_AT,
   SPRING_BATCH_OG_IMAGE,
   absoluteUrl,
+  teamOgImage,
 } from "@utils/seo";
 import { defaultDescription, SITE_NAME, SITE_URL } from "@utils/site";
 
@@ -59,7 +59,7 @@ export async function GET() {
       loc: `/batches/spring-2026/${team.data.slug}/`,
       images: [
         {
-          loc: team.data.seoImage ?? DEFAULT_OG_IMAGE,
+          loc: team.data.seoImage ?? teamOgImage(team.data.slug),
           title: `${team.data.displayName} social share image`,
           caption: team.data.seoDescription ?? team.data.tagline,
         },
