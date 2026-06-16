@@ -88,6 +88,7 @@ const REQUIRED_MANIFEST_ICONS = [
     type: "image/png",
     width: 16,
     height: 16,
+    sha256: "85449457abbe6abac5b4a9c6cc0ba44926c3de01f9db9ac6515350e61be32cd2",
   },
   {
     src: "/favicon/favicon-32x32.png",
@@ -95,6 +96,7 @@ const REQUIRED_MANIFEST_ICONS = [
     type: "image/png",
     width: 32,
     height: 32,
+    sha256: "d71dbc6a6e50209120993d8d6ec47cd4605c86c607943692bcd0ebcab3831fb8",
   },
   {
     src: "/favicon/apple-touch-icon.png",
@@ -102,6 +104,7 @@ const REQUIRED_MANIFEST_ICONS = [
     type: "image/png",
     width: 180,
     height: 180,
+    sha256: "e0edbe3fcc3aa5cbdee6a0c659d4303449bcfb9d91cd720d3be5e76771f5ab06",
   },
   {
     src: "/favicon/icon-192.png",
@@ -109,6 +112,7 @@ const REQUIRED_MANIFEST_ICONS = [
     type: "image/png",
     width: 192,
     height: 192,
+    sha256: "51b5422036d968e4bc773c697d1a9c4724b741ae0a582ad6181c9f009fa71ba3",
   },
   {
     src: "/favicon/icon-512.png",
@@ -116,6 +120,18 @@ const REQUIRED_MANIFEST_ICONS = [
     type: "image/png",
     width: 512,
     height: 512,
+    sha256: "e1cec157004f66f08e6439a98ca5e0354620f6ed00c0a55baf4d15954d1312cb",
+  },
+];
+const REQUIRED_FAVICON_ASSETS = [
+  ...REQUIRED_MANIFEST_ICONS,
+  {
+    src: "/favicon.ico",
+    sha256: "9f52cbf0b9573e3bb4f23ea869dbd1b17b4a616861ad3c99d75c3706a00eb204",
+  },
+  {
+    src: "/favicon/favicon.ico",
+    sha256: "9f52cbf0b9573e3bb4f23ea869dbd1b17b4a616861ad3c99d75c3706a00eb204",
   },
 ];
 const DUPLICATE_ORIGINS = (
@@ -1392,12 +1408,8 @@ function assertPageMetadata(html, url) {
     fail(`${url}: missing canonical web app manifest link`);
   }
 
-  if (
-    !iconLinks.some(
-      (link) => link.href === "/favicon.svg" && link.type === "image/svg+xml",
-    )
-  ) {
-    fail(`${url}: missing SVG favicon link`);
+  if (iconLinks.some((link) => link.href === "/favicon.svg")) {
+    fail(`${url}: stale SVG favicon link should not be advertised`);
   }
 
   if (
@@ -2441,6 +2453,11 @@ async function auditWebManifest() {
     if (!resource) continue;
 
     const dimensions = pngDimensions(resource.body);
+    const sha256 = createHash("sha256").update(resource.body).digest("hex");
+
+    if (sha256 !== expected.sha256) {
+      fail(`${iconUrl}: favicon does not match London Business School asset`);
+    }
 
     if (!dimensions) {
       fail(`${iconUrl}: manifest icon is not a valid PNG`);
@@ -2455,6 +2472,26 @@ async function auditWebManifest() {
         `${iconUrl}: manifest icon dimensions expected ${expected.width}x${expected.height}, got ${dimensions.width}x${dimensions.height}`,
       );
     }
+  }
+
+  for (const expected of REQUIRED_FAVICON_ASSETS) {
+    const iconUrl = new URL(expected.src, SITE_ORIGIN).toString();
+    const resource = await auditImageResource(iconUrl);
+
+    if (!resource) continue;
+
+    const sha256 = createHash("sha256").update(resource.body).digest("hex");
+
+    if (sha256 !== expected.sha256) {
+      fail(`${iconUrl}: favicon does not match London Business School asset`);
+    }
+  }
+
+  const staleSvgUrl = `${SITE_ORIGIN}/favicon.svg`;
+  const staleSvg = await get(staleSvgUrl, { accept: "image/svg+xml" });
+
+  if (staleSvg.status !== 404) {
+    fail(`${staleSvgUrl}: stale SVG favicon should not be served`);
   }
 }
 

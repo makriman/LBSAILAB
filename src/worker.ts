@@ -589,7 +589,6 @@ function isLongLivedAsset(pathname: string): boolean {
     /^\/mentors\/[^/]+\.(jpg|png|webp|avif)$/.test(pathname) ||
     pathname.startsWith("/favicon/") ||
     pathname === "/favicon.ico" ||
-    pathname === "/favicon.svg" ||
     /^\/og-[^/]+\.png$/.test(pathname) ||
     /^\/google-deepmind-logo-[^/]+\.png$/.test(pathname) ||
     pathname === "/lbs-logo.svg" ||
@@ -604,7 +603,6 @@ function isIndexableImageAsset(pathname: string): boolean {
     /^\/mentors\/[^/]+\.(jpg|png|webp|avif)$/i.test(pathname) ||
     pathname.startsWith("/favicon/") ||
     pathname === "/favicon.ico" ||
-    pathname === "/favicon.svg" ||
     /^\/og-[^/]+\.png$/.test(pathname) ||
     /^\/google-deepmind-logo-[^/]+\.png$/.test(pathname) ||
     pathname === "/lbs-logo.svg" ||
