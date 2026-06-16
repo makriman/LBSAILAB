@@ -51,6 +51,10 @@ jobs:
           GOOGLE_SITE_VERIFICATION_FILE: ${{ secrets.GOOGLE_SITE_VERIFICATION_FILE }}
         run: npm run seo:live
 
+      - name: Run production performance budget
+        if: github.event_name == 'push' && github.ref == 'refs/heads/main'
+        run: npm run seo:perf
+
       - name: Run production SEO suite
         if: github.event_name == 'schedule' || github.event_name == 'workflow_dispatch'
         env:

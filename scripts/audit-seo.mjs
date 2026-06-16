@@ -909,6 +909,16 @@ function auditExternalPerformanceMonitorConfig() {
     fail("SEO workflow should call npm run seo:live");
   }
 
+  if (!workflow.includes("Run production performance budget")) {
+    fail(
+      "SEO workflow should run production performance budgets on main pushes",
+    );
+  }
+
+  if (!workflow.includes("run: npm run seo:perf")) {
+    fail("SEO workflow should call npm run seo:perf");
+  }
+
   if (!liveAudit.includes("isCloudflareInsightsScript")) {
     fail("Live SEO audit should explicitly recognize Cloudflare Insights");
   }
