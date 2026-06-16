@@ -664,6 +664,7 @@ function auditSeoMonitorConfig() {
     "assertSecurityHeaders(imageResponse, imageSitemapUrl)",
     "assertIndexableHeaders(imageResponse, imageSitemapUrl)",
     "assertShortCache(imageResponse, imageSitemapUrl)",
+    "auditDuplicateOriginRedirects(pages)",
     "expected XML content type",
   ]) {
     if (!liveAudit.includes(expected)) {

@@ -2198,6 +2198,21 @@ async function auditCanonicalDuplicateRedirects(pages) {
   }
 }
 
+async function auditDuplicateOriginRedirects(pages) {
+  for (const origin of DUPLICATE_ORIGINS) {
+    for (const page of pages) {
+      const canonical = new URL(page);
+      const duplicate = new URL(origin);
+
+      duplicate.pathname = canonical.pathname;
+      duplicate.search = canonical.search;
+      duplicate.hash = canonical.hash;
+
+      await auditRedirectTarget(duplicate.toString(), page);
+    }
+  }
+}
+
 async function auditNoindexAndGone() {
   const healthUrl = `${SITE_ORIGIN}/healthz`;
   const { response } = await text(healthUrl, { accept: "application/json" });
@@ -2480,6 +2495,7 @@ async function auditLiveSeo() {
   await auditSecurityText();
   await auditRedirects();
   await auditCanonicalDuplicateRedirects(pages);
+  await auditDuplicateOriginRedirects(pages);
   await auditNoindexAndGone();
   await auditMissingPage();
   await auditErrorDocumentDirect();
