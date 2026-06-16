@@ -386,6 +386,12 @@ function isAllowedExternalScript(url) {
   return ALLOWED_EXTERNAL_SCRIPT_PATTERNS.some((pattern) => pattern.test(url));
 }
 
+function isCloudflareInsightsScript(url) {
+  return /^https:\/\/static\.cloudflareinsights\.com\/beacon\.min\.js(?:\/|$)/.test(
+    url,
+  );
+}
+
 function isDangerousDataUrl(value) {
   return /^data\s*:\s*(?:text\/html|application\/javascript|text\/javascript)/i.test(
     value,
@@ -1169,6 +1175,7 @@ function auditLiveContentIntegrity(html, pageUrl) {
       }
 
       if (!isExternalUrl(parsed)) continue;
+      if (isCloudflareInsightsScript(normalized)) continue;
 
       const allowedHosts = resourceContext
         ? ALLOWED_EXTERNAL_RESOURCE_HOSTS
@@ -1670,7 +1677,7 @@ function auditScriptHygiene(html, pageUrl) {
 
     if (!src) continue;
 
-    if (!isNonBlockingScript(script)) {
+    if (!isCloudflareInsightsScript(src) && !isNonBlockingScript(script)) {
       fail(`${pageUrl}: script should be async, defer, or module (${src})`);
     }
 

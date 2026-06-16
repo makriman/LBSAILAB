@@ -477,6 +477,10 @@ function auditExternalPerformanceMonitorConfig() {
     path.join(ROOT, ".github", "workflows", "seo.yml"),
     "utf8",
   );
+  const liveAudit = readFileSync(
+    path.join(ROOT, "scripts", "audit-live-seo.mjs"),
+    "utf8",
+  );
 
   if (
     !packageJson.includes('"seo:pagespeed": "node scripts/audit-pagespeed.mjs"')
@@ -514,6 +518,10 @@ function auditExternalPerformanceMonitorConfig() {
 
   if (!workflow.includes("run: npm run seo:live")) {
     fail("SEO workflow should call npm run seo:live");
+  }
+
+  if (!liveAudit.includes("isCloudflareInsightsScript")) {
+    fail("Live SEO audit should explicitly recognize Cloudflare Insights");
   }
 
   if (!workflow.includes("timeout-minutes: 25")) {
