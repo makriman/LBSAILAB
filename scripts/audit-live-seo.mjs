@@ -620,6 +620,30 @@ function assertPageMetadata(html, url) {
   if (!/<script\s+type=["']application\/ld\+json["']/i.test(html)) {
     fail(`${url}: missing JSON-LD`);
   }
+
+  const vitalsMonitors = [
+    ...html.matchAll(
+      /<script\b[^>]*data-vitals-monitor[^>]*>[\s\S]*?<\/script>/gi,
+    ),
+  ];
+
+  if (vitalsMonitors.length !== 1) {
+    fail(`${url}: expected one web vitals monitor script`);
+    return;
+  }
+
+  for (const expected of [
+    "PerformanceObserver",
+    "/api/vitals",
+    "sendBeacon",
+    "LCP",
+    "CLS",
+    "INP",
+  ]) {
+    if (!vitalsMonitors[0][0].includes(expected)) {
+      fail(`${url}: web vitals monitor missing ${expected}`);
+    }
+  }
 }
 
 async function auditPage(url, sitemapPages, inbound, assetUrls) {
@@ -795,6 +819,45 @@ async function auditNoindexAndGone() {
     if ((gone.headers.get("last-modified") || "") !== EXPECTED_LAST_MODIFIED) {
       fail(`${url}: expected ${EXPECTED_LAST_MODIFIED} Last-Modified`);
     }
+  }
+
+  const vitalsUrl = `${SITE_ORIGIN}/api/vitals`;
+  const vitalsGet = await get(vitalsUrl, { accept: "application/json" });
+
+  if (vitalsGet.status !== 200) {
+    fail(`${vitalsUrl}: expected GET 200, got ${vitalsGet.status}`);
+  }
+
+  if ((vitalsGet.headers.get("x-robots-tag") || "") !== NOINDEX_ROBOTS) {
+    fail(`${vitalsUrl}: expected ${NOINDEX_ROBOTS} X-Robots-Tag`);
+  }
+
+  if (!/no-store/i.test(vitalsGet.headers.get("cache-control") || "")) {
+    fail(`${vitalsUrl}: expected no-store cache`);
+  }
+
+  const vitalsPost = await fetch(vitalsUrl, {
+    body: JSON.stringify({
+      metrics: [
+        { name: "LCP", value: 1200 },
+        { name: "CLS", value: 0.01 },
+        { name: "INP", value: 80 },
+      ],
+      path: "/seo-audit",
+    }),
+    headers: {
+      "Content-Type": "application/json",
+      "User-Agent": "lbsailab-seo-audit/1.0",
+    },
+    method: "POST",
+  });
+
+  if (vitalsPost.status !== 204) {
+    fail(`${vitalsUrl}: expected POST 204, got ${vitalsPost.status}`);
+  }
+
+  if ((vitalsPost.headers.get("x-robots-tag") || "") !== NOINDEX_ROBOTS) {
+    fail(`${vitalsUrl}: POST expected ${NOINDEX_ROBOTS} X-Robots-Tag`);
   }
 }
 

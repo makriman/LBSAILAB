@@ -180,5 +180,89 @@ const bingSiteVerification = import.meta.env.PUBLIC_BING_SITE_VERIFICATION;
       <slot />
     </main>
     <Footer />
+    <script is:inline data-vitals-monitor>
+      (() => {
+        if (!("PerformanceObserver" in window) || !("navigator" in window)) {
+          return;
+        }
+
+        const endpoint = "/api/vitals";
+        const metrics = new Map();
+        const observers = [];
+        let sent = false;
+
+        const remember = (name, value) => {
+          if (!Number.isFinite(value) || value < 0) return;
+          metrics.set(name, Math.round(value * 1000) / 1000);
+        };
+
+        const observe = (options, each) => {
+          try {
+            const observer = new PerformanceObserver((list) => {
+              list.getEntries().forEach(each);
+            });
+            observer.observe(options);
+            observers.push(observer);
+          } catch {
+            // Older browsers simply skip unsupported web-vital observers.
+          }
+        };
+
+        observe({ type: "largest-contentful-paint", buffered: true }, (entry) =>
+          remember("LCP", entry.startTime),
+        );
+
+        let cumulativeLayoutShift = 0;
+        observe({ type: "layout-shift", buffered: true }, (entry) => {
+          if (!entry.hadRecentInput) {
+            cumulativeLayoutShift += entry.value;
+            remember("CLS", cumulativeLayoutShift);
+          }
+        });
+
+        observe(
+          { type: "event", buffered: true, durationThreshold: 40 },
+          (entry) => {
+            if (entry.interactionId) {
+              remember(
+                "INP",
+                Math.max(metrics.get("INP") || 0, entry.duration || 0),
+              );
+            }
+          },
+        );
+
+        const flush = () => {
+          if (sent || !metrics.size) return;
+          sent = true;
+          observers.forEach((observer) => observer.disconnect());
+
+          const body = JSON.stringify({
+            path: window.location.pathname,
+            metrics: [...metrics].map(([name, value]) => ({ name, value })),
+          });
+          const blob = new Blob([body], { type: "application/json" });
+
+          if (navigator.sendBeacon?.(endpoint, blob)) return;
+
+          fetch(endpoint, {
+            body,
+            credentials: "omit",
+            headers: { "Content-Type": "application/json" },
+            keepalive: true,
+            method: "POST",
+          }).catch(() => {});
+        };
+
+        document.addEventListener(
+          "visibilitychange",
+          () => {
+            if (document.visibilityState === "hidden") flush();
+          },
+          { once: true },
+        );
+        window.addEventListener("pagehide", flush, { once: true });
+      })();
+    </script>
   </body>
 </html>

@@ -21,6 +21,14 @@ interface GitHubFile {
   sha?: string;
 }
 
+interface WebVitalsPayload {
+  metrics?: Array<{
+    name?: unknown;
+    value?: unknown;
+  }>;
+  path?: unknown;
+}
+
 const DEFAULT_BRANCH = "main";
 const DEFAULT_REPO = "makriman/LBSAILAB";
 const DEFAULT_SUBMISSIONS_PATH = "data/application-submissions.md";
@@ -30,6 +38,7 @@ const END_MARKER = "<!-- APPLICATIONS:END -->";
 const APPLICATION_RE = /<!-- application:(.*?) -->/gs;
 const APPLICATIONS_CACHE_KEY_VERSION = "2026-05-23-prefill-csv-submissions";
 const APPLICATIONS_CACHE_TTL_SECONDS = 60 * 60 * 24;
+const MAX_VITALS_PAYLOAD_BYTES = 4096;
 const CANONICAL_HOST = "lbsailab.com";
 const INDEXNOW_KEY = "5e5bfddcc11447d381079b24b2d1e213";
 const INDEXNOW_KEY_PATH = `/${INDEXNOW_KEY}.txt`;
@@ -61,6 +70,7 @@ const GONE_PATHS = new Set([
 ]);
 const NOINDEX_PATH_PREFIXES = [
   "/admin/",
+  "/api/",
   "/cart/",
   "/checkout/",
   "/healthz",
@@ -132,6 +142,18 @@ export default {
       }
 
       return json({ error: "Method not allowed" }, 405);
+    }
+
+    if (url.pathname === "/api/vitals") {
+      if (request.method === "POST") {
+        return handleVitals(request);
+      }
+
+      if (["GET", "HEAD"].includes(request.method)) {
+        return json({ ok: true, service: "web-vitals" }, 200);
+      }
+
+      return noContent(405, { Allow: "GET, HEAD, POST" });
     }
 
     const assetResponse = await env.ASSETS.fetch(request);
@@ -500,6 +522,64 @@ async function handleListApplications(env: Env): Promise<Response> {
   }
 }
 
+async function handleVitals(request: Request): Promise<Response> {
+  const contentLength = Number(request.headers.get("Content-Length") || "0");
+
+  if (contentLength > MAX_VITALS_PAYLOAD_BYTES) {
+    return noContent();
+  }
+
+  let payload: WebVitalsPayload;
+
+  try {
+    payload = (await request.json()) as WebVitalsPayload;
+  } catch {
+    return noContent();
+  }
+
+  const metrics = sanitizeVitals(payload.metrics);
+
+  if (metrics.length) {
+    console.log(
+      JSON.stringify({
+        metrics,
+        path: sanitizePath(payload.path),
+        type: "web-vitals",
+      }),
+    );
+  }
+
+  return noContent();
+}
+
+function sanitizeVitals(metrics: WebVitalsPayload["metrics"]) {
+  if (!Array.isArray(metrics)) return [];
+
+  const allowedNames = new Set(["LCP", "CLS", "INP"]);
+
+  return metrics
+    .map((metric) => ({
+      name: typeof metric.name === "string" ? metric.name : "",
+      value: typeof metric.value === "number" ? metric.value : Number.NaN,
+    }))
+    .filter(
+      (metric) =>
+        allowedNames.has(metric.name) &&
+        Number.isFinite(metric.value) &&
+        metric.value >= 0 &&
+        metric.value < 120000,
+    )
+    .slice(0, 3);
+}
+
+function sanitizePath(path: unknown): string {
+  const value = typeof path === "string" ? path : "/";
+
+  return value.startsWith("/") && !value.startsWith("//")
+    ? value.slice(0, 160)
+    : "/";
+}
+
 async function appendSubmission(
   env: Env,
   submission: ApplicationSubmission,
@@ -793,6 +873,23 @@ function json(body: unknown, status = 200): Response {
   setHeaders(headers, SECURITY_HEADERS);
 
   return new Response(JSON.stringify(body), {
+    status,
+    headers,
+  });
+}
+
+function noContent(
+  status = 204,
+  headerValues: Record<string, string> = {},
+): Response {
+  const headers = new Headers({
+    "Cache-Control": "no-store",
+    "X-Robots-Tag": NOINDEX_ROBOTS,
+    ...headerValues,
+  });
+  setHeaders(headers, SECURITY_HEADERS);
+
+  return new Response(null, {
     status,
     headers,
   });

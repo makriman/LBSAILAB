@@ -112,17 +112,23 @@ async function checkCertificates() {
   ]);
 }
 
-async function requestUrl(url, method = "HEAD") {
+async function requestUrl(url, method = "HEAD", body = "", headers = {}) {
   const parsed = new URL(url);
   const transport = parsed.protocol === "http:" ? http : https;
+  const requestHeaders = {
+    "User-Agent": "lbsailab-seo-monitor/1.0",
+    ...headers,
+  };
+
+  if (body) {
+    requestHeaders["Content-Length"] = Buffer.byteLength(body);
+  }
 
   return new Promise((resolve, reject) => {
     const request = transport.request(
       parsed,
       {
-        headers: {
-          "User-Agent": "lbsailab-seo-monitor/1.0",
-        },
+        headers: requestHeaders,
         lookup: publicDnsFallbackLookup,
         method,
       },
@@ -144,13 +150,14 @@ async function requestUrl(url, method = "HEAD") {
     );
 
     request.on("error", reject);
+    if (body) request.write(body);
     request.end();
   });
 }
 
-async function requestStatus(url, method = "HEAD") {
+async function requestStatus(url, method = "HEAD", body = "", headers = {}) {
   try {
-    return await requestUrl(url, method);
+    return await requestUrl(url, method, body, headers);
   } catch (error) {
     fail(
       `${url}: request failed (${error instanceof Error ? error.message : String(error)})`,
@@ -217,6 +224,7 @@ async function checkStatus() {
     [`${SITE_ORIGIN}/404/`, 200, "HEAD"],
     [`${SITE_ORIGIN}/healthz`, 200, "HEAD"],
     [`${SITE_ORIGIN}/api/applications`, 200, "GET"],
+    [`${SITE_ORIGIN}/api/vitals`, 200, "GET"],
     [`${SITE_ORIGIN}/images/lbs-ai-lab-workshop-hero.png`, 410, "HEAD"],
     [`${SITE_ORIGIN}/missing-seo-monitor-page/`, 404, "HEAD"],
   ];
@@ -269,6 +277,7 @@ async function checkNoindex() {
   for (const url of [
     `${SITE_ORIGIN}/healthz`,
     `${SITE_ORIGIN}/api/applications`,
+    `${SITE_ORIGIN}/api/vitals`,
     `${SITE_ORIGIN}/.well-known/security.txt`,
     `${SITE_ORIGIN}/404.html`,
     `${SITE_ORIGIN}/404/`,
@@ -282,12 +291,35 @@ async function checkNoindex() {
   }
 }
 
+async function checkVitalsEndpoint() {
+  const url = `${SITE_ORIGIN}/api/vitals`;
+  const body = JSON.stringify({
+    metrics: [
+      { name: "LCP", value: 1200 },
+      { name: "CLS", value: 0.01 },
+      { name: "INP", value: 80 },
+    ],
+    path: "/seo-monitor",
+  });
+  const response = await requestStatus(url, "POST", body, {
+    "Content-Type": "application/json",
+  });
+
+  if (response.status !== 204) {
+    fail(`${url}: expected POST 204, got ${response.status}`);
+  }
+
+  expectHeader(response, url, "x-robots-tag", "noindex");
+  expectHeader(response, url, "cache-control", "no-store");
+}
+
 async function monitorSeo() {
   await checkDns();
   await checkCertificates();
   await checkStatus();
   await checkRedirects();
   await checkNoindex();
+  await checkVitalsEndpoint();
 
   if (failures.length) {
     console.error("SEO monitor failed:");

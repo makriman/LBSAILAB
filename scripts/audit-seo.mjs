@@ -789,6 +789,34 @@ function auditHomeHeroImages(url, html) {
   }
 }
 
+function auditVitalsMonitor(url, html) {
+  const monitors = fullTags(html, "script").filter((script) =>
+    /\bdata-vitals-monitor\b/.test(script),
+  );
+
+  if (monitors.length !== 1) {
+    fail(
+      `${url}: expected one web vitals monitor script, found ${monitors.length}`,
+    );
+    return;
+  }
+
+  const monitor = monitors[0];
+
+  for (const expected of [
+    "PerformanceObserver",
+    "/api/vitals",
+    "sendBeacon",
+    "LCP",
+    "CLS",
+    "INP",
+  ]) {
+    if (!monitor.includes(expected)) {
+      fail(`${url}: web vitals monitor missing ${expected}`);
+    }
+  }
+}
+
 function auditPage(url, metadataIndex) {
   const relativeFile = pageFileForUrl(url);
   const html = readDist(relativeFile);
@@ -808,6 +836,7 @@ function auditPage(url, metadataIndex) {
 
   auditHtmlIntegrity(html, url);
   auditHomeHeroImages(url, html);
+  auditVitalsMonitor(url, html);
 
   recordUniqueMetadata(metadataIndex.titles, title, url, "title");
   recordUniqueMetadata(
