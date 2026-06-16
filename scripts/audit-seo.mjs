@@ -441,6 +441,8 @@ function auditWorkerSeoAccessLogging() {
     "Bingbot",
     "DuckDuckBot",
     "LinkedInBot",
+    "host: sanitizeHost(url.host)",
+    "location: sanitizeHeaderValue",
     "sanitizePath(url.pathname)",
   ]) {
     if (!worker.includes(expected)) {
@@ -624,6 +626,9 @@ function auditSeoLogAnalyzer() {
     "EXPECTED_INDEXABLE_ROBOTS",
     "SEVERE_VITAL_LIMITS",
     "auditVitalsPercentiles",
+    "isCanonicalRedirectTarget",
+    "redirectTargets",
+    "crawler-facing ${status} redirect",
     "vitalsByConnection",
     "vitalsByViewport",
     "p75",
@@ -639,10 +644,22 @@ function auditSeoLogAnalyzer() {
       cacheControl: "public, max-age=300, must-revalidate",
       contentType: "text/html",
       crawler: "Googlebot",
+      host: "lbsailab.com",
       path: "/batches/spring-2026/",
       robots:
         "index, follow, max-snippet:-1, max-image-preview:large, max-video-preview:-1",
       status: 200,
+      type: "seo-access",
+    }),
+    JSON.stringify({
+      cacheControl: "public, max-age=300, must-revalidate",
+      contentType: null,
+      crawler: "Bingbot",
+      host: "www.lbsailab.com",
+      location: "https://lbsailab.com/about/",
+      path: "/about",
+      robots: null,
+      status: 301,
       type: "seo-access",
     }),
     JSON.stringify({
@@ -680,6 +697,16 @@ function auditSeoLogAnalyzer() {
       viewport: "mobile",
     }),
   ].join("\n");
+  const badRedirectLogs = JSON.stringify({
+    cacheControl: "public, max-age=300, must-revalidate",
+    contentType: null,
+    crawler: "Bingbot",
+    host: "lbsailab.com",
+    location: "https://example.com/about/",
+    path: "/about",
+    status: 302,
+    type: "seo-access",
+  });
   const good = spawnSync(process.execPath, [analyzerPath], {
     encoding: "utf8",
     input: goodLogs,
@@ -692,11 +719,16 @@ function auditSeoLogAnalyzer() {
     encoding: "utf8",
     input: badVitalsLogs,
   });
+  const badRedirect = spawnSync(process.execPath, [analyzerPath], {
+    encoding: "utf8",
+    input: badRedirectLogs,
+  });
 
   if (
     good.status !== 0 ||
     !good.stdout.includes("SEO log analysis passed") ||
     !good.stdout.includes('"p75"') ||
+    !good.stdout.includes("Redirects") ||
     !good.stdout.includes("Vitals by viewport") ||
     !good.stdout.includes("Vitals by connection")
   ) {
@@ -714,6 +746,14 @@ function auditSeoLogAnalyzer() {
     !badVitals.stderr.includes("web-vitals p75 LCP")
   ) {
     fail("SEO log analyzer did not fail severe p75 vitals sample logs");
+  }
+
+  if (
+    badRedirect.status === 0 ||
+    !badRedirect.stderr.includes("crawler-facing 302 redirect") ||
+    !badRedirect.stderr.includes("non-canonical redirect target")
+  ) {
+    fail("SEO log analyzer did not fail temporary external redirect logs");
   }
 }
 

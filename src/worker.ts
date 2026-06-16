@@ -544,6 +544,8 @@ function logSeoAccess(request: Request, url: URL, response: Response): void {
       contentType:
         response.headers.get("Content-Type")?.split(";")[0]?.trim() || null,
       crawler,
+      host: sanitizeHost(url.host),
+      location: sanitizeHeaderValue(response.headers.get("Location")),
       method: request.method,
       path: sanitizePath(url.pathname),
       robots: response.headers.get("X-Robots-Tag") || null,
@@ -555,6 +557,16 @@ function logSeoAccess(request: Request, url: URL, response: Response): void {
 
 function sanitizeCfValue(value: unknown): string | null {
   return typeof value === "string" && value ? value.slice(0, 32) : null;
+}
+
+function sanitizeHost(value: unknown): string | null {
+  return typeof value === "string" && value
+    ? value.toLowerCase().slice(0, 120)
+    : null;
+}
+
+function sanitizeHeaderValue(value: unknown): string | null {
+  return typeof value === "string" && value ? value.slice(0, 240) : null;
 }
 
 function isLongLivedAsset(pathname: string): boolean {

@@ -1,5 +1,6 @@
 import { readFileSync } from "node:fs";
 
+const SITE_ORIGIN = "https://lbsailab.com";
 const PUBLIC_PATH_PATTERNS = [
   /^\/$/,
   /^\/about\/$/,
@@ -142,6 +143,25 @@ function canonicalPathIssue(path) {
   return "";
 }
 
+function isRedirect(status) {
+  return status >= 300 && status < 400;
+}
+
+function isCanonicalRedirectTarget(location) {
+  try {
+    const url = new URL(location, SITE_ORIGIN);
+
+    if (url.origin !== SITE_ORIGIN) return false;
+    if (url.search) return false;
+    if (url.pathname === "/") return true;
+    if (url.pathname.endsWith("/")) return true;
+
+    return url.pathname.split("/").at(-1)?.includes(".") ?? false;
+  } catch {
+    return false;
+  }
+}
+
 function knownValue(value, allowedValues, fallback = "unknown") {
   return typeof value === "string" && allowedValues.includes(value)
     ? value
@@ -152,6 +172,8 @@ function analyzeSeoAccess(log, summary) {
   const status = Number(log.status);
   const path = typeof log.path === "string" ? log.path : "/";
   const crawler = typeof log.crawler === "string" ? log.crawler : "Unknown";
+  const host = typeof log.host === "string" ? log.host : "unknown";
+  const location = typeof log.location === "string" ? log.location : "";
   const robots = typeof log.robots === "string" ? log.robots : "";
   const cacheControl =
     typeof log.cacheControl === "string" ? log.cacheControl : "";
@@ -162,6 +184,7 @@ function analyzeSeoAccess(log, summary) {
   summary.statusBuckets[statusBucket(status)] =
     (summary.statusBuckets[statusBucket(status)] || 0) + 1;
   summary.crawlers[crawler] = (summary.crawlers[crawler] || 0) + 1;
+  summary.hosts[host] = (summary.hosts[host] || 0) + 1;
   summary.paths[path] = (summary.paths[path] || 0) + 1;
 
   if (status >= 500) {
@@ -170,11 +193,36 @@ function analyzeSeoAccess(log, summary) {
     fail(`${crawler} saw crawler-facing ${status} on ${path}`);
   }
 
-  if (isPublicPath(path) && robots !== EXPECTED_INDEXABLE_ROBOTS) {
+  if (isRedirect(status)) {
+    summary.redirects += 1;
+    summary.redirectTargets[location || "(missing)"] =
+      (summary.redirectTargets[location || "(missing)"] || 0) + 1;
+
+    if (status !== 301) {
+      fail(`${crawler} saw crawler-facing ${status} redirect on ${path}`);
+    }
+
+    if (!location) {
+      fail(`${crawler} saw redirect without Location on ${path}`);
+    } else if (!isCanonicalRedirectTarget(location)) {
+      fail(`${crawler} saw non-canonical redirect target ${location}`);
+    }
+  }
+
+  if (
+    status >= 200 &&
+    status < 300 &&
+    isPublicPath(path) &&
+    robots !== EXPECTED_INDEXABLE_ROBOTS
+  ) {
     fail(`${path} logged robots "${robots || "(missing)"}" for a public path`);
   }
 
-  if (isNoindexPath(path) && robots !== EXPECTED_NOINDEX_ROBOTS) {
+  if (
+    status < 300 &&
+    isNoindexPath(path) &&
+    robots !== EXPECTED_NOINDEX_ROBOTS
+  ) {
     fail(`${path} logged robots "${robots || "(missing)"}" for a noindex path`);
   }
 
@@ -293,7 +341,10 @@ function analyze(logs) {
   const summary = {
     connectionTypes: {},
     crawlers: {},
+    hosts: {},
     paths: {},
+    redirects: 0,
+    redirectTargets: {},
     seoAccess: 0,
     statusBuckets: {},
     vitals: {},
@@ -346,7 +397,10 @@ function printableSummary(summary) {
   return {
     connectionTypes: summary.connectionTypes,
     crawlers: summary.crawlers,
+    hosts: summary.hosts,
     paths: summary.paths,
+    redirects: summary.redirects,
+    redirectTargets: summary.redirectTargets,
     seoAccess: summary.seoAccess,
     statusBuckets: summary.statusBuckets,
     vitals,
@@ -373,6 +427,15 @@ function main() {
 
     if (Object.keys(summary.crawlers).length) {
       console.log(`Crawlers: ${JSON.stringify(summary.crawlers)}`);
+    }
+
+    if (summary.redirects) {
+      console.log(
+        `Redirects: ${JSON.stringify({
+          count: summary.redirects,
+          targets: summary.redirectTargets,
+        })}`,
+      );
     }
 
     if (Object.keys(report.vitals).length) {
