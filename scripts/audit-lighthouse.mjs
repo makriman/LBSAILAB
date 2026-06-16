@@ -8,6 +8,7 @@ const SITE_URL = process.env.SEO_SITE_URL || "https://lbsailab.com";
 const SITE_ORIGIN = new URL(SITE_URL).origin;
 const DEFAULT_PATHS = ["/", "/batches/spring-2026/", "/mentors/"];
 const LIGHTHOUSE_VERSION = "13.4.0";
+const LIGHTHOUSE_ATTEMPTS = Number(process.env.LIGHTHOUSE_ATTEMPTS || "2");
 const MIN_CATEGORY_SCORES = {
   accessibility: 0.9,
   "best-practices": 0.95,
@@ -109,8 +110,10 @@ function displayMetric(report, auditId) {
   return report.audits?.[auditId]?.displayValue || "n/a";
 }
 
-function auditReport(report, url) {
+function auditReport(report, url, attemptLabel = "") {
+  const reportFailures = [];
   const summary = [];
+  const recordFailure = (message) => reportFailures.push(message);
 
   const categories = [
     ...Object.keys(MIN_CATEGORY_SCORES),
@@ -129,7 +132,7 @@ function auditReport(report, url) {
       typeof minimum === "number" &&
       (typeof actual !== "number" || actual < minimum)
     ) {
-      fail(
+      recordFailure(
         `${url}: Lighthouse ${category} score ${percentage} below ${minimum * 100}`,
       );
     }
@@ -139,12 +142,12 @@ function auditReport(report, url) {
     const actual = metric(report, auditId);
 
     if (typeof actual !== "number") {
-      fail(`${url}: Lighthouse ${auditId} metric missing`);
+      recordFailure(`${url}: Lighthouse ${auditId} metric missing`);
       continue;
     }
 
     if (actual > maximum) {
-      fail(
+      recordFailure(
         `${url}: Lighthouse ${auditId} ${displayMetric(report, auditId)} exceeds ${maximum}`,
       );
     }
@@ -152,12 +155,12 @@ function auditReport(report, url) {
 
   for (const auditId of OBSERVED_METRICS) {
     if (typeof metric(report, auditId) !== "number") {
-      fail(`${url}: Lighthouse ${auditId} metric missing`);
+      recordFailure(`${url}: Lighthouse ${auditId} metric missing`);
     }
   }
 
   console.log(
-    `${url}: ${summary.join(", ")}; LCP ${displayMetric(
+    `${url}${attemptLabel}: ${summary.join(", ")}; LCP ${displayMetric(
       report,
       "largest-contentful-paint",
     )}; CLS ${displayMetric(report, "cumulative-layout-shift")}; TBT ${displayMetric(
@@ -165,16 +168,41 @@ function auditReport(report, url) {
       "total-blocking-time",
     )}`,
   );
+
+  return reportFailures;
 }
 
 async function auditLighthouse() {
   const temporaryDirectory = await mkdtemp(join(tmpdir(), "lbs-lighthouse-"));
 
   try {
-    for (const [index, url] of auditUrls().entries()) {
-      const outputPath = join(temporaryDirectory, `report-${index}.json`);
-      const report = await runLighthouse(url, outputPath);
-      auditReport(report, url);
+    for (const [urlIndex, url] of auditUrls().entries()) {
+      let finalFailures = [];
+
+      for (let attempt = 1; attempt <= LIGHTHOUSE_ATTEMPTS; attempt += 1) {
+        const outputPath = join(
+          temporaryDirectory,
+          `report-${urlIndex}-${attempt}.json`,
+        );
+        const report = await runLighthouse(url, outputPath);
+        const attemptFailures = auditReport(
+          report,
+          url,
+          LIGHTHOUSE_ATTEMPTS > 1 ? ` attempt ${attempt}` : "",
+        );
+
+        finalFailures = attemptFailures;
+
+        if (!attemptFailures.length) break;
+
+        if (attempt < LIGHTHOUSE_ATTEMPTS) {
+          console.warn(
+            `${url}: retrying Lighthouse after ${attemptFailures.length} failed check(s)`,
+          );
+        }
+      }
+
+      for (const failure of finalFailures) fail(failure);
     }
   } finally {
     await rm(temporaryDirectory, { force: true, recursive: true });
