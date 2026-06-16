@@ -170,6 +170,28 @@ function cspDirective(csp, name) {
   );
 }
 
+function htmlWithoutRawTextBlocks(html) {
+  return html
+    .replace(/<script\b[\s\S]*?<\/script>/gi, "")
+    .replace(/<style\b[\s\S]*?<\/style>/gi, "");
+}
+
+function inlineEventHandlerAttributes(html) {
+  return [
+    ...htmlWithoutRawTextBlocks(html).matchAll(/<([a-z][\w:-]*)\b([^>]*)>/gi),
+  ].flatMap((match) => {
+    const tagName = match[1].toLowerCase();
+    const attributeText = match[2] || "";
+
+    return [...attributeText.matchAll(/(?:^|\s)(on[a-z][\w:-]*)\s*=/gi)].map(
+      (attributeMatch) => ({
+        attribute: attributeMatch[1].toLowerCase(),
+        tagName,
+      }),
+    );
+  });
+}
+
 function metaContent(html, selector) {
   for (const tag of allTags(html, "meta")) {
     const attributes = attrs(tag);
@@ -379,10 +401,15 @@ function assertSecurityHeaders(response, url) {
 function assertPageCsp(response, html, url) {
   const csp = response.headers.get("content-security-policy") || "";
   const scriptSrc = cspDirective(csp, "script-src");
+  const scriptSrcAttr = cspDirective(csp, "script-src-attr");
 
   if (!scriptSrc) {
     fail(`${url}: CSP is missing script-src`);
     return;
+  }
+
+  if (!scriptSrcAttr.split(/\s+/).includes("'none'")) {
+    fail(`${url}: CSP script-src-attr must be 'none'`);
   }
 
   if (/\b'unsafe-inline'\b/.test(scriptSrc)) {
@@ -397,6 +424,12 @@ function assertPageCsp(response, html, url) {
     if (!scriptSrc.includes(`'${hash}'`)) {
       fail(`${url}: CSP script-src missing '${hash}'`);
     }
+  }
+
+  for (const eventHandler of inlineEventHandlerAttributes(html)) {
+    fail(
+      `${url}: inline event handler ${eventHandler.attribute} found on <${eventHandler.tagName}>`,
+    );
   }
 }
 

@@ -287,6 +287,28 @@ function cspDirective(csp, name) {
   );
 }
 
+function htmlWithoutRawTextBlocks(html) {
+  return html
+    .replace(/<script\b[\s\S]*?<\/script>/gi, "")
+    .replace(/<style\b[\s\S]*?<\/style>/gi, "");
+}
+
+function inlineEventHandlerAttributes(html) {
+  return [
+    ...htmlWithoutRawTextBlocks(html).matchAll(/<([a-z][\w:-]*)\b([^>]*)>/gi),
+  ].flatMap((match) => {
+    const tagName = match[1].toLowerCase();
+    const attributeText = match[2] || "";
+
+    return [...attributeText.matchAll(/(?:^|\s)(on[a-z][\w:-]*)\s*=/gi)].map(
+      (attributeMatch) => ({
+        attribute: attributeMatch[1].toLowerCase(),
+        tagName,
+      }),
+    );
+  });
+}
+
 function workerContentSecurityPolicy() {
   const worker = readFileSync(path.join(ROOT, "src", "worker.ts"), "utf8");
   const match = worker.match(/"Content-Security-Policy":\s*("[^"]+")/);
@@ -302,11 +324,16 @@ function workerContentSecurityPolicy() {
 function auditWorkerCsp(pages) {
   const csp = workerContentSecurityPolicy();
   const scriptSrc = cspDirective(csp, "script-src");
+  const scriptSrcAttr = cspDirective(csp, "script-src-attr");
   const hashes = new Set();
 
   if (!scriptSrc) {
     fail("Worker CSP is missing script-src");
     return;
+  }
+
+  if (!scriptSrcAttr.split(/\s+/).includes("'none'")) {
+    fail("Worker CSP script-src-attr must be 'none'");
   }
 
   if (/\b'unsafe-inline'\b/.test(scriptSrc)) {
@@ -333,6 +360,12 @@ function auditWorkerCsp(pages) {
 }
 
 function auditHtmlIntegrity(html, url) {
+  for (const eventHandler of inlineEventHandlerAttributes(html)) {
+    fail(
+      `${url}: inline event handler ${eventHandler.attribute} found on <${eventHandler.tagName}>`,
+    );
+  }
+
   if (!/<html\b[^>]*\blang=["']en["']/i.test(html)) {
     fail(`${url}: html lang should be en`);
   }
