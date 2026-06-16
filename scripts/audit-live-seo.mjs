@@ -154,6 +154,24 @@ const ALLOWED_EXTERNAL_LINK_HOSTS = new Set([
 const ALLOWED_EXTERNAL_RESOURCE_HOSTS = new Set([SITE_HOST]);
 const FORBIDDEN_EMBED_TAGS = ["iframe", "object", "embed", "applet", "base"];
 const LINK_ATTRIBUTES = ["href", "src", "action", "formaction"];
+const MAX_DOM_ELEMENTS = 500;
+const MAX_DOM_DEPTH = 18;
+const VOID_HTML_ELEMENTS = new Set([
+  "area",
+  "base",
+  "br",
+  "col",
+  "embed",
+  "hr",
+  "img",
+  "input",
+  "link",
+  "meta",
+  "param",
+  "source",
+  "track",
+  "wbr",
+]);
 const SPAM_PATTERNS = [
   /\bviagra\b/i,
   /\bcialis\b/i,
@@ -439,6 +457,48 @@ function htmlWithoutRawTextBlocks(html) {
   return html
     .replace(/<script\b[\s\S]*?<\/script>/gi, "")
     .replace(/<style\b[\s\S]*?<\/style>/gi, "");
+}
+
+function domStats(html) {
+  const sanitizedHtml = htmlWithoutRawTextBlocks(html);
+  let elements = 0;
+  let depth = 0;
+  let maxDepth = 0;
+
+  for (const match of sanitizedHtml.matchAll(/<\/?([a-z][\w:-]*)\b[^>]*>/gi)) {
+    const tag = match[0];
+    const tagName = match[1].toLowerCase();
+
+    if (tag.startsWith("</")) {
+      depth = Math.max(0, depth - 1);
+      continue;
+    }
+
+    elements += 1;
+
+    if (VOID_HTML_ELEMENTS.has(tagName) || /\/\s*>$/.test(tag)) {
+      continue;
+    }
+
+    depth += 1;
+    maxDepth = Math.max(maxDepth, depth);
+  }
+
+  return { elements, maxDepth };
+}
+
+function auditDomBudget(html, url) {
+  const { elements, maxDepth } = domStats(html);
+
+  if (elements > MAX_DOM_ELEMENTS) {
+    fail(`${url}: DOM has ${elements} elements, exceeding ${MAX_DOM_ELEMENTS}`);
+  }
+
+  if (maxDepth > MAX_DOM_DEPTH) {
+    fail(
+      `${url}: DOM nesting depth is ${maxDepth}, exceeding ${MAX_DOM_DEPTH}`,
+    );
+  }
 }
 
 function inlineEventHandlerAttributes(html) {
@@ -2198,6 +2258,7 @@ async function auditPage(
   assertShortCache(response, url);
   assertCanonicalLinkHeader(response, url);
   assertPageMetadata(body, url);
+  auditDomBudget(body, url);
   auditLiveContentIntegrity(body, url);
   auditJsonLd(url, body, sitemapPages);
   auditScriptHygiene(body, url);

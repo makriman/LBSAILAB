@@ -92,6 +92,24 @@ const REQUIRED_WORKER_GONE_PATHS = [
   "/images/lbs-ai-lab-workshop-hero.png",
   "/mentors/rhea-bisaria.png",
 ];
+const MAX_DOM_ELEMENTS = 500;
+const MAX_DOM_DEPTH = 18;
+const VOID_HTML_ELEMENTS = new Set([
+  "area",
+  "base",
+  "br",
+  "col",
+  "embed",
+  "hr",
+  "img",
+  "input",
+  "link",
+  "meta",
+  "param",
+  "source",
+  "track",
+  "wbr",
+]);
 
 const failures = [];
 
@@ -497,6 +515,48 @@ function htmlWithoutRawTextBlocks(html) {
     .replace(/<style\b[\s\S]*?<\/style>/gi, "");
 }
 
+function domStats(html) {
+  const sanitizedHtml = htmlWithoutRawTextBlocks(html);
+  let elements = 0;
+  let depth = 0;
+  let maxDepth = 0;
+
+  for (const match of sanitizedHtml.matchAll(/<\/?([a-z][\w:-]*)\b[^>]*>/gi)) {
+    const tag = match[0];
+    const tagName = match[1].toLowerCase();
+
+    if (tag.startsWith("</")) {
+      depth = Math.max(0, depth - 1);
+      continue;
+    }
+
+    elements += 1;
+
+    if (VOID_HTML_ELEMENTS.has(tagName) || /\/\s*>$/.test(tag)) {
+      continue;
+    }
+
+    depth += 1;
+    maxDepth = Math.max(maxDepth, depth);
+  }
+
+  return { elements, maxDepth };
+}
+
+function auditDomBudget(html, url) {
+  const { elements, maxDepth } = domStats(html);
+
+  if (elements > MAX_DOM_ELEMENTS) {
+    fail(`${url}: DOM has ${elements} elements, exceeding ${MAX_DOM_ELEMENTS}`);
+  }
+
+  if (maxDepth > MAX_DOM_DEPTH) {
+    fail(
+      `${url}: DOM nesting depth is ${maxDepth}, exceeding ${MAX_DOM_DEPTH}`,
+    );
+  }
+}
+
 function inlineEventHandlerAttributes(html) {
   return [
     ...htmlWithoutRawTextBlocks(html).matchAll(/<([a-z][\w:-]*)\b([^>]*)>/gi),
@@ -879,6 +939,9 @@ function auditSeoMonitorConfig() {
     "missing-seo-audit-file.css",
     "missing-seo-audit-script.js",
     "missing-seo-audit-image.webp",
+    "auditDomBudget",
+    "MAX_DOM_ELEMENTS",
+    "MAX_DOM_DEPTH",
     "expected XML content type",
   ]) {
     if (!liveAudit.includes(expected)) {
@@ -1075,6 +1138,8 @@ function auditWorkerCsp(pages) {
 }
 
 function auditHtmlIntegrity(html, url) {
+  auditDomBudget(html, url);
+
   for (const eventHandler of inlineEventHandlerAttributes(html)) {
     fail(
       `${url}: inline event handler ${eventHandler.attribute} found on <${eventHandler.tagName}>`,
