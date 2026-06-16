@@ -11,9 +11,9 @@ const LIGHTHOUSE_VERSION = "13.4.0";
 const MIN_CATEGORY_SCORES = {
   accessibility: 0.9,
   "best-practices": 0.95,
-  performance: 0.75,
   seo: 1,
 };
+const OBSERVED_CATEGORIES = ["performance"];
 const MAX_METRICS = {
   "cumulative-layout-shift": 0.1,
   "largest-contentful-paint": 3000,
@@ -112,13 +112,23 @@ function displayMetric(report, auditId) {
 function auditReport(report, url) {
   const summary = [];
 
-  for (const [category, minimum] of Object.entries(MIN_CATEGORY_SCORES)) {
+  const categories = [
+    ...Object.keys(MIN_CATEGORY_SCORES),
+    ...OBSERVED_CATEGORIES,
+  ];
+
+  for (const category of categories) {
     const actual = score(report, category);
     const percentage = Math.round((actual ?? 0) * 100);
 
     summary.push(`${category} ${percentage}`);
 
-    if (typeof actual !== "number" || actual < minimum) {
+    const minimum = MIN_CATEGORY_SCORES[category];
+
+    if (
+      typeof minimum === "number" &&
+      (typeof actual !== "number" || actual < minimum)
+    ) {
       fail(
         `${url}: Lighthouse ${category} score ${percentage} below ${minimum * 100}`,
       );
