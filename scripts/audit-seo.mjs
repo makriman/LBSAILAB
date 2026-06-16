@@ -275,6 +275,107 @@ function extractLastmods(xml) {
   );
 }
 
+function extractFeedEntries(xml) {
+  return [...xml.matchAll(/<entry>([\s\S]*?)<\/entry>/g)].map(
+    (match, index) => {
+      const entry = match[1];
+      const link =
+        entry.match(/<link\b[^>]*\bhref=(["'])(.*?)\1[^>]*\/?>/i)?.[2] || "";
+      const id = entry.match(/<id>([\s\S]*?)<\/id>/i)?.[1] || "";
+      const title = entry.match(/<title>([\s\S]*?)<\/title>/i)?.[1] || "";
+      const updated = entry.match(/<updated>([\s\S]*?)<\/updated>/i)?.[1] || "";
+
+      return {
+        id: decodeHtml(id.trim()),
+        index: index + 1,
+        link: decodeHtml(link.trim()),
+        title: decodeHtml(title.trim()),
+        updated: decodeHtml(updated.trim()),
+      };
+    },
+  );
+}
+
+function auditFeedCanonicalEntries(feed, sitemapLocs, label = "feed.xml") {
+  const entries = extractFeedEntries(feed);
+  const sitemapPages = new Set(sitemapLocs);
+  const expectedFeedPages = sitemapLocs.filter(
+    (loc) => new URL(loc).pathname !== "/sitemap/",
+  );
+  const seen = new Set();
+
+  if (!entries.length) {
+    fail(`${label} has no Atom entries`);
+    return;
+  }
+
+  for (const entry of entries) {
+    if (!entry.link) {
+      fail(`${label} entry ${entry.index} is missing link href`);
+      continue;
+    }
+
+    let entryUrl;
+
+    try {
+      entryUrl = new URL(entry.link);
+    } catch {
+      fail(`${label} entry ${entry.index} has invalid URL ${entry.link}`);
+      continue;
+    }
+
+    const canonicalEntryUrl = entryUrl.toString();
+
+    if (entryUrl.origin !== SITE_URL) {
+      fail(`${label} entry ${entry.index} is not on canonical origin`);
+    }
+
+    if (entryUrl.search || entryUrl.hash) {
+      fail(`${label} entry ${entry.index} includes search or hash`);
+    }
+
+    if (entryUrl.pathname !== "/" && !entryUrl.pathname.endsWith("/")) {
+      fail(`${label} entry ${entry.index} is missing trailing slash`);
+    }
+
+    if (entryUrl.pathname !== entryUrl.pathname.toLowerCase()) {
+      fail(`${label} entry ${entry.index} is not lowercase`);
+    }
+
+    if (/\/(?:cohorts?|teams)(?:\/|$)/i.test(entryUrl.pathname)) {
+      fail(`${label} entry ${entry.index} references a legacy URL`);
+    }
+
+    if (!sitemapPages.has(canonicalEntryUrl)) {
+      fail(`${label} entry ${canonicalEntryUrl} is not in the sitemap`);
+    }
+
+    if (seen.has(canonicalEntryUrl)) {
+      fail(`${label} duplicates entry ${canonicalEntryUrl}`);
+    }
+
+    seen.add(canonicalEntryUrl);
+
+    if (entry.id !== canonicalEntryUrl) {
+      fail(`${label} entry ${canonicalEntryUrl} id does not match link`);
+    }
+
+    if (!entry.title) {
+      fail(`${label} entry ${canonicalEntryUrl} is missing title`);
+    }
+
+    if (!entry.updated || Number.isNaN(Date.parse(entry.updated))) {
+      fail(`${label} entry ${canonicalEntryUrl} has invalid updated timestamp`);
+    }
+  }
+
+  for (const expectedUrl of expectedFeedPages) {
+    if (!seen.has(expectedUrl)) {
+      fail(`${label} is missing canonical page entry ${expectedUrl}`);
+    }
+  }
+}
+
 function pageFileForUrl(url) {
   const { pathname } = new URL(url);
 
@@ -754,6 +855,7 @@ function auditSeoMonitorConfig() {
     "assertSecurityHeaders(imageResponse, imageSitemapUrl)",
     "assertIndexableHeaders(imageResponse, imageSitemapUrl)",
     "assertShortCache(imageResponse, imageSitemapUrl)",
+    "auditFeedCanonicalEntries",
     "auditDuplicateOriginRedirects(pages)",
     "auditMissingFileResources",
     "missing-seo-audit-file.css",
@@ -1762,6 +1864,7 @@ function auditCrawlerFiles() {
   const feed = readDist("feed.xml");
   const llms = readDist("llms.txt");
   const llmsFull = readDist("llms-full.txt");
+  const sitemapLocs = extractLocs(readDist("sitemap-0.xml"));
   const key = readDist(INDEXNOW_KEY_FILE).trim();
 
   assertEqual(key, INDEXNOW_KEY, "IndexNow key file");
@@ -1826,6 +1929,8 @@ function auditCrawlerFiles() {
   if (!feed.includes(`<updated>${EXPECTED_LASTMOD}</updated>`)) {
     fail("feed.xml is missing the current updated value");
   }
+
+  auditFeedCanonicalEntries(feed, sitemapLocs);
 
   for (const [fileName, content] of [
     ["llms.txt", llms],

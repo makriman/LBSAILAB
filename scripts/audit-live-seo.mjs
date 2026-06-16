@@ -286,6 +286,109 @@ function extractLastmods(xml) {
   );
 }
 
+function extractFeedEntries(xml) {
+  return [...xml.matchAll(/<entry>([\s\S]*?)<\/entry>/g)].map(
+    (match, index) => {
+      const entry = match[1];
+      const link =
+        entry.match(/<link\b[^>]*\bhref=(["'])(.*?)\1[^>]*\/?>/i)?.[2] || "";
+      const id = entry.match(/<id>([\s\S]*?)<\/id>/i)?.[1] || "";
+      const title = entry.match(/<title>([\s\S]*?)<\/title>/i)?.[1] || "";
+      const updated = entry.match(/<updated>([\s\S]*?)<\/updated>/i)?.[1] || "";
+
+      return {
+        id: decodeHtml(id.trim()),
+        index: index + 1,
+        link: decodeHtml(link.trim()),
+        title: decodeHtml(title.trim()),
+        updated: decodeHtml(updated.trim()),
+      };
+    },
+  );
+}
+
+function auditFeedCanonicalEntries(feed, pages, label) {
+  const entries = extractFeedEntries(feed);
+  const sitemapPages = new Set(pages);
+  const expectedFeedPages = pages.filter(
+    (page) => new URL(page).pathname !== "/sitemap/",
+  );
+  const seen = new Set();
+
+  if (!entries.length) {
+    fail(`${label}: has no Atom entries`);
+    return;
+  }
+
+  for (const entry of entries) {
+    if (!entry.link) {
+      fail(`${label}: entry ${entry.index} is missing link href`);
+      continue;
+    }
+
+    let entryUrl;
+
+    try {
+      entryUrl = new URL(entry.link);
+    } catch {
+      fail(`${label}: entry ${entry.index} has invalid URL ${entry.link}`);
+      continue;
+    }
+
+    const canonicalEntryUrl = entryUrl.toString();
+
+    if (entryUrl.origin !== SITE_ORIGIN) {
+      fail(`${label}: entry ${entry.index} is not on canonical origin`);
+    }
+
+    if (entryUrl.search || entryUrl.hash) {
+      fail(`${label}: entry ${entry.index} includes search or hash`);
+    }
+
+    if (entryUrl.pathname !== "/" && !entryUrl.pathname.endsWith("/")) {
+      fail(`${label}: entry ${entry.index} is missing trailing slash`);
+    }
+
+    if (entryUrl.pathname !== entryUrl.pathname.toLowerCase()) {
+      fail(`${label}: entry ${entry.index} is not lowercase`);
+    }
+
+    if (/\/(?:cohorts?|teams)(?:\/|$)/i.test(entryUrl.pathname)) {
+      fail(`${label}: entry ${entry.index} references a legacy URL`);
+    }
+
+    if (!sitemapPages.has(canonicalEntryUrl)) {
+      fail(`${label}: entry ${canonicalEntryUrl} is not in the sitemap`);
+    }
+
+    if (seen.has(canonicalEntryUrl)) {
+      fail(`${label}: duplicates entry ${canonicalEntryUrl}`);
+    }
+
+    seen.add(canonicalEntryUrl);
+
+    if (entry.id !== canonicalEntryUrl) {
+      fail(`${label}: entry ${canonicalEntryUrl} id does not match link`);
+    }
+
+    if (!entry.title) {
+      fail(`${label}: entry ${canonicalEntryUrl} is missing title`);
+    }
+
+    if (!entry.updated || Number.isNaN(Date.parse(entry.updated))) {
+      fail(
+        `${label}: entry ${canonicalEntryUrl} has invalid updated timestamp`,
+      );
+    }
+  }
+
+  for (const expectedUrl of expectedFeedPages) {
+    if (!seen.has(expectedUrl)) {
+      fail(`${label}: missing canonical page entry ${expectedUrl}`);
+    }
+  }
+}
+
 function executableInlineScriptHashes(html) {
   return fullTags(html, "script")
     .map((tag) => ({
@@ -1013,7 +1116,7 @@ async function auditSitemaps() {
   return { imageUrls, pages };
 }
 
-async function auditFeed() {
+async function auditFeed(pages) {
   const url = `${SITE_ORIGIN}/feed.xml`;
   const { response, body } = await text(url, {
     accept: "application/atom+xml",
@@ -1033,6 +1136,8 @@ async function auditFeed() {
   if (!body.includes("<feed") || !body.includes(`${SITE_ORIGIN}/feed.xml`)) {
     fail(`${url}: missing Atom feed markers`);
   }
+
+  auditFeedCanonicalEntries(body, pages, url);
 }
 
 async function auditDiscoveryFiles(pages) {
@@ -2622,7 +2727,7 @@ async function auditReachability(pages) {
 async function auditLiveSeo() {
   await auditRobots();
   const { imageUrls, pages } = await auditSitemaps();
-  await auditFeed();
+  await auditFeed(pages);
   await auditDiscoveryFiles(pages);
   await auditImageSitemapAssets(imageUrls);
   await auditWebManifest();
