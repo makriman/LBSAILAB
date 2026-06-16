@@ -17,6 +17,13 @@ const INDEXABLE_META_ROBOTS =
   "index,follow,max-snippet:-1,max-image-preview:large,max-video-preview:-1";
 const EXPECTED_UPDATED_AT = "2026-06-16";
 const EXPECTED_LASTMOD = `${EXPECTED_UPDATED_AT}T00:00:00.000Z`;
+const EXPECTED_ORGANIZATION_TOPICS = [
+  "AI product development",
+  "AI-assisted application development",
+  "London Business School workflows",
+  "Product prototyping",
+  "Applied AI education",
+];
 
 const failures = [];
 
@@ -563,6 +570,57 @@ function auditMentorJsonLd(url, items) {
   }
 }
 
+function auditHomeOrganizationJsonLd(url, items) {
+  if (url !== `${SITE_URL}/`) return;
+
+  const organization = items.find(
+    (item) =>
+      item?.["@type"] === "EducationalOrganization" &&
+      item?.["@id"] === `${SITE_URL}/#organization`,
+  );
+
+  if (!organization) {
+    fail(`${url}: missing EducationalOrganization JSON-LD`);
+    return;
+  }
+
+  if (organization.logo?.url !== `${SITE_URL}/favicon/apple-touch-icon.png`) {
+    fail(`${url}: organization JSON-LD missing canonical logo`);
+  }
+
+  if (organization.logo?.width !== 180 || organization.logo?.height !== 180) {
+    fail(`${url}: organization logo JSON-LD should include dimensions`);
+  }
+
+  if (organization.image?.url !== `${SITE_URL}/og-default.png`) {
+    fail(`${url}: organization JSON-LD missing social image`);
+  }
+
+  if (
+    organization.parentOrganization?.["@id"] !==
+    "https://www.london.edu/#organization"
+  ) {
+    fail(`${url}: organization JSON-LD missing parent organization ID`);
+  }
+
+  if (
+    organization.department?.["@id"] !==
+    "https://www.london.edu/faculty-and-research/data-science-and-ai-initiative#organization"
+  ) {
+    fail(`${url}: organization JSON-LD missing DSAI organization ID`);
+  }
+
+  const topics = Array.isArray(organization.knowsAbout)
+    ? organization.knowsAbout
+    : [];
+
+  for (const topic of EXPECTED_ORGANIZATION_TOPICS) {
+    if (!topics.includes(topic)) {
+      fail(`${url}: organization JSON-LD missing knowsAbout "${topic}"`);
+    }
+  }
+}
+
 function auditSitemap() {
   const sitemapIndex = readDist("sitemap-index.xml");
   const sitemap = readDist("sitemap-0.xml");
@@ -779,6 +837,16 @@ function auditPage(url, metadataIndex) {
     INDEXABLE_META_ROBOTS,
     `${url}: meta robots`,
   );
+  assertEqual(
+    metaContent(html, "application-name"),
+    "LBS AI Lab",
+    `${url}: application-name`,
+  );
+  assertEqual(
+    metaContent(html, "apple-mobile-web-app-title"),
+    "LBS AI Lab",
+    `${url}: apple-mobile-web-app-title`,
+  );
   assertEqual(metaContent(html, "og:type"), "website", `${url}: og:type`);
   assertEqual(metaContent(html, "og:locale"), "en_GB", `${url}: og:locale`);
   assertEqual(
@@ -800,6 +868,11 @@ function auditPage(url, metadataIndex) {
     `${url}: absolute og:image`,
   );
   assertEqual(
+    metaContent(html, "og:image:secure_url"),
+    metaContent(html, "og:image"),
+    `${url}: og:image:secure_url`,
+  );
+  assertEqual(
     metaContent(html, "og:image:width"),
     "1200",
     `${url}: og:image:width`,
@@ -815,6 +888,11 @@ function auditPage(url, metadataIndex) {
     `${url}: og:image:type`,
   );
   assertTruthy(metaContent(html, "og:image:alt"), `${url}: og:image:alt`);
+  assertEqual(
+    metaContent(html, "og:updated_time"),
+    EXPECTED_LASTMOD,
+    `${url}: og:updated_time`,
+  );
   assertEqual(
     metaContent(html, "twitter:card"),
     "summary_large_image",
@@ -884,6 +962,7 @@ function auditPage(url, metadataIndex) {
 
   auditTeamJsonLd(url, jsonLdItems, html);
   auditMentorJsonLd(url, jsonLdItems);
+  auditHomeOrganizationJsonLd(url, jsonLdItems);
 
   for (const tag of allTags(html, "img")) {
     const image = attrs(tag);

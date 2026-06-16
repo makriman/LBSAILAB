@@ -13,6 +13,7 @@ const INDEXABLE_META_ROBOTS =
   "index,follow,max-snippet:-1,max-image-preview:large,max-video-preview:-1";
 const NOINDEX_ROBOTS = "noindex, nofollow";
 const EXPECTED_LAST_MODIFIED = "Tue, 16 Jun 2026 00:00:00 GMT";
+const EXPECTED_UPDATED_TIME = "2026-06-16T00:00:00.000Z";
 const REQUIRED_SECURITY_HEADERS = [
   "content-security-policy",
   "cross-origin-opener-policy",
@@ -562,14 +563,18 @@ function assertPageMetadata(html, url) {
 
   for (const required of [
     "description",
+    "application-name",
+    "apple-mobile-web-app-title",
     "og:title",
     "og:description",
     "og:url",
     "og:image",
+    "og:image:secure_url",
     "og:image:width",
     "og:image:height",
     "og:image:type",
     "og:image:alt",
+    "og:updated_time",
     "twitter:card",
     "twitter:title",
     "twitter:description",
@@ -581,6 +586,16 @@ function assertPageMetadata(html, url) {
 
   if (metaContent(html, "og:url") !== url) {
     fail(`${url}: og:url does not match canonical URL`);
+  }
+
+  if (
+    metaContent(html, "og:image:secure_url") !== metaContent(html, "og:image")
+  ) {
+    fail(`${url}: og:image:secure_url does not match og:image`);
+  }
+
+  if (metaContent(html, "og:updated_time") !== EXPECTED_UPDATED_TIME) {
+    fail(`${url}: og:updated_time does not match site update time`);
   }
 
   for (const imageField of ["og:image", "twitter:image"]) {

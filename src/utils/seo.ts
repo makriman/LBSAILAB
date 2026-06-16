@@ -8,6 +8,7 @@ import {
 } from "@utils/site";
 
 export const SEO_UPDATED_AT = "2026-06-16";
+export const SEO_UPDATED_AT_ISO = "2026-06-16T00:00:00.000Z";
 export const DEFAULT_ROBOTS =
   "index,follow,max-snippet:-1,max-image-preview:large,max-video-preview:-1";
 export const DEFAULT_OG_IMAGE = "/og-default.png";
@@ -16,6 +17,7 @@ export const DEFAULT_OG_IMAGE_ALT =
   "LBS AI Lab social share card for London Business School AI product development";
 export const SPRING_BATCH_OG_IMAGE_ALT =
   "Spring 2026 Batch social share card for LBS AI Lab in partnership with Google DeepMind";
+export const ORGANIZATION_LOGO = "/favicon/apple-touch-icon.png";
 export const OG_IMAGE_WIDTH = 1200;
 export const OG_IMAGE_HEIGHT = 630;
 export const OG_IMAGE_TYPE = "image/png";
@@ -87,13 +89,34 @@ export function organizationJsonLd(): JsonLd {
     alternateName: "London Business School AI Lab",
     url: `${SITE_URL}/`,
     description: defaultDescription,
+    logo: {
+      "@type": "ImageObject",
+      url: absoluteUrl(ORGANIZATION_LOGO),
+      width: 180,
+      height: 180,
+    },
+    image: {
+      "@type": "ImageObject",
+      url: absoluteUrl(DEFAULT_OG_IMAGE),
+      width: OG_IMAGE_WIDTH,
+      height: OG_IMAGE_HEIGHT,
+    },
+    knowsAbout: [
+      "AI product development",
+      "AI-assisted application development",
+      "London Business School workflows",
+      "Product prototyping",
+      "Applied AI education",
+    ],
     parentOrganization: {
       "@type": "CollegeOrUniversity",
+      "@id": `${LBS_URL}#organization`,
       name: "London Business School",
       url: LBS_URL,
     },
     department: {
       "@type": "Organization",
+      "@id": `${DSAI_URL}#organization`,
       name: "Data Science & AI Initiative",
       url: DSAI_URL,
     },
