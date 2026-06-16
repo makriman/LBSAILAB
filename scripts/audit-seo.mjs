@@ -847,6 +847,18 @@ function auditExternalPerformanceMonitorConfig() {
 
   if (
     !packageJson.includes(
+      '"seo:startup": "npx wrangler check startup --outfile /tmp/lbsailab-worker-startup.cpuprofile"',
+    )
+  ) {
+    fail("package.json is missing the Worker startup performance script");
+  }
+
+  if (!packageJson.includes("npm run seo:startup")) {
+    fail("seo:ci should include Worker startup performance profiling");
+  }
+
+  if (
+    !packageJson.includes(
       '"seo:live": "npm run seo:monitor && npm run seo:audit:live"',
     )
   ) {
