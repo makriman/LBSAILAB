@@ -1,4 +1,5 @@
 import { existsSync, readFileSync, readdirSync } from "node:fs";
+import { createHash } from "node:crypto";
 import path from "node:path";
 import { fileURLToPath } from "node:url";
 
@@ -228,6 +229,84 @@ function isExternalHttpUrl(href) {
   if (!/^https?:\/\//i.test(href)) return false;
 
   return new URL(href).origin !== SITE_URL;
+}
+
+function executableInlineScriptHashes(html) {
+  return fullTags(html, "script")
+    .map((tag) => ({
+      attributes: attrs(tag.match(/^<script\b[^>]*>/i)?.[0] || tag),
+      tag,
+    }))
+    .filter(({ attributes }) => !attributes.src)
+    .filter(({ attributes }) => {
+      const type = (attributes.type || "").toLowerCase();
+      return (
+        !type ||
+        type === "module" ||
+        type === "text/javascript" ||
+        type === "application/javascript"
+      );
+    })
+    .map(({ tag }) => {
+      const script = tag
+        .replace(/^<script\b[^>]*>/i, "")
+        .replace(/<\/script>$/i, "");
+      return `sha256-${createHash("sha256").update(script).digest("base64")}`;
+    });
+}
+
+function cspDirective(csp, name) {
+  return (
+    csp
+      .split(";")
+      .map((directive) => directive.trim())
+      .find((directive) => directive.startsWith(`${name} `)) || ""
+  );
+}
+
+function workerContentSecurityPolicy() {
+  const worker = readFileSync(path.join(ROOT, "src", "worker.ts"), "utf8");
+  const match = worker.match(/"Content-Security-Policy":\s*("[^"]+")/);
+
+  if (!match) {
+    fail("Worker is missing Content-Security-Policy header");
+    return "";
+  }
+
+  return JSON.parse(match[1]);
+}
+
+function auditWorkerCsp(pages) {
+  const csp = workerContentSecurityPolicy();
+  const scriptSrc = cspDirective(csp, "script-src");
+  const hashes = new Set();
+
+  if (!scriptSrc) {
+    fail("Worker CSP is missing script-src");
+    return;
+  }
+
+  if (/\b'unsafe-inline'\b/.test(scriptSrc)) {
+    fail("Worker CSP script-src must not allow unsafe-inline");
+  }
+
+  if (!scriptSrc.includes("https://static.cloudflareinsights.com")) {
+    fail("Worker CSP script-src must allow Cloudflare Insights script origin");
+  }
+
+  for (const page of pages) {
+    for (const hash of executableInlineScriptHashes(
+      readDist(pageFileForUrl(page)),
+    )) {
+      hashes.add(hash);
+    }
+  }
+
+  for (const hash of hashes) {
+    if (!scriptSrc.includes(`'${hash}'`)) {
+      fail(`Worker CSP script-src is missing '${hash}'`);
+    }
+  }
 }
 
 function auditHtmlIntegrity(html, url) {
@@ -1220,6 +1299,7 @@ function audit() {
     auditPage(page, metadataIndex);
   }
 
+  auditWorkerCsp(pages);
   auditDuplicateMainContent(metadataIndex.mainContent);
   auditGeneratedPageCoverage(pages);
 

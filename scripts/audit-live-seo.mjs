@@ -1,4 +1,5 @@
 import { lookup as systemLookup, setServers } from "node:dns";
+import { createHash } from "node:crypto";
 import { Resolver } from "node:dns/promises";
 import http from "node:http";
 import https from "node:https";
@@ -113,6 +114,14 @@ function allTags(html, tagName) {
   );
 }
 
+function fullTags(html, tagName) {
+  return [
+    ...html.matchAll(
+      new RegExp(`<${tagName}\\b[^>]*>[\\s\\S]*?<\\/${tagName}>`, "gi"),
+    ),
+  ].map((match) => match[0]);
+}
+
 function decodeHtml(value) {
   return value
     .replaceAll("&amp;", "&")
@@ -125,6 +134,39 @@ function decodeHtml(value) {
 function extractLocs(xml) {
   return [...xml.matchAll(/<loc>(.*?)<\/loc>/g)].map((match) =>
     decodeHtml(match[1].trim()),
+  );
+}
+
+function executableInlineScriptHashes(html) {
+  return fullTags(html, "script")
+    .map((tag) => ({
+      attributes: attrs(tag.match(/^<script\b[^>]*>/i)?.[0] || tag),
+      tag,
+    }))
+    .filter(({ attributes }) => !attributes.src)
+    .filter(({ attributes }) => {
+      const type = (attributes.type || "").toLowerCase();
+      return (
+        !type ||
+        type === "module" ||
+        type === "text/javascript" ||
+        type === "application/javascript"
+      );
+    })
+    .map(({ tag }) => {
+      const script = tag
+        .replace(/^<script\b[^>]*>/i, "")
+        .replace(/<\/script>$/i, "");
+      return `sha256-${createHash("sha256").update(script).digest("base64")}`;
+    });
+}
+
+function cspDirective(csp, name) {
+  return (
+    csp
+      .split(";")
+      .map((directive) => directive.trim())
+      .find((directive) => directive.startsWith(`${name} `)) || ""
   );
 }
 
@@ -334,6 +376,30 @@ function assertSecurityHeaders(response, url) {
   }
 }
 
+function assertPageCsp(response, html, url) {
+  const csp = response.headers.get("content-security-policy") || "";
+  const scriptSrc = cspDirective(csp, "script-src");
+
+  if (!scriptSrc) {
+    fail(`${url}: CSP is missing script-src`);
+    return;
+  }
+
+  if (/\b'unsafe-inline'\b/.test(scriptSrc)) {
+    fail(`${url}: CSP script-src must not allow unsafe-inline`);
+  }
+
+  if (!scriptSrc.includes("https://static.cloudflareinsights.com")) {
+    fail(`${url}: CSP script-src missing Cloudflare Insights origin`);
+  }
+
+  for (const hash of executableInlineScriptHashes(html)) {
+    if (!scriptSrc.includes(`'${hash}'`)) {
+      fail(`${url}: CSP script-src missing '${hash}'`);
+    }
+  }
+}
+
 function assertIndexableHeaders(response, url) {
   const robots = response.headers.get("x-robots-tag") || "";
 
@@ -375,6 +441,7 @@ async function auditRobots() {
   if (response.status !== 200)
     fail(`${url}: expected 200, got ${response.status}`);
   assertSecurityHeaders(response, url);
+  assertPageCsp(response, body, url);
   assertIndexableHeaders(response, url);
   assertShortCache(response, url);
 
@@ -748,6 +815,7 @@ async function auditPage(url, sitemapPages, inbound, assetUrls) {
   }
 
   assertSecurityHeaders(response, url);
+  assertPageCsp(response, body, url);
   assertIndexableHeaders(response, url);
   assertShortCache(response, url);
   assertPageMetadata(body, url);
