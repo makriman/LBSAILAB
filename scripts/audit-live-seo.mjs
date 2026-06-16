@@ -8,6 +8,12 @@ const SITE_URL = process.env.SEO_SITE_URL || "https://lbsailab.com";
 const SITE = new URL(SITE_URL);
 const SITE_ORIGIN = SITE.origin;
 const SITE_HOST = SITE.host;
+const GOOGLE_SITE_VERIFICATION_FILE = (
+  process.env.GOOGLE_SITE_VERIFICATION_FILE || ""
+).trim();
+const BING_SITE_VERIFICATION_TOKEN = (
+  process.env.BING_SITE_VERIFICATION_TOKEN || ""
+).trim();
 const INDEXABLE_ROBOTS =
   "index, follow, max-snippet:-1, max-image-preview:large, max-video-preview:-1";
 const INDEXABLE_META_ROBOTS =
@@ -2271,6 +2277,66 @@ async function auditSecurityText() {
   }
 }
 
+async function auditSearchVerificationFiles() {
+  if (GOOGLE_SITE_VERIFICATION_FILE) {
+    if (!/^google[a-z0-9_-]+\.html$/i.test(GOOGLE_SITE_VERIFICATION_FILE)) {
+      fail(
+        "GOOGLE_SITE_VERIFICATION_FILE should be a Google verification HTML filename",
+      );
+    } else {
+      const url = `${SITE_ORIGIN}/${GOOGLE_SITE_VERIFICATION_FILE}`;
+      const { response, body } = await text(url, { accept: "text/plain" });
+
+      if (response.status !== 200) {
+        fail(`${url}: expected 200, got ${response.status}`);
+      }
+
+      assertSecurityHeaders(response, url);
+      assertShortCache(response, url);
+
+      if ((response.headers.get("x-robots-tag") || "") !== NOINDEX_ROBOTS) {
+        fail(`${url}: expected ${NOINDEX_ROBOTS} X-Robots-Tag`);
+      }
+
+      if (
+        body.trim() !==
+        `google-site-verification: ${GOOGLE_SITE_VERIFICATION_FILE}`
+      ) {
+        fail(`${url}: unexpected Google verification body`);
+      }
+    }
+  }
+
+  if (BING_SITE_VERIFICATION_TOKEN) {
+    if (!/^[a-z0-9_-]{8,160}$/i.test(BING_SITE_VERIFICATION_TOKEN)) {
+      fail("BING_SITE_VERIFICATION_TOKEN has an unexpected format");
+    } else {
+      const url = `${SITE_ORIGIN}/BingSiteAuth.xml`;
+      const { response, body } = await text(url, { accept: "application/xml" });
+      const contentType = response.headers.get("content-type") || "";
+
+      if (response.status !== 200) {
+        fail(`${url}: expected 200, got ${response.status}`);
+      }
+
+      assertSecurityHeaders(response, url);
+      assertShortCache(response, url);
+
+      if ((response.headers.get("x-robots-tag") || "") !== NOINDEX_ROBOTS) {
+        fail(`${url}: expected ${NOINDEX_ROBOTS} X-Robots-Tag`);
+      }
+
+      if (!contentType.includes("application/xml")) {
+        fail(`${url}: expected XML content type, got "${contentType}"`);
+      }
+
+      if (!body.includes(`<user>${BING_SITE_VERIFICATION_TOKEN}</user>`)) {
+        fail(`${url}: missing Bing verification token`);
+      }
+    }
+  }
+}
+
 async function auditReachability(pages) {
   const sitemapPages = new Set(pages);
   const inbound = new Map(pages.map((page) => [page, new Set()]));
@@ -2311,6 +2377,7 @@ async function auditLiveSeo() {
   await auditNoindexAndGone();
   await auditMissingPage();
   await auditErrorDocumentDirect();
+  await auditSearchVerificationFiles();
   await auditReachability(pages);
 
   if (warnings.length) {

@@ -46,12 +46,17 @@ jobs:
 
       - name: Run live SEO smoke suite
         if: github.event_name == 'push' && github.ref == 'refs/heads/main'
+        env:
+          BING_SITE_VERIFICATION_TOKEN: ${{ secrets.BING_SITE_VERIFICATION_TOKEN }}
+          GOOGLE_SITE_VERIFICATION_FILE: ${{ secrets.GOOGLE_SITE_VERIFICATION_FILE }}
         run: npm run seo:live
 
       - name: Run production SEO suite
         if: github.event_name == 'schedule' || github.event_name == 'workflow_dispatch'
         env:
+          BING_SITE_VERIFICATION_TOKEN: ${{ secrets.BING_SITE_VERIFICATION_TOKEN }}
           CRUX_API_KEY: ${{ secrets.CRUX_API_KEY }}
+          GOOGLE_SITE_VERIFICATION_FILE: ${{ secrets.GOOGLE_SITE_VERIFICATION_FILE }}
           PAGESPEED_API_KEY: ${{ secrets.PAGESPEED_API_KEY }}
         run: npm run seo:production
 

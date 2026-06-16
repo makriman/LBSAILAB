@@ -491,6 +491,14 @@ function auditSearchEngineVerificationSupport() {
     path.join(ROOT, "src", "layouts", "BaseLayout.astro"),
     "utf8",
   );
+  const liveAudit = readFileSync(
+    path.join(ROOT, "scripts", "audit-live-seo.mjs"),
+    "utf8",
+  );
+  const workflow = readFileSync(
+    path.join(ROOT, ".github", "workflows", "seo.yml"),
+    "utf8",
+  );
   const worker = readFileSync(path.join(ROOT, "src", "worker.ts"), "utf8");
 
   for (const expected of [
@@ -517,6 +525,27 @@ function auditSearchEngineVerificationSupport() {
   ]) {
     if (!worker.includes(expected)) {
       fail(`Worker search verification support is missing ${expected}`);
+    }
+  }
+
+  for (const expected of [
+    "auditSearchVerificationFiles",
+    "GOOGLE_SITE_VERIFICATION_FILE",
+    "BING_SITE_VERIFICATION_TOKEN",
+    "google-site-verification:",
+    "/BingSiteAuth.xml",
+  ]) {
+    if (!liveAudit.includes(expected)) {
+      fail(`Live SEO search verification audit is missing ${expected}`);
+    }
+  }
+
+  for (const expected of [
+    "BING_SITE_VERIFICATION_TOKEN: ${{ secrets.BING_SITE_VERIFICATION_TOKEN }}",
+    "GOOGLE_SITE_VERIFICATION_FILE: ${{ secrets.GOOGLE_SITE_VERIFICATION_FILE }}",
+  ]) {
+    if (!workflow.includes(expected)) {
+      fail(`SEO workflow search verification env is missing ${expected}`);
     }
   }
 }

@@ -81,6 +81,9 @@ name, for example `googleabc123.html`. The Worker will serve that path with the
 exact `google-site-verification:` body Google expects. `BING_SITE_VERIFICATION_TOKEN`
 serves `/BingSiteAuth.xml` for Bing Webmaster Tools.
 
+Set the same names as GitHub Actions secrets when you want `npm run seo:live`
+and the scheduled production SEO workflow to verify those files automatically.
+
 ## Content
 
 Primary content lives in:
