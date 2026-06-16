@@ -425,6 +425,34 @@ function auditWorkerSeoAccessLogging() {
   }
 }
 
+function auditPageSpeedMonitorConfig() {
+  const packageJson = readFileSync(path.join(ROOT, "package.json"), "utf8");
+  const workflow = readFileSync(
+    path.join(ROOT, ".github", "workflows", "seo.yml"),
+    "utf8",
+  );
+
+  if (
+    !packageJson.includes('"seo:pagespeed": "node scripts/audit-pagespeed.mjs"')
+  ) {
+    fail("package.json is missing the seo:pagespeed script");
+  }
+
+  if (!packageJson.includes("npm run seo:pagespeed")) {
+    fail("seo:production should include PageSpeed Insights monitoring");
+  }
+
+  if (!workflow.includes("timeout-minutes: 25")) {
+    fail("SEO workflow timeout should allow PageSpeed Insights monitoring");
+  }
+
+  if (
+    !workflow.includes("PAGESPEED_API_KEY: ${{ secrets.PAGESPEED_API_KEY }}")
+  ) {
+    fail("SEO workflow should pass the optional PageSpeed API key secret");
+  }
+}
+
 function auditWorkerCsp(pages) {
   const csp = workerContentSecurityPolicy();
   const scriptSrc = cspDirective(csp, "script-src");
@@ -1588,6 +1616,7 @@ function audit() {
   auditErrorDocument();
   auditWorkerRetiredPaths();
   auditWorkerSeoAccessLogging();
+  auditPageSpeedMonitorConfig();
 
   const pages = auditSitemap();
   const metadataIndex = {

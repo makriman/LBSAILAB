@@ -22,7 +22,7 @@ jobs:
   audit:
     name: Build and audit SEO
     runs-on: ubuntu-latest
-    timeout-minutes: 15
+    timeout-minutes: 25
 
     env:
       SEO_SITE_URL: https://lbsailab.com
@@ -46,6 +46,8 @@ jobs:
 
       - name: Run production SEO suite
         if: github.event_name == 'schedule' || github.event_name == 'workflow_dispatch'
+        env:
+          PAGESPEED_API_KEY: ${{ secrets.PAGESPEED_API_KEY }}
         run: npm run seo:production
 
       - name: Submit canonical URLs to IndexNow
