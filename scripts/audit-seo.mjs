@@ -117,10 +117,54 @@ function textContent(markup) {
     markup
       .replace(/<script\b[\s\S]*?<\/script>/gi, "")
       .replace(/<style\b[\s\S]*?<\/style>/gi, "")
+      .replace(/<svg\b[\s\S]*?<\/svg>/gi, "")
       .replace(/<[^>]*>/g, " ")
       .replace(/\s+/g, " ")
       .trim(),
   );
+}
+
+function mainContentHtml(html) {
+  return (
+    html.match(
+      /<main\b[^>]*\bid=["']main-content["'][^>]*>([\s\S]*?)<\/main>/i,
+    )?.[1] || html
+  );
+}
+
+function wordsForText(text) {
+  return text
+    .split(/\s+/)
+    .map((word) => word.trim())
+    .filter(Boolean);
+}
+
+function comparisonShingles(text, size = 5) {
+  const words = text
+    .toLowerCase()
+    .replace(/[^a-z0-9]+/g, " ")
+    .trim()
+    .split(/\s+/)
+    .filter((word) => word.length > 2);
+  const shingles = new Set();
+
+  for (let index = 0; index <= words.length - size; index += 1) {
+    shingles.add(words.slice(index, index + size).join(" "));
+  }
+
+  return shingles;
+}
+
+function jaccardSimilarity(left, right) {
+  if (!left.size && !right.size) return 0;
+
+  let intersection = 0;
+
+  for (const item of left) {
+    if (right.has(item)) intersection += 1;
+  }
+
+  return intersection / new Set([...left, ...right]).size;
 }
 
 function linkAttrs(html, rel) {
@@ -351,6 +395,74 @@ function recordUniqueMetadata(index, value, url, label) {
   }
 
   index.set(normalized, url);
+}
+
+function minimumMainWordCount(url) {
+  const { pathname } = new URL(url);
+
+  if (pathname === "/sitemap/") return 40;
+  if (pathname === "/contact/") return 90;
+  if (/^\/batches\/spring-2026\/[^/]+\/$/.test(pathname)) return 90;
+  if (pathname === "/") return 250;
+
+  return 110;
+}
+
+function auditContentQuality(url, html, metadataIndex) {
+  const mainHtml = mainContentHtml(html);
+  const mainText = textContent(mainHtml);
+  const words = wordsForText(mainText);
+  const minimumWords = minimumMainWordCount(url);
+
+  if (words.length < minimumWords) {
+    fail(
+      `${url}: main content is thin (${words.length} words, expected at least ${minimumWords})`,
+    );
+  }
+
+  if (/page not found|could not be found|404\b/i.test(mainText)) {
+    fail(`${url}: canonical page appears to contain not-found copy`);
+  }
+
+  const uniqueWords = new Set(
+    words
+      .map((word) => word.toLowerCase().replace(/[^a-z0-9]/g, ""))
+      .filter((word) => word.length > 2),
+  );
+
+  if (words.length >= 90 && uniqueWords.size < 35) {
+    fail(`${url}: main content has too little vocabulary variety`);
+  }
+
+  metadataIndex.mainContent.set(url, {
+    shingles: comparisonShingles(mainText),
+    wordCount: words.length,
+  });
+}
+
+function auditDuplicateMainContent(mainContentIndex) {
+  const pages = [...mainContentIndex.entries()];
+
+  for (let leftIndex = 0; leftIndex < pages.length; leftIndex += 1) {
+    for (
+      let rightIndex = leftIndex + 1;
+      rightIndex < pages.length;
+      rightIndex += 1
+    ) {
+      const [leftUrl, left] = pages[leftIndex];
+      const [rightUrl, right] = pages[rightIndex];
+
+      if (Math.min(left.wordCount, right.wordCount) < 90) continue;
+
+      const similarity = jaccardSimilarity(left.shingles, right.shingles);
+
+      if (similarity > 0.7) {
+        fail(
+          `${leftUrl} and ${rightUrl}: main content is too similar (${similarity.toFixed(2)})`,
+        );
+      }
+    }
+  }
 }
 
 function auditGeneratedPageCoverage(sitemapLocs) {
@@ -889,6 +1001,7 @@ function auditPage(url, metadataIndex) {
   const description = metaContent(html, "description");
 
   auditHtmlIntegrity(html, url);
+  auditContentQuality(url, html, metadataIndex);
   auditHomeHeroImages(url, html);
   auditVitalsMonitor(url, html);
 
@@ -1095,6 +1208,7 @@ function audit() {
   const pages = auditSitemap();
   const metadataIndex = {
     descriptions: new Map(),
+    mainContent: new Map(),
     titles: new Map(),
   };
 
@@ -1102,6 +1216,7 @@ function audit() {
     auditPage(page, metadataIndex);
   }
 
+  auditDuplicateMainContent(metadataIndex.mainContent);
   auditGeneratedPageCoverage(pages);
 
   if (failures.length) {
