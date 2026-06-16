@@ -704,6 +704,110 @@ function assertLongCache(response, url) {
   }
 }
 
+function robotsRulesForUserAgent(robots, userAgent = "*") {
+  const rules = [];
+  let groupAgents = [];
+  let groupHasRules = false;
+
+  for (const rawLine of robots.split(/\r?\n/)) {
+    const line = rawLine.replace(/#.*/, "").trim();
+    const match = line.match(/^([a-z-]+)\s*:\s*(.*)$/i);
+
+    if (!match) continue;
+
+    const field = match[1].toLowerCase();
+    const value = match[2].trim();
+
+    if (field === "user-agent") {
+      if (groupHasRules) {
+        groupAgents = [];
+        groupHasRules = false;
+      }
+
+      groupAgents.push(value.toLowerCase());
+      continue;
+    }
+
+    if (field !== "allow" && field !== "disallow") continue;
+
+    groupHasRules = true;
+
+    if (
+      groupAgents.includes("*") ||
+      groupAgents.includes(userAgent.toLowerCase())
+    ) {
+      rules.push({ directive: field, pattern: value });
+    }
+  }
+
+  return rules;
+}
+
+function robotsPatternMatches(pattern, pathname) {
+  if (!pattern) return false;
+
+  const anchored = pattern.endsWith("$");
+  const rawPattern = anchored ? pattern.slice(0, -1) : pattern;
+  const expression = rawPattern
+    .split("*")
+    .map((part) => part.replace(/[.+?^${}()|[\]\\]/g, "\\$&"))
+    .join(".*");
+  const regex = new RegExp(`^${expression}${anchored ? "$" : ""}`);
+
+  return regex.test(pathname);
+}
+
+function isRobotsAllowed(robots, pathname, userAgent = "*") {
+  const matches = robotsRulesForUserAgent(robots, userAgent)
+    .filter((rule) => robotsPatternMatches(rule.pattern, pathname))
+    .toSorted((left, right) => {
+      const lengthDelta = right.pattern.length - left.pattern.length;
+
+      if (lengthDelta) return lengthDelta;
+      if (left.directive === right.directive) return 0;
+
+      return left.directive === "allow" ? -1 : 1;
+    });
+
+  return matches[0]?.directive !== "disallow";
+}
+
+function auditRobotsBehavior(robots, url) {
+  const allowedPaths = [
+    "/",
+    "/about/",
+    "/_astro/app.css",
+    "/images/lbs-ai-lab-workshop-hero-960.webp",
+    "/favicon/favicon-32x32.png",
+    "/robots.txt",
+    "/sitemap-index.xml",
+    "/llms.txt",
+  ];
+  const disallowedPaths = [
+    "/api/vitals",
+    "/admin/",
+    "/login/",
+    "/search/",
+    "/cart/",
+    "/checkout/",
+    "/healthz",
+    "/internal/private",
+    "/private/page",
+  ];
+
+  for (const pathname of allowedPaths) {
+    if (!isRobotsAllowed(robots, pathname)) {
+      fail(`${url}: blocks crawlable path ${pathname}`);
+    }
+  }
+
+  for (const pathname of disallowedPaths) {
+    if (isRobotsAllowed(robots, pathname)) {
+      fail(`${url}: allows private or non-indexable path ${pathname}`);
+    }
+  }
+}
+
 async function auditRobots() {
   const url = `${SITE_ORIGIN}/robots.txt`;
   const { response, body } = await text(url, { accept: "text/plain" });
@@ -732,6 +836,8 @@ async function auditRobots() {
       fail(`${url}: blocks crawlable asset path ${allowedPath}`);
     }
   }
+
+  auditRobotsBehavior(body, url);
 
   return body;
 }
