@@ -22,6 +22,12 @@ await Promise.all([
   ...heroWidths.map((width) =>
     sharp(heroInput)
       .resize({ width, withoutEnlargement: true })
+      .avif({ effort: 5, quality: 58 })
+      .toFile(`${heroBase}-${width}.avif`),
+  ),
+  ...heroWidths.map((width) =>
+    sharp(heroInput)
+      .resize({ width, withoutEnlargement: true })
       .webp({ effort: 5, quality: 78 })
       .toFile(`${heroBase}-${width}.webp`),
   ),

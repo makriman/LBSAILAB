@@ -584,6 +584,42 @@ function auditErrorDocument() {
   }
 }
 
+function auditHomeHeroImages(url, html) {
+  if (url !== `${SITE_URL}/`) return;
+
+  const imagePreloads = linkAttrs(html, "preload").filter(
+    (link) => link.as === "image",
+  );
+  const heroPreload = imagePreloads.find((link) =>
+    (link.href || "").includes("/images/lbs-ai-lab-workshop-hero-"),
+  );
+
+  if (!heroPreload) {
+    fail(`${url}: missing hero image preload`);
+    return;
+  }
+
+  assertEqual(heroPreload.type, "image/avif", `${url}: hero preload type`);
+
+  if (!heroPreload.imagesrcset?.includes(".avif")) {
+    fail(`${url}: hero preload srcset should include AVIF variants`);
+  }
+
+  if (!/<source\b[^>]*type=["']image\/avif["']/i.test(html)) {
+    fail(`${url}: hero picture is missing an AVIF source`);
+  }
+
+  for (const width of ["960", "1280", "1672"]) {
+    if (
+      !existsSync(
+        path.join(DIST, `images/lbs-ai-lab-workshop-hero-${width}.avif`),
+      )
+    ) {
+      fail(`${url}: missing generated ${width}px AVIF hero image`);
+    }
+  }
+}
+
 function auditPage(url, metadataIndex) {
   const relativeFile = pageFileForUrl(url);
   const html = readDist(relativeFile);
@@ -602,6 +638,7 @@ function auditPage(url, metadataIndex) {
   const description = metaContent(html, "description");
 
   auditHtmlIntegrity(html, url);
+  auditHomeHeroImages(url, html);
 
   recordUniqueMetadata(metadataIndex.titles, title, url, "title");
   recordUniqueMetadata(

@@ -250,12 +250,16 @@ function auditHeroPreload(html, pageUrl) {
     return;
   }
 
-  if (heroPreload.type !== "image/webp") {
-    fail(`${pageUrl}: hero preload should prefer WebP`);
+  if (heroPreload.type !== "image/avif") {
+    fail(`${pageUrl}: hero preload should prefer AVIF`);
   }
 
   if (!heroPreload.imagesrcset || !heroPreload.imagesizes) {
     fail(`${pageUrl}: hero preload missing responsive image metadata`);
+  }
+
+  if (!heroPreload.imagesrcset?.includes(".avif")) {
+    fail(`${pageUrl}: hero preload srcset should include AVIF variants`);
   }
 
   const heroImage = allTags(html, "img")
