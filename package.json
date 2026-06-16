@@ -16,6 +16,7 @@
     "seo:all": "npm run build && npm run seo:audit && npm run seo:monitor && npm run seo:audit:live && npm run seo:perf",
     "seo:images": "node scripts/generate-og-images.mjs",
     "seo:indexnow": "node scripts/submit-indexnow.mjs",
+    "seo:lighthouse": "node scripts/audit-lighthouse.mjs",
     "seo:monitor": "node scripts/monitor-seo.mjs",
     "seo:perf": "node scripts/audit-performance.mjs",
     "deploy": "npm run build && npx wrangler deploy && npm run seo:indexnow",

@@ -45,6 +45,9 @@ jobs:
       - name: Run full SEO suite
         run: npm run seo:all
 
+      - name: Run Lighthouse audit
+        run: npm run seo:lighthouse
+
       - name: Submit canonical URLs to IndexNow
         if: github.event_name != 'pull_request' && github.ref == 'refs/heads/main'
         run: npm run seo:indexnow
