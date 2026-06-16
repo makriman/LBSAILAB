@@ -2134,8 +2134,22 @@ async function auditSecurityText() {
     fail(`${url}: expected ${NOINDEX_ROBOTS} X-Robots-Tag`);
   }
 
-  for (const field of ["Contact:", "Canonical:", "Expires:"]) {
-    if (!body.includes(field)) fail(`${url}: missing ${field}`);
+  if ((response.headers.get("content-language") || "") !== "en-GB") {
+    fail(`${url}: expected en-GB Content-Language`);
+  }
+
+  for (const expected of [
+    `Contact: ${SITE_ORIGIN}/contact/`,
+    "Expires: 2027-06-16T00:00:00.000Z",
+    "Preferred-Languages: en",
+    `Canonical: ${SITE_ORIGIN}/.well-known/security.txt`,
+    `Policy: ${SITE_ORIGIN}/contact/`,
+  ]) {
+    if (!body.includes(expected)) fail(`${url}: missing ${expected}`);
+  }
+
+  if (/\bmailto:|[a-z0-9._%+-]+@london\.edu\b/i.test(body)) {
+    fail(`${url}: should use the contact page instead of exposing email`);
   }
 }
 

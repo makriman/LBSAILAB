@@ -1315,6 +1315,26 @@ function auditCrawlerFiles() {
   }
 }
 
+function auditSecurityTxt() {
+  const security = readDist(".well-known/security.txt");
+
+  for (const expected of [
+    "Contact: https://lbsailab.com/contact/",
+    "Expires: 2027-06-16T00:00:00.000Z",
+    "Preferred-Languages: en",
+    "Canonical: https://lbsailab.com/.well-known/security.txt",
+    "Policy: https://lbsailab.com/contact/",
+  ]) {
+    if (!security.includes(expected)) {
+      fail(`security.txt is missing ${expected}`);
+    }
+  }
+
+  if (/\bmailto:|[a-z0-9._%+-]+@london\.edu\b/i.test(security)) {
+    fail("security.txt should use the contact page instead of exposing email");
+  }
+}
+
 function auditManifestAndIcons() {
   let manifest;
 
@@ -1769,6 +1789,7 @@ function audit() {
 
   auditRobots();
   auditCrawlerFiles();
+  auditSecurityTxt();
   auditManifestAndIcons();
   auditErrorDocument();
   auditWorkerRetiredPaths();
