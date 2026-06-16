@@ -71,6 +71,11 @@ const COMPRESSED_TEXT_PATHS = [
   "/sitemap-0.xml",
   "/image-sitemap.xml",
 ];
+const INDEXABLE_IMAGE_PATHS = [
+  "/images/lbs-ai-lab-workshop-hero-1672.webp",
+  "/og-default.png",
+  "/google-deepmind-logo-blue.png",
+];
 const CRAWLER_USER_AGENTS = [
   "Mozilla/5.0 AppleWebKit/537.36 (KHTML, like Gecko; compatible; Googlebot/2.1; +https://www.google.com/bot.html)",
   "Mozilla/5.0 AppleWebKit/537.36 (KHTML, like Gecko; compatible; bingbot/2.0; +http://www.bing.com/bingbot.htm)",
@@ -642,6 +647,24 @@ async function checkCdnAndCompression() {
   }
 }
 
+async function checkImageIndexingHeaders() {
+  for (const path of INDEXABLE_IMAGE_PATHS) {
+    const url = `${SITE_ORIGIN}${path}`;
+    const response = await requestStatus(url);
+
+    if (response.status !== 200) {
+      fail(
+        `${url}: expected indexable image asset 200, got ${response.status}`,
+      );
+      continue;
+    }
+
+    expectHeader(response, url, "x-robots-tag", "index, follow");
+    expectHeader(response, url, "x-robots-tag", "max-image-preview:large");
+    expectHeader(response, url, "cache-control", "max-age=31536000");
+  }
+}
+
 async function checkVitalsEndpoint() {
   const url = `${SITE_ORIGIN}/api/vitals`;
   const body = JSON.stringify({
@@ -680,6 +703,7 @@ async function monitorSeo() {
   await checkDiscoveryFiles();
   await checkCrawlerCompatibility();
   await checkCdnAndCompression();
+  await checkImageIndexingHeaders();
   await checkVitalsEndpoint();
 
   if (failures.length) {

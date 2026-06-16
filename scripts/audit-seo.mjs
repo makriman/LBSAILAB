@@ -436,6 +436,23 @@ function auditWorkerSeoAccessLogging() {
   }
 }
 
+function auditWorkerImageIndexingHeaders() {
+  const worker = readFileSync(path.join(ROOT, "src", "worker.ts"), "utf8");
+
+  for (const expected of [
+    "isIndexableImageAsset(pathname)",
+    "function isIndexableImageAsset",
+    'pathname.startsWith("/images/")',
+    "/^\\/og-[^/]+\\.png$/.test(pathname)",
+    "/^\\/google-deepmind-logo-[^/]+\\.png$/.test(pathname)",
+    'pathname === "/og-default.svg"',
+  ]) {
+    if (!worker.includes(expected)) {
+      fail(`Worker image indexing headers are missing ${expected}`);
+    }
+  }
+}
+
 function auditWorkerDiscoveryRedirects() {
   const worker = readFileSync(path.join(ROOT, "src", "worker.ts"), "utf8");
 
@@ -1876,6 +1893,7 @@ function audit() {
   auditErrorDocument();
   auditWorkerRetiredPaths();
   auditWorkerSeoAccessLogging();
+  auditWorkerImageIndexingHeaders();
   auditWorkerDiscoveryRedirects();
   auditExternalPerformanceMonitorConfig();
   auditSeoMonitorConfig();

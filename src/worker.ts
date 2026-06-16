@@ -390,6 +390,8 @@ function withSeoHeaders(response: Response, pathname: string): Response {
     headers.set("X-Robots-Tag", NOINDEX_ROBOTS);
   } else if (isCrawlerUtilityPath(pathname)) {
     headers.set("X-Robots-Tag", INDEXABLE_ROBOTS);
+  } else if (isIndexableImageAsset(pathname)) {
+    headers.set("X-Robots-Tag", INDEXABLE_ROBOTS);
   } else if (isHtmlResponse(headers)) {
     headers.set("X-Robots-Tag", INDEXABLE_ROBOTS);
   }
@@ -566,6 +568,18 @@ function isLongLivedAsset(pathname: string): boolean {
     pathname === "/lbs-logo.svg" ||
     pathname === "/og-default.svg" ||
     pathname === "/site.webmanifest"
+  );
+}
+
+function isIndexableImageAsset(pathname: string): boolean {
+  return (
+    pathname.startsWith("/images/") ||
+    /^\/mentors\/[^/]+\.(jpg|png|webp|avif)$/i.test(pathname) ||
+    pathname === "/favicon.svg" ||
+    /^\/og-[^/]+\.png$/.test(pathname) ||
+    /^\/google-deepmind-logo-[^/]+\.png$/.test(pathname) ||
+    pathname === "/lbs-logo.svg" ||
+    pathname === "/og-default.svg"
   );
 }
 

@@ -651,6 +651,16 @@ function assertIndexableHeaders(response, url) {
   }
 }
 
+function assertIndexableRobotsHeader(response, url) {
+  const robots = response.headers.get("x-robots-tag") || "";
+
+  if (robots !== INDEXABLE_ROBOTS) {
+    fail(
+      `${url}: X-Robots-Tag expected "${INDEXABLE_ROBOTS}", got "${robots || "(missing)"}"`,
+    );
+  }
+}
+
 function assertShortCache(response, url) {
   const cacheControl = response.headers.get("cache-control") || "";
 
@@ -1746,6 +1756,7 @@ async function auditImageResource(url, options = {}) {
 
   assertSecurityHeaders(response, url);
   assertLongCache(response, url);
+  assertIndexableRobotsHeader(response, url);
 
   if (!contentType.startsWith("image/")) {
     fail(`${url}: expected image content type, got "${contentType}"`);
