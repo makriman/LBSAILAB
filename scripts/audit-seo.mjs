@@ -73,6 +73,17 @@ const EXPECTED_SITE_NAVIGATION_URLS = [
   `${SITE_URL}/contact/`,
   `${SITE_URL}/sitemap/`,
 ];
+const JSON_LD_URL_FIELDS = new Set([
+  "@id",
+  "url",
+  "sameAs",
+  "image",
+  "logo",
+  "item",
+  "contentUrl",
+  "embedUrl",
+  "thumbnailUrl",
+]);
 const REQUIRED_WORKER_GONE_PATHS = [
   "/_headers",
   "/_headers/",
@@ -856,6 +867,7 @@ function auditSeoMonitorConfig() {
     "assertIndexableHeaders(imageResponse, imageSitemapUrl)",
     "assertShortCache(imageResponse, imageSitemapUrl)",
     "auditFeedCanonicalEntries",
+    "auditJsonLdGraphHygiene",
     "auditDuplicateOriginRedirects(pages)",
     "auditMissingFileResources",
     "missing-seo-audit-file.css",
@@ -1404,6 +1416,140 @@ function auditTeamJsonLd(url, items, html) {
 
   if (prototype.creator?.["@id"] !== `${url}#team`) {
     fail(`${url}: prototype CreativeWork JSON-LD missing team creator`);
+  }
+}
+
+function jsonLdTypeLabel(value) {
+  if (Array.isArray(value)) return value.join(",");
+  return value || "unknown";
+}
+
+function collectJsonLdUrlValues(value, sourcePath = [], values = []) {
+  if (Array.isArray(value)) {
+    value.forEach((item, index) =>
+      collectJsonLdUrlValues(item, [...sourcePath, String(index)], values),
+    );
+    return values;
+  }
+
+  if (!value || typeof value !== "object") return values;
+
+  for (const [key, child] of Object.entries(value)) {
+    const childPath = [...sourcePath, key];
+
+    if (JSON_LD_URL_FIELDS.has(key) && typeof child === "string") {
+      values.push({ path: childPath.join("."), value: child });
+      continue;
+    }
+
+    if (JSON_LD_URL_FIELDS.has(key) && Array.isArray(child)) {
+      child.forEach((item, index) => {
+        if (typeof item === "string") {
+          values.push({
+            path: [...childPath, String(index)].join("."),
+            value: item,
+          });
+        } else {
+          collectJsonLdUrlValues(item, [...childPath, String(index)], values);
+        }
+      });
+      continue;
+    }
+
+    collectJsonLdUrlValues(child, childPath, values);
+  }
+
+  return values;
+}
+
+function collectJsonLdDeclaredIds(value, sourcePath = [], ids = []) {
+  if (Array.isArray(value)) {
+    value.forEach((item, index) =>
+      collectJsonLdDeclaredIds(item, [...sourcePath, String(index)], ids),
+    );
+    return ids;
+  }
+
+  if (!value || typeof value !== "object") return ids;
+
+  if (typeof value["@id"] === "string" && value["@type"]) {
+    ids.push({
+      id: value["@id"],
+      path: sourcePath.join(".") || "$",
+      type: jsonLdTypeLabel(value["@type"]),
+    });
+  }
+
+  for (const [key, child] of Object.entries(value)) {
+    collectJsonLdDeclaredIds(child, [...sourcePath, key], ids);
+  }
+
+  return ids;
+}
+
+function auditJsonLdGraphHygiene(url, items, sitemapPages) {
+  const declaredIds = new Map();
+
+  for (const node of collectJsonLdDeclaredIds(items)) {
+    const key = `${node.id}::${node.type}`;
+    const existing = declaredIds.get(key);
+
+    if (existing) {
+      fail(
+        `${url}: duplicate JSON-LD @id ${node.id} for ${node.type} at ${existing} and ${node.path}`,
+      );
+    } else {
+      declaredIds.set(key, node.path);
+    }
+  }
+
+  for (const { path: valuePath, value } of collectJsonLdUrlValues(items)) {
+    let parsed;
+
+    try {
+      parsed = new URL(value);
+    } catch {
+      fail(`${url}: JSON-LD ${valuePath} is not a valid absolute URL`);
+      continue;
+    }
+
+    if (parsed.protocol !== "https:") {
+      fail(`${url}: JSON-LD ${valuePath} is not HTTPS (${value})`);
+    }
+
+    if (parsed.host === `www.${SITE_HOST}`) {
+      fail(`${url}: JSON-LD ${valuePath} uses non-canonical www domain`);
+    }
+
+    if (parsed.origin !== SITE_URL) continue;
+
+    if (parsed.search) {
+      fail(`${url}: JSON-LD ${valuePath} includes URL parameters`);
+    }
+
+    if (parsed.pathname !== parsed.pathname.toLowerCase()) {
+      fail(`${url}: JSON-LD ${valuePath} path is not lowercase`);
+    }
+
+    if (/\/(?:cohorts?|teams)(?:\/|$)/i.test(parsed.pathname)) {
+      fail(`${url}: JSON-LD ${valuePath} references a legacy URL`);
+    }
+
+    if (parsed.pathname === "/" || parsed.pathname.endsWith("/")) {
+      const pageUrl = `${parsed.origin}${parsed.pathname}`;
+
+      if (!sitemapPages.has(pageUrl)) {
+        fail(`${url}: JSON-LD ${valuePath} page URL is not in the sitemap`);
+      }
+
+      continue;
+    }
+
+    const assetPath = decodeURIComponent(parsed.pathname.slice(1));
+
+    if (!existsSync(path.join(DIST, assetPath))) {
+      fail(`${url}: JSON-LD ${valuePath} asset URL is missing from dist`);
+    }
   }
 }
 
@@ -2388,6 +2534,7 @@ function auditPage(url, metadataIndex, sitemapPages) {
     }
   }
 
+  auditJsonLdGraphHygiene(url, jsonLdItems, sitemapPages);
   auditTeamJsonLd(url, jsonLdItems, html);
   auditItemListJsonLd(url, jsonLdItems, sitemapPages);
   auditMentorJsonLd(url, jsonLdItems);

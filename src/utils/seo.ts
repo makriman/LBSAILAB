@@ -58,6 +58,7 @@ interface ItemListEntry {
   type?: string;
   description?: string;
   image?: string;
+  referenceOnly?: boolean;
 }
 
 interface TeamMemberJsonLdInput {
@@ -242,14 +243,18 @@ export function itemListJsonLd({
       position: index + 1,
       name: item.name,
       url: absoluteUrl(item.url),
-      item: {
-        "@type": item.type ?? "WebPage",
-        "@id": item.id ? absoluteUrl(item.id) : undefined,
-        name: item.name,
-        url: absoluteUrl(item.url),
-        description: item.description,
-        image: item.image ? absoluteUrl(item.image) : undefined,
-      },
+      item: item.referenceOnly
+        ? {
+            "@id": item.id ? absoluteUrl(item.id) : absoluteUrl(item.url),
+          }
+        : {
+            "@type": item.type ?? "WebPage",
+            "@id": item.id ? absoluteUrl(item.id) : undefined,
+            name: item.name,
+            url: absoluteUrl(item.url),
+            description: item.description,
+            image: item.image ? absoluteUrl(item.image) : undefined,
+          },
     })),
   };
 }

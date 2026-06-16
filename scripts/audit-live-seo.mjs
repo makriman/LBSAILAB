@@ -40,6 +40,17 @@ const EXPECTED_SITE_NAVIGATION_URLS = [
   `${SITE_ORIGIN}/contact/`,
   `${SITE_ORIGIN}/sitemap/`,
 ];
+const JSON_LD_URL_FIELDS = new Set([
+  "@id",
+  "url",
+  "sameAs",
+  "image",
+  "logo",
+  "item",
+  "contentUrl",
+  "embedUrl",
+  "thumbnailUrl",
+]);
 const REQUIRED_SECURITY_HEADERS = [
   "content-security-policy",
   "cross-origin-opener-policy",
@@ -1588,6 +1599,132 @@ function parseJsonLdItems(html, url) {
   return items;
 }
 
+function jsonLdTypeLabel(value) {
+  if (Array.isArray(value)) return value.join(",");
+  return value || "unknown";
+}
+
+function collectJsonLdUrlValues(value, sourcePath = [], values = []) {
+  if (Array.isArray(value)) {
+    value.forEach((item, index) =>
+      collectJsonLdUrlValues(item, [...sourcePath, String(index)], values),
+    );
+    return values;
+  }
+
+  if (!value || typeof value !== "object") return values;
+
+  for (const [key, child] of Object.entries(value)) {
+    const childPath = [...sourcePath, key];
+
+    if (JSON_LD_URL_FIELDS.has(key) && typeof child === "string") {
+      values.push({ path: childPath.join("."), value: child });
+      continue;
+    }
+
+    if (JSON_LD_URL_FIELDS.has(key) && Array.isArray(child)) {
+      child.forEach((item, index) => {
+        if (typeof item === "string") {
+          values.push({
+            path: [...childPath, String(index)].join("."),
+            value: item,
+          });
+        } else {
+          collectJsonLdUrlValues(item, [...childPath, String(index)], values);
+        }
+      });
+      continue;
+    }
+
+    collectJsonLdUrlValues(child, childPath, values);
+  }
+
+  return values;
+}
+
+function collectJsonLdDeclaredIds(value, sourcePath = [], ids = []) {
+  if (Array.isArray(value)) {
+    value.forEach((item, index) =>
+      collectJsonLdDeclaredIds(item, [...sourcePath, String(index)], ids),
+    );
+    return ids;
+  }
+
+  if (!value || typeof value !== "object") return ids;
+
+  if (typeof value["@id"] === "string" && value["@type"]) {
+    ids.push({
+      id: value["@id"],
+      path: sourcePath.join(".") || "$",
+      type: jsonLdTypeLabel(value["@type"]),
+    });
+  }
+
+  for (const [key, child] of Object.entries(value)) {
+    collectJsonLdDeclaredIds(child, [...sourcePath, key], ids);
+  }
+
+  return ids;
+}
+
+function auditJsonLdGraphHygiene(url, items, sitemapPages) {
+  const declaredIds = new Map();
+
+  for (const node of collectJsonLdDeclaredIds(items)) {
+    const key = `${node.id}::${node.type}`;
+    const existing = declaredIds.get(key);
+
+    if (existing) {
+      fail(
+        `${url}: duplicate JSON-LD @id ${node.id} for ${node.type} at ${existing} and ${node.path}`,
+      );
+    } else {
+      declaredIds.set(key, node.path);
+    }
+  }
+
+  for (const { path, value } of collectJsonLdUrlValues(items)) {
+    let parsed;
+
+    try {
+      parsed = new URL(value);
+    } catch {
+      fail(`${url}: JSON-LD ${path} is not a valid absolute URL`);
+      continue;
+    }
+
+    if (parsed.protocol !== "https:") {
+      fail(`${url}: JSON-LD ${path} is not HTTPS (${value})`);
+    }
+
+    if (parsed.host === `www.${SITE_HOST}`) {
+      fail(`${url}: JSON-LD ${path} uses non-canonical www domain`);
+    }
+
+    if (parsed.origin !== SITE_ORIGIN) continue;
+
+    if (parsed.search) {
+      fail(`${url}: JSON-LD ${path} includes URL parameters`);
+    }
+
+    if (parsed.pathname !== parsed.pathname.toLowerCase()) {
+      fail(`${url}: JSON-LD ${path} path is not lowercase`);
+    }
+
+    if (/\/(?:cohorts?|teams)(?:\/|$)/i.test(parsed.pathname)) {
+      fail(`${url}: JSON-LD ${path} references a legacy URL`);
+    }
+
+    if (parsed.pathname === "/" || parsed.pathname.endsWith("/")) {
+      const pageUrl = `${parsed.origin}${parsed.pathname}`;
+
+      if (!sitemapPages.has(pageUrl)) {
+        fail(`${url}: JSON-LD ${path} page URL is not in the sitemap`);
+      }
+    }
+  }
+}
+
 function auditBreadcrumbJsonLd(url, items) {
   const breadcrumb = items.find((item) => isJsonLdType(item, "BreadcrumbList"));
 
@@ -1994,6 +2131,7 @@ function auditTeamJsonLd(url, html, items) {
 function auditJsonLd(url, html, sitemapPages) {
   const items = parseJsonLdItems(html, url);
 
+  auditJsonLdGraphHygiene(url, items, sitemapPages);
   auditWebPageJsonLd(url, html, items);
   auditBreadcrumbJsonLd(url, items);
   auditItemListJsonLd(url, items, sitemapPages);

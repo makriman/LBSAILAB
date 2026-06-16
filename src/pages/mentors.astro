@@ -44,6 +44,7 @@ const jsonLd = [
         type: "Person",
         description: academicLead.role,
         image: academicLead.image,
+        referenceOnly: true,
       },
       ...mentors.map((mentor) => ({
         id: mentorPersonId(mentor.data.id),
@@ -52,6 +53,7 @@ const jsonLd = [
         type: "Person",
         description: mentor.data.mentorType ?? mentor.data.role,
         image: mentor.data.image,
+        referenceOnly: true,
       })),
     ],
   }),
