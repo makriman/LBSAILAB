@@ -59,6 +59,9 @@ const LONG_CACHE_PATHS = [
   /^\/google-deepmind-logo-[^/]+\.png$/,
   /^\/site\.webmanifest$/,
 ];
+const ALLOWED_EXTERNAL_SCRIPT_PATTERNS = [
+  /^https:\/\/static\.cloudflareinsights\.com\/beacon\.min\.js(?:\/|$)/,
+];
 const LEGACY_URLS = [
   ["/cohorts", `${SITE_ORIGIN}/batches/`],
   ["/cohorts/cohort-01", `${SITE_ORIGIN}/batches/spring-2026/`],
@@ -250,6 +253,21 @@ function isCanonicalPageUrl(url) {
 
 function isLongCachePath(pathname) {
   return LONG_CACHE_PATHS.some((pattern) => pattern.test(pathname));
+}
+
+function isAllowedExternalScript(url) {
+  return ALLOWED_EXTERNAL_SCRIPT_PATTERNS.some((pattern) => pattern.test(url));
+}
+
+function isNonBlockingScript(attributes) {
+  const type = (attributes.type || "").toLowerCase();
+
+  return (
+    "async" in attributes ||
+    "defer" in attributes ||
+    type === "module" ||
+    type === "application/ld+json"
+  );
 }
 
 function pngDimensions(bytes) {
@@ -883,6 +901,25 @@ function assertCanonicalLinkHeader(response, url) {
   }
 }
 
+function auditScriptHygiene(html, pageUrl) {
+  for (const tag of allTags(html, "script")) {
+    const script = attrs(tag);
+    const src = script.src ? normalizeUrl(script.src, pageUrl) : "";
+
+    if (!src) continue;
+
+    if (!isNonBlockingScript(script)) {
+      fail(`${pageUrl}: script should be async, defer, or module (${src})`);
+    }
+
+    if (sameOrigin(src)) continue;
+
+    if (!isAllowedExternalScript(src)) {
+      fail(`${pageUrl}: unapproved third-party script found (${src})`);
+    }
+  }
+}
+
 function socialImageUrls(html, pageUrl) {
   return [
     metaContent(html, "og:image"),
@@ -909,6 +946,7 @@ async function auditPage(url, sitemapPages, inbound, assetUrls, socialImages) {
   assertShortCache(response, url);
   assertCanonicalLinkHeader(response, url);
   assertPageMetadata(body, url);
+  auditScriptHygiene(body, url);
 
   const { links, assets, externalLinks, sameOriginNonPages } = extractPageLinks(
     body,

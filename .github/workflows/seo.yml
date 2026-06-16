@@ -27,14 +27,13 @@ jobs:
     env:
       SEO_SITE_URL: https://lbsailab.com
       SEO_DUPLICATE_ORIGINS: https://lbsailab.zahra-moghadasi.workers.dev
-      FORCE_JAVASCRIPT_ACTIONS_TO_NODE24: true
 
     steps:
       - name: Check out repository
-        uses: actions/checkout@v4
+        uses: actions/checkout@v6
 
       - name: Set up Node.js
-        uses: actions/setup-node@v4
+        uses: actions/setup-node@v6
         with:
           node-version: 24
           cache: npm
@@ -55,7 +54,7 @@ jobs:
 
       - name: Upload generated site
         if: always()
-        uses: actions/upload-artifact@v4
+        uses: actions/upload-artifact@v7
         with:
           name: dist
           path: dist
