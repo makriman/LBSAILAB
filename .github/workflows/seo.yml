@@ -47,6 +47,7 @@ jobs:
       - name: Run production SEO suite
         if: github.event_name == 'schedule' || github.event_name == 'workflow_dispatch'
         env:
+          CRUX_API_KEY: ${{ secrets.CRUX_API_KEY }}
           PAGESPEED_API_KEY: ${{ secrets.PAGESPEED_API_KEY }}
         run: npm run seo:production
 

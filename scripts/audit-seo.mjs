@@ -425,7 +425,7 @@ function auditWorkerSeoAccessLogging() {
   }
 }
 
-function auditPageSpeedMonitorConfig() {
+function auditExternalPerformanceMonitorConfig() {
   const packageJson = readFileSync(path.join(ROOT, "package.json"), "utf8");
   const workflow = readFileSync(
     path.join(ROOT, ".github", "workflows", "seo.yml"),
@@ -442,14 +442,26 @@ function auditPageSpeedMonitorConfig() {
     fail("seo:production should include PageSpeed Insights monitoring");
   }
 
+  if (!packageJson.includes('"seo:crux": "node scripts/audit-crux.mjs"')) {
+    fail("package.json is missing the seo:crux script");
+  }
+
+  if (!packageJson.includes("npm run seo:crux")) {
+    fail("seo:production should include CrUX Core Web Vitals monitoring");
+  }
+
   if (!workflow.includes("timeout-minutes: 25")) {
-    fail("SEO workflow timeout should allow PageSpeed Insights monitoring");
+    fail("SEO workflow timeout should allow external performance monitoring");
   }
 
   if (
     !workflow.includes("PAGESPEED_API_KEY: ${{ secrets.PAGESPEED_API_KEY }}")
   ) {
     fail("SEO workflow should pass the optional PageSpeed API key secret");
+  }
+
+  if (!workflow.includes("CRUX_API_KEY: ${{ secrets.CRUX_API_KEY }}")) {
+    fail("SEO workflow should pass the optional CrUX API key secret");
   }
 }
 
@@ -1616,7 +1628,7 @@ function audit() {
   auditErrorDocument();
   auditWorkerRetiredPaths();
   auditWorkerSeoAccessLogging();
-  auditPageSpeedMonitorConfig();
+  auditExternalPerformanceMonitorConfig();
 
   const pages = auditSitemap();
   const metadataIndex = {
