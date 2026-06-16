@@ -24,6 +24,7 @@ const DNS_RECORD_TYPES = [
   { label: "AAAA", method: "resolve6" },
 ];
 const MIN_CERT_VALID_DAYS = 30;
+const EXPECTED_CONTENT_LANGUAGE = "en-GB";
 const CANONICAL_PATHS = [
   "/",
   "/about/",
@@ -559,6 +560,7 @@ async function checkCanonicalUrlsDoNotRedirect() {
     }
 
     expectHeader(response, url, "link", `<${url}>; rel="canonical"`);
+    expectHeader(response, url, "content-language", EXPECTED_CONTENT_LANGUAGE);
   }
 }
 
@@ -590,6 +592,7 @@ async function checkDiscoveryFiles() {
     expectHeader(response, url, "content-type", "text/plain");
     expectHeader(response, url, "x-robots-tag", "index, follow");
     expectHeader(response, url, "cache-control", "max-age=300");
+    expectHeader(response, url, "content-language", EXPECTED_CONTENT_LANGUAGE);
   }
 }
 
@@ -625,6 +628,7 @@ async function checkCdnAndCompression() {
     expectHeader(response, url, "server", "cloudflare");
     expectHeader(response, url, "alt-svc", "h3");
     expectHeaderPresent(response, url, "cf-cache-status");
+    expectHeader(response, url, "content-language", EXPECTED_CONTENT_LANGUAGE);
 
     const contentEncoding = response.headers.get("content-encoding") || "";
 

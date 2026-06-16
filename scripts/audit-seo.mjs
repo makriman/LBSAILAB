@@ -413,6 +413,7 @@ function auditWorkerSeoAccessLogging() {
     "response.status >= 500",
     'response.headers.get("Cache-Control")',
     'response.headers.get("X-Robots-Tag")',
+    "Content-Language",
     "Googlebot",
     "Bingbot",
     "DuckDuckBot",

@@ -56,6 +56,7 @@ const ERROR_DOCUMENT_PATHS = new Set(["/404.html", "/404/"]);
 const INDEXABLE_ROBOTS =
   "index, follow, max-snippet:-1, max-image-preview:large, max-video-preview:-1";
 const NOINDEX_ROBOTS = "noindex, nofollow";
+const CONTENT_LANGUAGE = "en-GB";
 const SITE_UPDATED_AT = "2026-06-16T00:00:00.000Z";
 const LAST_MODIFIED = new Date(SITE_UPDATED_AT).toUTCString();
 const SHORT_CACHE_CONTROL = "public, max-age=300, must-revalidate";
@@ -397,6 +398,10 @@ function withSeoHeaders(response: Response, pathname: string): Response {
     headers.set("Content-Type", "application/atom+xml; charset=utf-8");
   }
 
+  if (shouldSetContentLanguage(pathname, headers, response.status)) {
+    headers.set("Content-Language", CONTENT_LANGUAGE);
+  }
+
   headers.set("Cache-Control", cacheControlFor(pathname, headers));
 
   if (shouldSetLastModified(pathname, headers, response.status)) {
@@ -431,6 +436,22 @@ function cacheControlFor(pathname: string, headers: Headers): string {
 }
 
 function shouldSetLastModified(
+  pathname: string,
+  headers: Headers,
+  status: number,
+): boolean {
+  if (isLongLivedAsset(pathname)) return false;
+
+  return (
+    status === 404 ||
+    status === 410 ||
+    isHtmlResponse(headers) ||
+    isCrawlerUtilityPath(pathname) ||
+    isNoindexPath(pathname)
+  );
+}
+
+function shouldSetContentLanguage(
   pathname: string,
   headers: Headers,
   status: number,

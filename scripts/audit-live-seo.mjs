@@ -16,6 +16,7 @@ const NOINDEX_ROBOTS = "noindex, nofollow";
 const EXPECTED_LAST_MODIFIED = "Tue, 16 Jun 2026 00:00:00 GMT";
 const EXPECTED_DATE_MODIFIED = "2026-06-16";
 const EXPECTED_UPDATED_TIME = "2026-06-16T00:00:00.000Z";
+const EXPECTED_CONTENT_LANGUAGE = "en-GB";
 const EXPECTED_ORGANIZATION_TOPICS = [
   "AI product development",
   "AI-assisted application development",
@@ -626,10 +627,17 @@ function assertPageCsp(response, html, url) {
 
 function assertIndexableHeaders(response, url) {
   const robots = response.headers.get("x-robots-tag") || "";
+  const language = response.headers.get("content-language") || "";
 
   if (robots !== INDEXABLE_ROBOTS) {
     fail(
       `${url}: X-Robots-Tag expected "${INDEXABLE_ROBOTS}", got "${robots}"`,
+    );
+  }
+
+  if (language !== EXPECTED_CONTENT_LANGUAGE) {
+    fail(
+      `${url}: Content-Language expected "${EXPECTED_CONTENT_LANGUAGE}", got "${language || "(missing)"}"`,
     );
   }
 }
