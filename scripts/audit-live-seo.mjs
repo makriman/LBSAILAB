@@ -108,6 +108,32 @@ const LONG_CACHE_PATHS = [
 const ALLOWED_EXTERNAL_SCRIPT_PATTERNS = [
   /^https:\/\/static\.cloudflareinsights\.com\/beacon\.min\.js(?:\/|$)/,
 ];
+const ALLOWED_EXTERNAL_LINK_HOSTS = new Set([
+  "briefd.lbsailab.com",
+  "compass.lbsailab.com",
+  "deepmind.google",
+  "funded.lbsailab.com",
+  "londoneatspal.lbsailab.com",
+  "recruitsmart.lbsailab.com",
+  "wayfinder.lbsailab.com",
+  "www.emsplusplus.com",
+  "www.linkedin.com",
+  "www.london.edu",
+  "zentra.lbsailab.com",
+]);
+const ALLOWED_EXTERNAL_RESOURCE_HOSTS = new Set([SITE_HOST]);
+const FORBIDDEN_EMBED_TAGS = ["iframe", "object", "embed", "applet", "base"];
+const LINK_ATTRIBUTES = ["href", "src", "action", "formaction"];
+const SPAM_PATTERNS = [
+  /\bviagra\b/i,
+  /\bcialis\b/i,
+  /\bonline\s+pharmacy\b/i,
+  /\bcasino\b/i,
+  /\bsports\s+betting\b/i,
+  /\bpayday\s+loans?\b/i,
+  /\bforex\s+signals?\b/i,
+  /\bessay\s+writing\s+service\b/i,
+];
 const LEGACY_URLS = [
   ["/cohorts", `${SITE_ORIGIN}/batches/`],
   ["/cohorts/cohort-01", `${SITE_ORIGIN}/batches/spring-2026/`],
@@ -167,6 +193,10 @@ function attrs(tag) {
   return attributes;
 }
 
+function openingTag(tag) {
+  return tag.match(/^<[^>]+>/i)?.[0] || tag;
+}
+
 function allTags(html, tagName) {
   return [...html.matchAll(new RegExp(`<${tagName}\\b[^>]*>`, "gi"))].map(
     (match) => match[0],
@@ -183,11 +213,29 @@ function fullTags(html, tagName) {
 
 function decodeHtml(value) {
   return value
+    .replace(/&#x([0-9a-f]+);/gi, (_, hex) =>
+      String.fromCodePoint(Number.parseInt(hex, 16)),
+    )
+    .replace(/&#(\d+);/g, (_, code) =>
+      String.fromCodePoint(Number.parseInt(code, 10)),
+    )
     .replaceAll("&amp;", "&")
     .replaceAll("&quot;", '"')
     .replaceAll("&#39;", "'")
     .replaceAll("&lt;", "<")
     .replaceAll("&gt;", ">");
+}
+
+function textContent(markup) {
+  return decodeHtml(
+    markup
+      .replace(/<script\b[\s\S]*?<\/script>/gi, " ")
+      .replace(/<style\b[\s\S]*?<\/style>/gi, " ")
+      .replace(/<svg\b[\s\S]*?<\/svg>/gi, " ")
+      .replace(/<[^>]*>/g, " ")
+      .replace(/\s+/g, " ")
+      .trim(),
+  );
 }
 
 function extractLocs(xml) {
@@ -292,6 +340,10 @@ function sameOrigin(url) {
   return new URL(url).origin === SITE_ORIGIN;
 }
 
+function isExternalUrl(url) {
+  return ["http:", "https:"].includes(url.protocol) && url.host !== SITE_HOST;
+}
+
 function isJsonLdType(item, type) {
   const itemType = item?.["@type"];
 
@@ -309,6 +361,24 @@ function isLongCachePath(pathname) {
 
 function isAllowedExternalScript(url) {
   return ALLOWED_EXTERNAL_SCRIPT_PATTERNS.some((pattern) => pattern.test(url));
+}
+
+function isDangerousDataUrl(value) {
+  return /^data\s*:\s*(?:text\/html|application\/javascript|text\/javascript)/i.test(
+    value,
+  );
+}
+
+function isHiddenLink(attributes) {
+  const style = attributes.style || "";
+
+  return (
+    "hidden" in attributes ||
+    attributes["aria-hidden"] === "true" ||
+    /(?:^|;)\s*display\s*:\s*none\b/i.test(style) ||
+    /(?:^|;)\s*visibility\s*:\s*hidden\b/i.test(style) ||
+    /(?:^|;)\s*opacity\s*:\s*0(?:[;\s]|$)/i.test(style)
+  );
 }
 
 function isNonBlockingScript(attributes) {
@@ -351,9 +421,11 @@ async function get(url, options = {}) {
       },
     });
   } catch (error) {
-    fail(
-      `${url}: fetch failed (${error instanceof Error ? error.message : String(error)})`,
-    );
+    if (!options.allowFetchFailure) {
+      fail(
+        `${url}: fetch failed (${error instanceof Error ? error.message : String(error)})`,
+      );
+    }
 
     return new Response("", {
       status: 599,
@@ -992,6 +1064,101 @@ function assertCanonicalLinkHeader(response, url) {
   }
 }
 
+function auditLiveContentIntegrity(html, pageUrl) {
+  for (const tagName of FORBIDDEN_EMBED_TAGS) {
+    if (new RegExp(`<${tagName}\\b`, "i").test(html)) {
+      fail(`${pageUrl}: contains forbidden <${tagName}> tag`);
+    }
+  }
+
+  if (/<meta\b[^>]*http-equiv\s*=\s*["']?refresh\b/i.test(html)) {
+    fail(`${pageUrl}: contains meta refresh`);
+  }
+
+  for (const match of html.matchAll(/<[a-z][\w:-]*\b[^>]*>/gi)) {
+    const tag = match[0];
+    const tagName = tag.match(/^<([^\s>/]+)/i)?.[1]?.toLowerCase() || "tag";
+    const attributes = attrs(tag);
+    const relValues = (attributes.rel || "").toLowerCase().split(/\s+/);
+    const resourceContext =
+      tagName === "script" ||
+      tagName === "img" ||
+      tagName === "source" ||
+      tagName === "video" ||
+      tagName === "audio" ||
+      (tagName === "link" &&
+        relValues.some((rel) =>
+          ["stylesheet", "preload", "modulepreload", "prefetch"].includes(rel),
+        ));
+
+    for (const attribute of Object.keys(attributes)) {
+      if (/^on[a-z]+$/i.test(attribute)) {
+        fail(`${pageUrl}: ${tagName} has inline event handler ${attribute}`);
+      }
+    }
+
+    for (const attribute of LINK_ATTRIBUTES) {
+      if (!(attribute in attributes)) continue;
+
+      const value = decodeHtml(attributes[attribute]).trim();
+
+      if (!value || value.startsWith("#")) continue;
+      if (/^(mailto|tel):/i.test(value)) continue;
+
+      if (/^javascript\s*:/i.test(value)) {
+        fail(`${pageUrl}: ${tagName} ${attribute} uses javascript:`);
+        continue;
+      }
+
+      if (isDangerousDataUrl(value)) {
+        fail(`${pageUrl}: ${tagName} ${attribute} uses executable data URL`);
+        continue;
+      }
+
+      const normalized = normalizeUrl(value, pageUrl);
+
+      if (!normalized) {
+        fail(`${pageUrl}: ${tagName} ${attribute} is not a valid URL`);
+        continue;
+      }
+
+      const parsed = new URL(normalized);
+
+      if (parsed.protocol === "http:") {
+        fail(`${pageUrl}: ${tagName} ${attribute} uses insecure HTTP URL`);
+      }
+
+      if (!isExternalUrl(parsed)) continue;
+
+      const allowedHosts = resourceContext
+        ? ALLOWED_EXTERNAL_RESOURCE_HOSTS
+        : ALLOWED_EXTERNAL_LINK_HOSTS;
+
+      if (!allowedHosts.has(parsed.host)) {
+        fail(
+          `${pageUrl}: ${tagName} ${attribute} points to unexpected external host ${parsed.host}`,
+        );
+      }
+    }
+  }
+
+  for (const anchor of fullTags(html, "a")) {
+    const attributes = attrs(openingTag(anchor));
+
+    if (attributes.href && isHiddenLink(attributes)) {
+      fail(`${pageUrl}: hidden link points to ${attributes.href}`);
+    }
+  }
+
+  const visibleText = textContent(html);
+
+  for (const pattern of SPAM_PATTERNS) {
+    if (pattern.test(visibleText)) {
+      fail(`${pageUrl}: visible text matches spam pattern ${pattern}`);
+    }
+  }
+}
+
 function parseJsonLdItems(html, url) {
   const items = [];
   const tags = fullTags(html, "script").filter((tag) => {
@@ -1454,6 +1621,7 @@ async function auditPage(url, sitemapPages, inbound, assetUrls, socialImages) {
   assertShortCache(response, url);
   assertCanonicalLinkHeader(response, url);
   assertPageMetadata(body, url);
+  auditLiveContentIntegrity(body, url);
   auditJsonLd(url, body, sitemapPages);
   auditScriptHygiene(body, url);
 
@@ -1683,6 +1851,7 @@ async function auditExternalLinks(inbound) {
 
     const response = await get(url, {
       accept: "text/html,*/*",
+      allowFetchFailure: true,
       redirect: "follow",
     });
 
@@ -1690,7 +1859,7 @@ async function auditExternalLinks(inbound) {
 
     if (
       isBotProtectedExternalHost(new URL(response.url || url).hostname) &&
-      [401, 403, 429, 999].includes(response.status)
+      [401, 403, 429, 599, 999].includes(response.status)
     ) {
       continue;
     }
