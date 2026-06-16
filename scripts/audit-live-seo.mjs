@@ -147,6 +147,12 @@ function extractLocs(xml) {
   );
 }
 
+function extractImageLocs(xml) {
+  return [...xml.matchAll(/<image:loc>(.*?)<\/image:loc>/g)].map((match) =>
+    decodeHtml(match[1].trim()),
+  );
+}
+
 function executableInlineScriptHashes(html) {
   return fullTags(html, "script")
     .map((tag) => ({
@@ -246,6 +252,19 @@ function isLongCachePath(pathname) {
   return LONG_CACHE_PATHS.some((pattern) => pattern.test(pathname));
 }
 
+function pngDimensions(bytes) {
+  const signature = bytes.subarray(0, 8).toString("hex");
+
+  if (signature !== "89504e470d0a1a0a" || bytes.length < 24) {
+    return null;
+  }
+
+  return {
+    height: bytes.readUInt32BE(20),
+    width: bytes.readUInt32BE(16),
+  };
+}
+
 function isBotProtectedExternalHost(hostname) {
   return BOT_PROTECTED_EXTERNAL_HOSTS.has(hostname);
 }
@@ -276,6 +295,13 @@ async function get(url, options = {}) {
 async function text(url, options = {}) {
   const response = await get(url, options);
   const body = await response.text();
+
+  return { response, body };
+}
+
+async function bytes(url, options = {}) {
+  const response = await get(url, options);
+  const body = Buffer.from(await response.arrayBuffer());
 
   return { response, body };
 }
@@ -565,13 +591,15 @@ async function auditSitemaps() {
     fail(`${imageSitemapUrl}: expected 200, got ${imageResponse.status}`);
   }
 
-  for (const imageUrl of extractLocs(imageSitemap)) {
+  const imageUrls = extractImageLocs(imageSitemap);
+
+  for (const imageUrl of imageUrls) {
     if (!sameOrigin(imageUrl)) {
       fail(`${imageSitemapUrl}: non-canonical image URL ${imageUrl}`);
     }
   }
 
-  return pages;
+  return { imageUrls, pages };
 }
 
 async function auditFeed() {
@@ -855,7 +883,17 @@ function assertCanonicalLinkHeader(response, url) {
   }
 }
 
-async function auditPage(url, sitemapPages, inbound, assetUrls) {
+function socialImageUrls(html, pageUrl) {
+  return [
+    metaContent(html, "og:image"),
+    metaContent(html, "og:image:secure_url"),
+    metaContent(html, "twitter:image"),
+  ]
+    .map((imageUrl) => normalizeUrl(imageUrl, pageUrl))
+    .filter((imageUrl) => imageUrl && sameOrigin(imageUrl));
+}
+
+async function auditPage(url, sitemapPages, inbound, assetUrls, socialImages) {
   const { response, body } = await text(url, { accept: "text/html" });
   const contentType = response.headers.get("content-type") || "";
 
@@ -884,6 +922,9 @@ async function auditPage(url, sitemapPages, inbound, assetUrls) {
   }
 
   for (const asset of assets) assetUrls.add(asset);
+  for (const socialImage of socialImageUrls(body, url)) {
+    socialImages.add(socialImage);
+  }
   for (const link of externalLinks) {
     if (!inbound.has(link)) inbound.set(link, new Set());
     inbound.get(link).add(url);
@@ -899,6 +940,66 @@ async function auditPage(url, sitemapPages, inbound, assetUrls) {
     ) {
       assetUrls.add(linked);
     }
+  }
+}
+
+async function auditImageResource(url, options = {}) {
+  const { response, body } = await bytes(url, { accept: "image/*" });
+  const contentType = response.headers.get("content-type") || "";
+
+  if (response.status !== 200) {
+    fail(`${url}: image asset expected 200, got ${response.status}`);
+    return null;
+  }
+
+  assertSecurityHeaders(response, url);
+  assertLongCache(response, url);
+
+  if (!contentType.startsWith("image/")) {
+    fail(`${url}: expected image content type, got "${contentType}"`);
+  }
+
+  if (options.contentType && !contentType.includes(options.contentType)) {
+    fail(
+      `${url}: expected ${options.contentType} content type, got "${contentType}"`,
+    );
+  }
+
+  if (!body.length) {
+    fail(`${url}: image asset body is empty`);
+  }
+
+  return { body, contentType };
+}
+
+async function auditSocialImages(socialImages) {
+  for (const url of socialImages) {
+    const resource = await auditImageResource(url, {
+      contentType: "image/png",
+    });
+
+    if (!resource) continue;
+
+    const dimensions = pngDimensions(resource.body);
+
+    if (!dimensions) {
+      fail(`${url}: social image is not a valid PNG`);
+      continue;
+    }
+
+    if (dimensions.width !== 1200 || dimensions.height !== 630) {
+      fail(
+        `${url}: social image dimensions expected 1200x630, got ${dimensions.width}x${dimensions.height}`,
+      );
+    }
+  }
+}
+
+async function auditImageSitemapAssets(imageUrls) {
+  const uniqueImageUrls = new Set(imageUrls);
+
+  for (const url of uniqueImageUrls) {
+    await auditImageResource(url);
   }
 }
 
@@ -1171,9 +1272,10 @@ async function auditReachability(pages) {
   const sitemapPages = new Set(pages);
   const inbound = new Map(pages.map((page) => [page, new Set()]));
   const assetUrls = new Set();
+  const socialImages = new Set();
 
   for (const page of pages) {
-    await auditPage(page, sitemapPages, inbound, assetUrls);
+    await auditPage(page, sitemapPages, inbound, assetUrls, socialImages);
   }
 
   for (const page of pages) {
@@ -1189,14 +1291,16 @@ async function auditReachability(pages) {
   }
 
   await auditAssets(assetUrls);
+  await auditSocialImages(socialImages);
   await auditExternalLinks(inbound);
 }
 
 async function auditLiveSeo() {
   await auditRobots();
-  const pages = await auditSitemaps();
+  const { imageUrls, pages } = await auditSitemaps();
   await auditFeed();
   await auditDiscoveryFiles(pages);
+  await auditImageSitemapAssets(imageUrls);
   await auditSecurityText();
   await auditRedirects();
   await auditNoindexAndGone();
