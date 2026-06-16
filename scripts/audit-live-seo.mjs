@@ -758,6 +758,19 @@ async function auditSitemaps() {
     fail(`${indexUrl}: missing ${sitemapUrl}`);
   }
 
+  const indexLocs = extractLocs(index);
+  const indexLastmods = extractLastmods(index);
+
+  if (indexLastmods.length !== indexLocs.length) {
+    fail(`${indexUrl}: expected one lastmod per sitemap URL`);
+  }
+
+  for (const lastmod of indexLastmods) {
+    if (lastmod !== EXPECTED_UPDATED_TIME) {
+      fail(`${indexUrl}: unexpected lastmod ${lastmod}`);
+    }
+  }
+
   const pages = extractLocs(sitemap);
   const seen = new Set();
 

@@ -1300,9 +1300,20 @@ function auditSitemap() {
   const sitemap = readDist("sitemap-0.xml");
   const sitemapLocs = extractLocs(sitemap);
   const indexLocs = extractLocs(sitemapIndex);
+  const indexLastmods = extractLastmods(sitemapIndex);
 
   if (!indexLocs.includes(`${SITE_URL}/sitemap-0.xml`)) {
     fail("sitemap-index.xml does not reference sitemap-0.xml");
+  }
+
+  if (indexLastmods.length !== indexLocs.length) {
+    fail("sitemap-index.xml should include one lastmod per sitemap URL");
+  }
+
+  for (const lastmod of indexLastmods) {
+    if (lastmod !== EXPECTED_LASTMOD) {
+      fail(`sitemap-index.xml has unexpected lastmod ${lastmod}`);
+    }
   }
 
   if (!sitemapLocs.length) {
