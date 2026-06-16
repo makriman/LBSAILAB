@@ -443,6 +443,7 @@ function auditWorkerImageIndexingHeaders() {
     "isIndexableImageAsset(pathname)",
     "function isIndexableImageAsset",
     'pathname.startsWith("/images/")',
+    'pathname.startsWith("/favicon/")',
     "/^\\/og-[^/]+\\.png$/.test(pathname)",
     "/^\\/google-deepmind-logo-[^/]+\\.png$/.test(pathname)",
     'pathname === "/og-default.svg"',

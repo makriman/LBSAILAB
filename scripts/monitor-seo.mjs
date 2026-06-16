@@ -650,7 +650,7 @@ async function checkCdnAndCompression() {
 async function checkImageIndexingHeaders() {
   for (const path of INDEXABLE_IMAGE_PATHS) {
     const url = `${SITE_ORIGIN}${path}`;
-    const response = await requestStatus(url);
+    const response = await requestStatus(url, "GET");
 
     if (response.status !== 200) {
       fail(
