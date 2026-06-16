@@ -161,6 +161,60 @@ async function checkCertificates() {
   ]);
 }
 
+async function negotiatedTlsProtocolFor(hostname) {
+  const [address] = await publicARecords(hostname);
+
+  if (!address) {
+    throw new Error(`No public A record for ${hostname}`);
+  }
+
+  return new Promise((resolve, reject) => {
+    const socket = tls.connect(
+      {
+        ALPNProtocols: ["h2", "http/1.1"],
+        host: address,
+        port: 443,
+        servername: hostname,
+        timeout: 10000,
+      },
+      () => {
+        const protocol = socket.alpnProtocol || "";
+        socket.end();
+        resolve(protocol);
+      },
+    );
+
+    socket.on("error", reject);
+    socket.on("timeout", () => {
+      socket.destroy();
+      reject(new Error("TLS ALPN negotiation timed out"));
+    });
+  });
+}
+
+async function checkHttpProtocolNegotiation(hostname) {
+  try {
+    const protocol = await negotiatedTlsProtocolFor(hostname);
+
+    if (protocol !== "h2") {
+      fail(
+        `${hostname}: expected TLS ALPN to negotiate HTTP/2 (h2), got "${protocol || "(none)"}"`,
+      );
+    }
+  } catch (error) {
+    fail(
+      `${hostname}: HTTP/2 ALPN check failed (${error instanceof Error ? error.message : String(error)})`,
+    );
+  }
+}
+
+async function checkHttpProtocols() {
+  await Promise.all([
+    checkHttpProtocolNegotiation(SITE_HOST),
+    checkHttpProtocolNegotiation(`www.${SITE_HOST}`),
+  ]);
+}
+
 async function requestUrl(url, method = "HEAD", body = "", headers = {}) {
   const parsed = new URL(url);
   const transport = parsed.protocol === "http:" ? http : https;
@@ -521,6 +575,7 @@ async function checkVitalsEndpoint() {
 async function monitorSeo() {
   await checkDns();
   await checkCertificates();
+  await checkHttpProtocols();
   await checkStatus();
   await checkRedirects();
   await checkCanonicalUrlsDoNotRedirect();
