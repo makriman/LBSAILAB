@@ -42,11 +42,12 @@ jobs:
       - name: Install dependencies
         run: npm ci
 
-      - name: Run full SEO suite
-        run: npm run seo:all
+      - name: Run build artifact SEO suite
+        run: npm run seo:ci
 
-      - name: Run Lighthouse audit
-        run: npm run seo:lighthouse
+      - name: Run production SEO suite
+        if: github.event_name == 'schedule' || github.event_name == 'workflow_dispatch'
+        run: npm run seo:production
 
       - name: Submit canonical URLs to IndexNow
         if: github.event_name != 'pull_request' && github.ref == 'refs/heads/main'
