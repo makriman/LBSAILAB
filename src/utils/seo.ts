@@ -21,6 +21,15 @@ export const ORGANIZATION_LOGO = "/favicon/apple-touch-icon.png";
 export const OG_IMAGE_WIDTH = 1200;
 export const OG_IMAGE_HEIGHT = 630;
 export const OG_IMAGE_TYPE = "image/png";
+export const SITE_NAVIGATION_ITEMS = [
+  { name: "About", path: "/about/" },
+  { name: "Batches", path: "/batches/" },
+  { name: "Spring 2026 Batch", path: "/batches/spring-2026/" },
+  { name: "Mentors", path: "/mentors/" },
+  { name: "Apply", path: "/apply/" },
+  { name: "Contact", path: "/contact/" },
+  { name: "Sitemap", path: "/sitemap/" },
+];
 
 export function teamOgImage(slug: string) {
   return `/og-team-${slug}.png`;
@@ -135,6 +144,21 @@ export function websiteJsonLd(): JsonLd {
     publisher: {
       "@id": `${SITE_URL}/#organization`,
     },
+  };
+}
+
+export function siteNavigationJsonLd(): JsonLd {
+  return {
+    "@context": "https://schema.org",
+    "@type": "SiteNavigationElement",
+    "@id": `${SITE_URL}/#site-navigation`,
+    name: "LBS AI Lab site navigation",
+    url: `${SITE_URL}/`,
+    hasPart: SITE_NAVIGATION_ITEMS.map((item) => ({
+      "@type": "SiteNavigationElement",
+      name: item.name,
+      url: absoluteUrl(item.path),
+    })),
   };
 }
 

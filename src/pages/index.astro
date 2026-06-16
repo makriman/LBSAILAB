@@ -12,6 +12,7 @@ import { sortTeamsByBatchList } from "@utils/collections";
 import {
   organizationJsonLd,
   pageJsonLd,
+  siteNavigationJsonLd,
   SPRING_BATCH_OG_IMAGE,
   SPRING_BATCH_OG_IMAGE_ALT,
   websiteJsonLd,
@@ -40,6 +41,7 @@ const pageDescription =
 const jsonLd = [
   organizationJsonLd(),
   websiteJsonLd(),
+  siteNavigationJsonLd(),
   ...pageJsonLd({
     title: pageTitle,
     description: pageDescription,

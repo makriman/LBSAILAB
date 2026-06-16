@@ -24,6 +24,15 @@ const EXPECTED_ORGANIZATION_TOPICS = [
   "Product prototyping",
   "Applied AI education",
 ];
+const EXPECTED_SITE_NAVIGATION_URLS = [
+  `${SITE_ORIGIN}/about/`,
+  `${SITE_ORIGIN}/batches/`,
+  `${SITE_ORIGIN}/batches/spring-2026/`,
+  `${SITE_ORIGIN}/mentors/`,
+  `${SITE_ORIGIN}/apply/`,
+  `${SITE_ORIGIN}/contact/`,
+  `${SITE_ORIGIN}/sitemap/`,
+];
 const REQUIRED_SECURITY_HEADERS = [
   "content-security-policy",
   "cross-origin-opener-policy",
@@ -1410,6 +1419,11 @@ function auditHomeJsonLd(url, items) {
       isJsonLdType(item, "EducationalOrganization") &&
       item?.["@id"] === `${SITE_ORIGIN}/#organization`,
   );
+  const navigation = items.find(
+    (item) =>
+      isJsonLdType(item, "SiteNavigationElement") &&
+      item?.["@id"] === `${SITE_ORIGIN}/#site-navigation`,
+  );
 
   if (!website) {
     fail(`${url}: missing WebSite JSON-LD`);
@@ -1453,6 +1467,22 @@ function auditHomeJsonLd(url, items) {
   for (const topic of EXPECTED_ORGANIZATION_TOPICS) {
     if (!topics.includes(topic)) {
       fail(`${url}: organization JSON-LD missing knowsAbout "${topic}"`);
+    }
+  }
+
+  if (!navigation) {
+    fail(`${url}: missing SiteNavigationElement JSON-LD`);
+    return;
+  }
+
+  const navigationParts = Array.isArray(navigation.hasPart)
+    ? navigation.hasPart
+    : [];
+  const navigationUrls = navigationParts.map((item) => item?.url);
+
+  for (const expectedUrl of EXPECTED_SITE_NAVIGATION_URLS) {
+    if (!navigationUrls.includes(expectedUrl)) {
+      fail(`${url}: SiteNavigationElement missing ${expectedUrl}`);
     }
   }
 }

@@ -62,6 +62,15 @@ const EXPECTED_ORGANIZATION_TOPICS = [
   "Product prototyping",
   "Applied AI education",
 ];
+const EXPECTED_SITE_NAVIGATION_URLS = [
+  `${SITE_URL}/about/`,
+  `${SITE_URL}/batches/`,
+  `${SITE_URL}/batches/spring-2026/`,
+  `${SITE_URL}/mentors/`,
+  `${SITE_URL}/apply/`,
+  `${SITE_URL}/contact/`,
+  `${SITE_URL}/sitemap/`,
+];
 const REQUIRED_WORKER_GONE_PATHS = [
   "/_headers",
   "/_headers/",
@@ -1048,6 +1057,28 @@ function auditHomeOrganizationJsonLd(url, items) {
   for (const topic of EXPECTED_ORGANIZATION_TOPICS) {
     if (!topics.includes(topic)) {
       fail(`${url}: organization JSON-LD missing knowsAbout "${topic}"`);
+    }
+  }
+
+  const navigation = items.find(
+    (item) =>
+      item?.["@type"] === "SiteNavigationElement" &&
+      item?.["@id"] === `${SITE_URL}/#site-navigation`,
+  );
+
+  if (!navigation) {
+    fail(`${url}: missing SiteNavigationElement JSON-LD`);
+    return;
+  }
+
+  const navigationParts = Array.isArray(navigation.hasPart)
+    ? navigation.hasPart
+    : [];
+  const navigationUrls = navigationParts.map((item) => item?.url);
+
+  for (const expectedUrl of EXPECTED_SITE_NAVIGATION_URLS) {
+    if (!navigationUrls.includes(expectedUrl)) {
+      fail(`${url}: SiteNavigationElement missing ${expectedUrl}`);
     }
   }
 }
