@@ -1349,6 +1349,20 @@ function auditItemListJsonLd(url, items, sitemapPages) {
       fail(`${url}: ItemList JSON-LD missing name`);
     }
 
+    if (!itemList["@id"]?.startsWith(url)) {
+      fail(`${url}: ItemList JSON-LD missing stable page-scoped @id`);
+    }
+
+    if (
+      itemList.itemListOrder !== "https://schema.org/ItemListOrderAscending"
+    ) {
+      fail(`${url}: ItemList JSON-LD missing ascending list order`);
+    }
+
+    if (itemList.numberOfItems !== elements.length) {
+      fail(`${url}: ItemList numberOfItems does not match list length`);
+    }
+
     if (!elements.length) {
       fail(`${url}: ItemList JSON-LD is empty`);
       continue;

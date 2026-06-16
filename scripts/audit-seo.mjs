@@ -973,6 +973,60 @@ function auditTeamJsonLd(url, items, html) {
   }
 }
 
+function auditItemListJsonLd(url, items, sitemapPages) {
+  const itemLists = items.filter((item) => item?.["@type"] === "ItemList");
+
+  for (const itemList of itemLists) {
+    const elements = Array.isArray(itemList.itemListElement)
+      ? itemList.itemListElement
+      : [];
+
+    if (!itemList["@id"]?.startsWith(url)) {
+      fail(`${url}: ItemList JSON-LD missing stable page-scoped @id`);
+    }
+
+    if (!itemList.name) {
+      fail(`${url}: ItemList JSON-LD missing name`);
+    }
+
+    if (
+      itemList.itemListOrder !== "https://schema.org/ItemListOrderAscending"
+    ) {
+      fail(`${url}: ItemList JSON-LD missing ascending list order`);
+    }
+
+    if (itemList.numberOfItems !== elements.length) {
+      fail(`${url}: ItemList numberOfItems does not match list length`);
+    }
+
+    if (!elements.length) {
+      fail(`${url}: ItemList JSON-LD is empty`);
+      continue;
+    }
+
+    elements.forEach((entry, index) => {
+      if (entry?.["@type"] !== "ListItem") {
+        fail(`${url}: ItemList entry ${index + 1} is not a ListItem`);
+      }
+
+      if (entry?.position !== index + 1) {
+        fail(`${url}: ItemList entry ${index + 1} has wrong position`);
+      }
+
+      const entryUrl = normalizePageLink(
+        entry?.url || entry?.item?.url || "",
+        url,
+      );
+
+      if (!entryUrl) {
+        fail(`${url}: ItemList entry ${index + 1} missing canonical URL`);
+      } else if (!sitemapPages.has(entryUrl)) {
+        fail(`${url}: ItemList entry ${entryUrl} is not in the sitemap`);
+      }
+    });
+  }
+}
+
 function auditMentorJsonLd(url, items) {
   if (url !== `${SITE_URL}/mentors/`) return;
 
@@ -1522,7 +1576,7 @@ function auditVitalsMonitor(url, html) {
   }
 }
 
-function auditPage(url, metadataIndex) {
+function auditPage(url, metadataIndex, sitemapPages) {
   const relativeFile = pageFileForUrl(url);
   const html = readDist(relativeFile);
   const canonicalLinks = linkAttrs(html, "canonical");
@@ -1738,6 +1792,7 @@ function auditPage(url, metadataIndex) {
   }
 
   auditTeamJsonLd(url, jsonLdItems, html);
+  auditItemListJsonLd(url, jsonLdItems, sitemapPages);
   auditMentorJsonLd(url, jsonLdItems);
   auditSiteIdentityJsonLd(url, jsonLdItems);
   auditHomeNavigationJsonLd(url, jsonLdItems);
@@ -1833,9 +1888,13 @@ function audit() {
     titles: new Map(),
   };
   const pageLinks = new Map();
+  const sitemapPages = new Set(pages);
 
   for (const page of pages) {
-    pageLinks.set(page, auditPage(page, metadataIndex) || new Set());
+    pageLinks.set(
+      page,
+      auditPage(page, metadataIndex, sitemapPages) || new Set(),
+    );
   }
 
   auditWorkerCsp(pages);

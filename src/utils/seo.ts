@@ -219,10 +219,12 @@ export function pageJsonLd(options: PageJsonLdOptions): JsonLd[] {
 }
 
 export function itemListJsonLd({
+  id,
   name,
   description,
   items,
 }: {
+  id: string;
   name: string;
   description?: string;
   items: ItemListEntry[];
@@ -230,8 +232,11 @@ export function itemListJsonLd({
   return {
     "@context": "https://schema.org",
     "@type": "ItemList",
+    "@id": absoluteUrl(id),
     name,
     description,
+    numberOfItems: items.length,
+    itemListOrder: "https://schema.org/ItemListOrderAscending",
     itemListElement: items.map((item, index) => ({
       "@type": "ListItem",
       position: index + 1,
