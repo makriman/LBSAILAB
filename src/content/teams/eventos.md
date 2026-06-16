@@ -7,7 +7,6 @@ batch: spring-2026
 batchLabel: Spring 2026 Batch
 category: Club operations / Event automation
 status: Prototype / batch build
-productUrl: https://eventos.lbsailab.com
 tagline: AI-assisted club event planning, venue sizing, and form generation.
 summary: >-
   EventOS is an AI-powered event planning platform that assists organisers with club event planning. It predicts expected sign-up numbers to help determine appropriate venue sizing, and automatically populates forms related to venue booking, catering, and registration. All generated information can be reviewed and edited before submission, giving organisers full control over the final details.

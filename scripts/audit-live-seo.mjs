@@ -80,6 +80,11 @@ const CANONICAL_REDIRECTS = [
   ]),
 ];
 const GONE_URLS = ["/images/lbs-ai-lab-workshop-hero.png"];
+const BOT_PROTECTED_EXTERNAL_HOSTS = new Set([
+  "linkedin.com",
+  "www.linkedin.com",
+  "uk.linkedin.com",
+]);
 const failures = [];
 const warnings = [];
 const publicResolver = new Resolver();
@@ -166,10 +171,15 @@ function isLongCachePath(pathname) {
   return LONG_CACHE_PATHS.some((pattern) => pattern.test(pathname));
 }
 
+function isBotProtectedExternalHost(hostname) {
+  return BOT_PROTECTED_EXTERNAL_HOSTS.has(hostname);
+}
+
 async function get(url, options = {}) {
   try {
     return await fetch(url, {
       redirect: options.redirect || "follow",
+      signal: AbortSignal.timeout(options.timeoutMs || 15000),
       headers: {
         "User-Agent": "lbsailab-seo-audit/1.0",
         Accept: options.accept || "*/*",
@@ -477,6 +487,7 @@ async function auditFeed() {
 function extractPageLinks(html, pageUrl, sitemapPages) {
   const links = new Set();
   const assets = new Set();
+  const externalLinks = new Set();
   const sameOriginNonPages = new Set();
 
   for (const tag of allTags(html, "a")) {
@@ -490,7 +501,12 @@ function extractPageLinks(html, pageUrl, sitemapPages) {
     }
 
     const normalized = normalizeUrl(href, pageUrl);
-    if (!normalized || !sameOrigin(normalized)) continue;
+    if (!normalized) continue;
+
+    if (!sameOrigin(normalized)) {
+      externalLinks.add(normalized);
+      continue;
+    }
 
     const parsed = new URL(normalized);
 
@@ -527,7 +543,7 @@ function extractPageLinks(html, pageUrl, sitemapPages) {
     }
   }
 
-  return { links, assets, sameOriginNonPages };
+  return { links, assets, externalLinks, sameOriginNonPages };
 }
 
 function assertPageMetadata(html, url) {
@@ -606,7 +622,7 @@ async function auditPage(url, sitemapPages, inbound, assetUrls) {
   assertShortCache(response, url);
   assertPageMetadata(body, url);
 
-  const { links, assets, sameOriginNonPages } = extractPageLinks(
+  const { links, assets, externalLinks, sameOriginNonPages } = extractPageLinks(
     body,
     url,
     sitemapPages,
@@ -618,6 +634,10 @@ async function auditPage(url, sitemapPages, inbound, assetUrls) {
   }
 
   for (const asset of assets) assetUrls.add(asset);
+  for (const link of externalLinks) {
+    if (!inbound.has(link)) inbound.set(link, new Set());
+    inbound.get(link).add(url);
+  }
 
   for (const linked of sameOriginNonPages) {
     const parsed = new URL(linked);
@@ -660,6 +680,38 @@ async function auditAssets(assetUrls) {
     if (isLongCachePath(pathname)) {
       assertLongCache(response, url);
     }
+  }
+}
+
+async function auditExternalLinks(inbound) {
+  const externalLinks = [...inbound.keys()].filter((url) => !sameOrigin(url));
+
+  for (const url of externalLinks) {
+    const parsed = new URL(url);
+
+    if (parsed.protocol !== "https:") {
+      fail(`${url}: external link must use HTTPS`);
+      continue;
+    }
+
+    const response = await get(url, {
+      accept: "text/html,*/*",
+      redirect: "follow",
+    });
+
+    if (response.status >= 200 && response.status < 400) continue;
+
+    if (
+      isBotProtectedExternalHost(new URL(response.url || url).hostname) &&
+      [401, 403, 429, 999].includes(response.status)
+    ) {
+      continue;
+    }
+
+    const sources = [...(inbound.get(url) || [])].join(", ");
+    fail(
+      `${url}: external link returned ${response.status} from ${sources || "(unknown page)"}`,
+    );
   }
 }
 
@@ -797,6 +849,7 @@ async function auditReachability(pages) {
   }
 
   await auditAssets(assetUrls);
+  await auditExternalLinks(inbound);
 }
 
 async function auditLiveSeo() {

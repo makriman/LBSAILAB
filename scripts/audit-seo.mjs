@@ -364,7 +364,7 @@ function isTeamPage(url) {
   return /^https:\/\/lbsailab\.com\/batches\/spring-2026\/[^/]+\/$/.test(url);
 }
 
-function auditTeamJsonLd(url, items) {
+function auditTeamJsonLd(url, items, html) {
   if (!isTeamPage(url)) return;
 
   const team = items.find(
@@ -408,11 +408,18 @@ function auditTeamJsonLd(url, items) {
       item?.["@type"] === "CreativeWork" &&
       item?.["@id"] === `${url}#prototype`,
   );
+  const hasProductLink = html.includes("Open prototype");
 
-  if (!prototype) {
+  if (!hasProductLink && prototype) {
+    fail(`${url}: prototype CreativeWork JSON-LD present without product link`);
+  }
+
+  if (hasProductLink && !prototype) {
     fail(`${url}: missing prototype CreativeWork JSON-LD`);
     return;
   }
+
+  if (!prototype) return;
 
   if (!prototype.url || !/^https:\/\//.test(prototype.url)) {
     fail(`${url}: prototype CreativeWork JSON-LD missing HTTPS URL`);
@@ -669,7 +676,7 @@ function auditPage(url, metadataIndex) {
     }
   }
 
-  auditTeamJsonLd(url, jsonLdItems);
+  auditTeamJsonLd(url, jsonLdItems, html);
 
   for (const tag of allTags(html, "img")) {
     const image = attrs(tag);
