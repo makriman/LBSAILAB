@@ -372,6 +372,60 @@ function normalizeUrl(url, base = SITE_ORIGIN) {
   }
 }
 
+function fragmentTargets(html) {
+  const targets = new Set();
+
+  for (const tag of [...html.matchAll(/<[a-z][\w:-]*\b[^>]*>/gi)].map(
+    (match) => match[0],
+  )) {
+    const attributes = attrs(tag);
+
+    if (attributes.id) targets.add(attributes.id);
+  }
+
+  for (const anchor of allTags(html, "a")) {
+    const name = attrs(anchor).name;
+
+    if (name) targets.add(name);
+  }
+
+  return targets;
+}
+
+function decodeFragmentId(hash) {
+  const raw = hash.replace(/^#/, "");
+
+  try {
+    return decodeURIComponent(raw);
+  } catch {
+    return raw;
+  }
+}
+
+function fragmentReference(href, baseUrl) {
+  if (
+    !href ||
+    href.startsWith("mailto:") ||
+    href.startsWith("tel:") ||
+    href.startsWith("javascript:")
+  ) {
+    return null;
+  }
+
+  try {
+    const target = new URL(decodeHtml(href), baseUrl);
+
+    if (target.origin !== SITE_ORIGIN || !target.hash) return null;
+
+    const fragment = decodeFragmentId(target.hash);
+    target.hash = "";
+
+    return fragment ? { fragment, url: target.toString() } : null;
+  } catch {
+    return null;
+  }
+}
+
 function sameOrigin(url) {
   return new URL(url).origin === SITE_ORIGIN;
 }
@@ -1874,9 +1928,18 @@ function socialImageUrls(html, pageUrl) {
     .filter((imageUrl) => imageUrl && sameOrigin(imageUrl));
 }
 
-async function auditPage(url, sitemapPages, inbound, assetUrls, socialImages) {
+async function auditPage(
+  url,
+  sitemapPages,
+  inbound,
+  assetUrls,
+  socialImages,
+  pageBodies,
+) {
   const { response, body } = await text(url, { accept: "text/html" });
   const contentType = response.headers.get("content-type") || "";
+
+  pageBodies.set(url, body);
 
   if (response.status !== 200)
     fail(`${url}: expected 200, got ${response.status}`);
@@ -2458,14 +2521,49 @@ async function auditSearchVerificationFiles() {
   }
 }
 
+function auditFragmentTargets(pageBodies, sitemapPages) {
+  for (const [sourceUrl, html] of pageBodies) {
+    for (const tag of allTags(html, "a")) {
+      const href = attrs(tag).href || "";
+      const reference = fragmentReference(href, sourceUrl);
+
+      if (!reference) continue;
+
+      if (!sitemapPages.has(reference.url)) {
+        fail(`${sourceUrl}: fragment link points outside sitemap ${href}`);
+        continue;
+      }
+
+      const targetHtml = pageBodies.get(reference.url);
+
+      if (!targetHtml) {
+        fail(`${sourceUrl}: fragment link target page was not audited ${href}`);
+        continue;
+      }
+
+      if (!fragmentTargets(targetHtml).has(reference.fragment)) {
+        fail(`${sourceUrl}: fragment link ${href} has no target`);
+      }
+    }
+  }
+}
+
 async function auditReachability(pages) {
   const sitemapPages = new Set(pages);
   const inbound = new Map(pages.map((page) => [page, new Set()]));
   const assetUrls = new Set();
+  const pageBodies = new Map();
   const socialImages = new Set();
 
   for (const page of pages) {
-    await auditPage(page, sitemapPages, inbound, assetUrls, socialImages);
+    await auditPage(
+      page,
+      sitemapPages,
+      inbound,
+      assetUrls,
+      socialImages,
+      pageBodies,
+    );
   }
 
   for (const page of pages) {
@@ -2480,6 +2578,7 @@ async function auditReachability(pages) {
     }
   }
 
+  auditFragmentTargets(pageBodies, sitemapPages);
   await auditAssets(assetUrls);
   await auditSocialImages(socialImages);
   await auditExternalLinks(inbound);

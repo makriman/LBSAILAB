@@ -401,6 +401,80 @@ function inlineEventHandlerAttributes(html) {
   });
 }
 
+function fragmentTargets(html) {
+  const targets = new Set();
+
+  for (const tag of [...html.matchAll(/<[a-z][\w:-]*\b[^>]*>/gi)].map(
+    (match) => match[0],
+  )) {
+    const attributes = attrs(tag);
+
+    if (attributes.id) targets.add(attributes.id);
+  }
+
+  for (const anchor of allTags(html, "a")) {
+    const name = attrs(anchor).name;
+
+    if (name) targets.add(name);
+  }
+
+  return targets;
+}
+
+function decodeFragmentId(hash) {
+  const raw = hash.replace(/^#/, "");
+
+  try {
+    return decodeURIComponent(raw);
+  } catch {
+    return raw;
+  }
+}
+
+function fragmentReference(href, baseUrl) {
+  if (
+    !href ||
+    href.startsWith("mailto:") ||
+    href.startsWith("tel:") ||
+    href.startsWith("javascript:")
+  ) {
+    return null;
+  }
+
+  try {
+    const target = new URL(decodeHtml(href), baseUrl);
+
+    if (target.origin !== SITE_URL || !target.hash) return null;
+
+    const fragment = decodeFragmentId(target.hash);
+    target.hash = "";
+
+    return fragment ? { fragment, url: target.toString() } : null;
+  } catch {
+    return null;
+  }
+}
+
+function auditAnchorFragmentTarget(sourceUrl, href, sourceHtml, sitemapPages) {
+  const reference = fragmentReference(href, sourceUrl);
+
+  if (!reference) return;
+
+  if (!sitemapPages.has(reference.url)) {
+    fail(`${sourceUrl}: fragment link points outside sitemap ${href}`);
+    return;
+  }
+
+  const targetHtml =
+    reference.url === sourceUrl
+      ? sourceHtml
+      : readDist(pageFileForUrl(reference.url));
+
+  if (!fragmentTargets(targetHtml).has(reference.fragment)) {
+    fail(`${sourceUrl}: fragment link ${href} has no target`);
+  }
+}
+
 function workerContentSecurityPolicy() {
   const worker = readFileSync(path.join(ROOT, "src", "worker.ts"), "utf8");
   const match = worker.match(/"Content-Security-Policy":\s*("[^"]+")/);
@@ -2211,6 +2285,8 @@ function auditPage(url, metadataIndex, sitemapPages) {
     if (href === "#" || href.startsWith("javascript:")) {
       fail(`${url}: non-crawlable link href "${href}"`);
     }
+
+    auditAnchorFragmentTarget(url, href, html, sitemapPages);
 
     const normalized = normalizePageLink(href, url);
 
