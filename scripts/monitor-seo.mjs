@@ -350,6 +350,16 @@ async function checkRedirects() {
   const redirects = [
     [`http://${SITE_HOST}/`, `${SITE_ORIGIN}/`],
     [`http://www.${SITE_HOST}/`, `${SITE_ORIGIN}/`],
+    [`${SITE_ORIGIN}/index.html`, `${SITE_ORIGIN}/`],
+    [`${SITE_ORIGIN}/about/index.html`, `${SITE_ORIGIN}/about/`],
+    [
+      `${SITE_ORIGIN}/batches/spring-2026/wayfinder/index.html`,
+      `${SITE_ORIGIN}/batches/spring-2026/wayfinder/`,
+    ],
+    [
+      `${SITE_ORIGIN}/cohorts/cohort-01/index.html`,
+      `${SITE_ORIGIN}/batches/spring-2026/`,
+    ],
     [`http://${SITE_HOST}/about`, `${SITE_ORIGIN}/about/`],
     [`http://www.${SITE_HOST}/About?utm_source=test`, `${SITE_ORIGIN}/about/`],
     [`https://www.${SITE_HOST}/about`, `${SITE_ORIGIN}/about/`],
@@ -420,6 +430,8 @@ async function checkCanonicalUrlsDoNotRedirect() {
     if (response.headers.get("location")) {
       fail(`${url}: canonical URL unexpectedly returned a redirect location`);
     }
+
+    expectHeader(response, url, "link", `<${url}>; rel="canonical"`);
   }
 }
 

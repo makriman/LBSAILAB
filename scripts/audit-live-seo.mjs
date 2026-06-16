@@ -73,6 +73,16 @@ const CANONICAL_REDIRECTS = [
   [`http://${SITE_HOST}/about`, `${SITE_ORIGIN}/about/`],
   [`https://www.${SITE_HOST}/about`, `${SITE_ORIGIN}/about/`],
   [`${SITE_ORIGIN}/About`, `${SITE_ORIGIN}/about/`],
+  [`${SITE_ORIGIN}/index.html`, `${SITE_ORIGIN}/`],
+  [`${SITE_ORIGIN}/about/index.html`, `${SITE_ORIGIN}/about/`],
+  [
+    `${SITE_ORIGIN}/batches/spring-2026/wayfinder/index.html`,
+    `${SITE_ORIGIN}/batches/spring-2026/wayfinder/`,
+  ],
+  [
+    `${SITE_ORIGIN}/cohorts/cohort-01/index.html`,
+    `${SITE_ORIGIN}/batches/spring-2026/`,
+  ],
   [`${SITE_ORIGIN}/about`, `${SITE_ORIGIN}/about/`],
   [`${SITE_ORIGIN}/about/?utm_source=test&gclid=test`, `${SITE_ORIGIN}/about/`],
   [`${SITE_ORIGIN}/about/?preview=true&foo=bar`, `${SITE_ORIGIN}/about/`],
@@ -837,6 +847,14 @@ function assertPageMetadata(html, url) {
   }
 }
 
+function assertCanonicalLinkHeader(response, url) {
+  const linkHeader = response.headers.get("link") || "";
+
+  if (!linkHeader.includes(`<${url}>; rel="canonical"`)) {
+    fail(`${url}: Link header is missing canonical URL`);
+  }
+}
+
 async function auditPage(url, sitemapPages, inbound, assetUrls) {
   const { response, body } = await text(url, { accept: "text/html" });
   const contentType = response.headers.get("content-type") || "";
@@ -851,6 +869,7 @@ async function auditPage(url, sitemapPages, inbound, assetUrls) {
   assertPageCsp(response, body, url);
   assertIndexableHeaders(response, url);
   assertShortCache(response, url);
+  assertCanonicalLinkHeader(response, url);
   assertPageMetadata(body, url);
 
   const { links, assets, externalLinks, sameOriginNonPages } = extractPageLinks(

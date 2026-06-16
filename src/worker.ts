@@ -173,7 +173,8 @@ function canonicalRedirectResponse(
   if (!["GET", "HEAD"].includes(request.method)) return null;
   if (url.pathname.startsWith("/api/")) return null;
 
-  const legacyDestination = legacyRedirectDestination(url.pathname);
+  const indexCleanedPathname = cleanIndexDocumentPath(url.pathname);
+  const legacyDestination = legacyRedirectDestination(indexCleanedPathname);
   const cleanedSearch = canonicalSearch();
 
   if (legacyDestination) {
@@ -186,6 +187,7 @@ function canonicalRedirectResponse(
 
   const redirectUrl = canonicalUrl(url);
   redirectUrl.search = cleanedSearch;
+  redirectUrl.pathname = indexCleanedPathname;
 
   if (shouldNormalizePathCase(redirectUrl.pathname)) {
     const lowercasePath = redirectUrl.pathname.toLowerCase();
@@ -199,6 +201,12 @@ function canonicalRedirectResponse(
   return redirectUrl.toString() === url.toString()
     ? null
     : permanentRedirect(redirectUrl);
+}
+
+function cleanIndexDocumentPath(pathname: string): string {
+  if (!/\/index\.html$/i.test(pathname)) return pathname;
+
+  return pathname.replace(/\/index\.html$/i, "/") || "/";
 }
 
 function permanentRedirect(url: URL): Response {
@@ -352,6 +360,13 @@ function withSeoHeaders(response: Response, pathname: string): Response {
     headers.set("Last-Modified", LAST_MODIFIED);
   }
 
+  if (shouldSetCanonicalHeader(pathname, headers, response.status)) {
+    headers.append(
+      "Link",
+      `<${canonicalHeaderUrl(pathname)}>; rel="canonical"`,
+    );
+  }
+
   return new Response(response.body, {
     status: response.status,
     statusText: response.statusText,
@@ -386,6 +401,29 @@ function shouldSetLastModified(
     isCrawlerUtilityPath(pathname) ||
     isNoindexPath(pathname)
   );
+}
+
+function shouldSetCanonicalHeader(
+  pathname: string,
+  headers: Headers,
+  status: number,
+): boolean {
+  return status === 200 && isHtmlResponse(headers) && !isNoindexPath(pathname);
+}
+
+function canonicalHeaderUrl(pathname: string): string {
+  const url = new URL(`https://${CANONICAL_HOST}`);
+  url.pathname = cleanIndexDocumentPath(pathname);
+
+  if (shouldNormalizePathCase(url.pathname)) {
+    url.pathname = url.pathname.toLowerCase();
+  }
+
+  if (shouldAddTrailingSlash(url.pathname)) {
+    url.pathname = `${url.pathname}/`;
+  }
+
+  return url.toString();
 }
 
 function isNoindexPath(pathname: string): boolean {
