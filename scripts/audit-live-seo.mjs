@@ -166,7 +166,14 @@ const CANONICAL_REDIRECTS = [
     `${SITE_ORIGIN}/about/`,
   ]),
 ];
-const GONE_URLS = ["/images/lbs-ai-lab-workshop-hero.png"];
+const GONE_URLS = [
+  "/_headers",
+  "/_headers/",
+  "/_redirects",
+  "/_redirects/",
+  "/images/lbs-ai-lab-workshop-hero.png",
+  "/mentors/rhea-bisaria.png",
+];
 const BOT_PROTECTED_EXTERNAL_HOSTS = new Set([
   "linkedin.com",
   "www.linkedin.com",

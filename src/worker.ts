@@ -67,6 +67,10 @@ const SECURITY_HEADERS = {
   "Strict-Transport-Security": "max-age=31536000",
 };
 const GONE_PATHS = new Set([
+  "/_headers",
+  "/_headers/",
+  "/_redirects",
+  "/_redirects/",
   "/images/lbs-ai-lab-workshop-hero.png",
   "/mentors/rhea-bisaria.png",
 ]);
@@ -261,6 +265,7 @@ function legacyRedirectDestination(pathname: string): URL | null {
 function shouldAddTrailingSlash(pathname: string): boolean {
   if (pathname === "/" || pathname.endsWith("/")) return false;
   if (pathname === "/healthz") return false;
+  if (GONE_PATHS.has(pathname)) return false;
 
   const lastSegment = pathname.split("/").at(-1) ?? "";
   return !lastSegment.includes(".");

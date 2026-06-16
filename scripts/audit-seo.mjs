@@ -62,6 +62,14 @@ const EXPECTED_ORGANIZATION_TOPICS = [
   "Product prototyping",
   "Applied AI education",
 ];
+const REQUIRED_WORKER_GONE_PATHS = [
+  "/_headers",
+  "/_headers/",
+  "/_redirects",
+  "/_redirects/",
+  "/images/lbs-ai-lab-workshop-hero.png",
+  "/mentors/rhea-bisaria.png",
+];
 
 const failures = [];
 
@@ -380,6 +388,20 @@ function workerContentSecurityPolicy() {
   }
 
   return JSON.parse(match[1]);
+}
+
+function auditWorkerRetiredPaths() {
+  const worker = readFileSync(path.join(ROOT, "src", "worker.ts"), "utf8");
+
+  for (const pathname of REQUIRED_WORKER_GONE_PATHS) {
+    if (!worker.includes(`"${pathname}"`)) {
+      fail(`Worker GONE_PATHS is missing ${pathname}`);
+    }
+  }
+
+  if (!worker.includes("if (GONE_PATHS.has(pathname)) return false;")) {
+    fail("Worker should avoid trailing-slash redirects for GONE_PATHS");
+  }
 }
 
 function auditWorkerCsp(pages) {
@@ -1543,6 +1565,7 @@ function audit() {
   auditCrawlerFiles();
   auditManifestAndIcons();
   auditErrorDocument();
+  auditWorkerRetiredPaths();
 
   const pages = auditSitemap();
   const metadataIndex = {

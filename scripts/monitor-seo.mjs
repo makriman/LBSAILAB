@@ -30,6 +30,10 @@ const CANONICAL_PATHS = [
   "/sitemap/",
 ];
 const GONE_PATHS = [
+  "/_headers",
+  "/_headers/",
+  "/_redirects",
+  "/_redirects/",
   "/images/lbs-ai-lab-workshop-hero.png",
   "/mentors/rhea-bisaria.png",
 ];
