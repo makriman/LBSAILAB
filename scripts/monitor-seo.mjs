@@ -79,6 +79,9 @@ const INDEXABLE_IMAGE_PATHS = [
 const CRAWLER_USER_AGENTS = [
   "Mozilla/5.0 AppleWebKit/537.36 (KHTML, like Gecko; compatible; Googlebot/2.1; +https://www.google.com/bot.html)",
   "Mozilla/5.0 AppleWebKit/537.36 (KHTML, like Gecko; compatible; bingbot/2.0; +http://www.bing.com/bingbot.htm)",
+  "facebookexternalhit/1.1 (+http://www.facebook.com/externalhit_uatext.php)",
+  "LinkedInBot/1.0 (+http://www.linkedin.com)",
+  "Twitterbot/1.0",
 ];
 const failures = [];
 const resolver = new Resolver();

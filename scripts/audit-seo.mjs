@@ -483,6 +483,23 @@ function auditWorkerDiscoveryRedirects() {
   }
 }
 
+function auditWorkerCrawlerUtilityCompression() {
+  const worker = readFileSync(path.join(ROOT, "src", "worker.ts"), "utf8");
+
+  for (const expected of [
+    "withCrawlerUtilityCompression",
+    'new CompressionStream("gzip")',
+    'headers.set("Content-Encoding", "gzip")',
+    'appendVary(headers, "Accept-Encoding")',
+    'type === "application/atom+xml"',
+    "isCrawlerUtilityPath(pathname)",
+  ]) {
+    if (!worker.includes(expected)) {
+      fail(`Worker crawler utility compression is missing ${expected}`);
+    }
+  }
+}
+
 function auditExternalPerformanceMonitorConfig() {
   const packageJson = readFileSync(path.join(ROOT, "package.json"), "utf8");
   const workflow = readFileSync(
@@ -556,6 +573,14 @@ function auditSeoMonitorConfig() {
     path.join(ROOT, "scripts", "monitor-seo.mjs"),
     "utf8",
   );
+  const performanceAudit = readFileSync(
+    path.join(ROOT, "scripts", "audit-performance.mjs"),
+    "utf8",
+  );
+  const liveAudit = readFileSync(
+    path.join(ROOT, "scripts", "audit-live-seo.mjs"),
+    "utf8",
+  );
 
   for (const expected of [
     "Cloudflare",
@@ -568,9 +593,27 @@ function auditSeoMonitorConfig() {
     "checkVitalsEndpoint",
     "connectionType",
     "viewport",
+    "facebookexternalhit",
+    "LinkedInBot",
+    "Twitterbot",
   ]) {
     if (!monitor.includes(expected)) {
       fail(`SEO monitor is missing ${expected}`);
+    }
+  }
+
+  if (!performanceAudit.includes('`${SITE_ORIGIN}/feed.xml`')) {
+    fail("Performance audit should verify Atom feed compression");
+  }
+
+  for (const expected of [
+    "assertSecurityHeaders(imageResponse, imageSitemapUrl)",
+    "assertIndexableHeaders(imageResponse, imageSitemapUrl)",
+    "assertShortCache(imageResponse, imageSitemapUrl)",
+    "expected XML content type",
+  ]) {
+    if (!liveAudit.includes(expected)) {
+      fail(`Live SEO audit image sitemap checks are missing ${expected}`);
     }
   }
 }
@@ -2026,6 +2069,7 @@ function audit() {
   auditWorkerSeoAccessLogging();
   auditWorkerImageIndexingHeaders();
   auditWorkerDiscoveryRedirects();
+  auditWorkerCrawlerUtilityCompression();
   auditExternalPerformanceMonitorConfig();
   auditSeoMonitorConfig();
   auditSeoLogAnalyzer();

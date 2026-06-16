@@ -793,9 +793,20 @@ async function auditSitemaps() {
     imageSitemapUrl,
     { accept: "application/xml" },
   );
+  const imageContentType = imageResponse.headers.get("content-type") || "";
 
   if (imageResponse.status !== 200) {
     fail(`${imageSitemapUrl}: expected 200, got ${imageResponse.status}`);
+  }
+
+  assertSecurityHeaders(imageResponse, imageSitemapUrl);
+  assertIndexableHeaders(imageResponse, imageSitemapUrl);
+  assertShortCache(imageResponse, imageSitemapUrl);
+
+  if (!imageContentType.includes("application/xml")) {
+    fail(
+      `${imageSitemapUrl}: expected XML content type, got "${imageContentType}"`,
+    );
   }
 
   const imageUrls = extractImageLocs(imageSitemap);
