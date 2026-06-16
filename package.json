@@ -27,7 +27,7 @@
     "seo:perf": "node scripts/audit-performance.mjs",
     "seo:production": "npm run seo:live && npm run seo:perf && npm run seo:lighthouse && npm run seo:pagespeed && npm run seo:crux",
     "seo:sitemap-index": "node scripts/finalize-sitemap-index.mjs",
-    "deploy": "npm run build && npx wrangler deploy --keep-vars && npm run seo:indexnow && npm run seo:live",
+    "deploy": "npm run seo:ci && npx wrangler deploy --keep-vars && npm run seo:live && npm run seo:perf && npm run seo:indexnow",
     "format": "prettier --write .",
     "format:check": "prettier --check .",
     "astro": "astro"

@@ -794,12 +794,16 @@ function auditExternalPerformanceMonitorConfig() {
     fail("deploy script should preserve dashboard-set Worker variables");
   }
 
-  if (!packageJson.includes('"deploy": "npm run build')) {
-    fail("deploy script should build before publishing");
+  if (!packageJson.includes('"deploy": "npm run seo:ci')) {
+    fail("deploy script should run static SEO CI before publishing");
   }
 
-  if (!packageJson.includes("npm run seo:indexnow && npm run seo:live")) {
-    fail("deploy script should ping IndexNow and run live SEO verification");
+  if (!packageJson.includes("npm run seo:live && npm run seo:perf")) {
+    fail("deploy script should run live SEO and performance verification");
+  }
+
+  if (!packageJson.includes("npm run seo:perf && npm run seo:indexnow")) {
+    fail("deploy script should ping IndexNow after live verification passes");
   }
 
   if (!workflow.includes("Run live SEO smoke suite")) {
