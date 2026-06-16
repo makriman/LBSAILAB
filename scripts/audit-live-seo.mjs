@@ -17,6 +17,7 @@ const EXPECTED_LAST_MODIFIED = "Tue, 16 Jun 2026 00:00:00 GMT";
 const EXPECTED_DATE_MODIFIED = "2026-06-16";
 const EXPECTED_UPDATED_TIME = "2026-06-16T00:00:00.000Z";
 const EXPECTED_CONTENT_LANGUAGE = "en-GB";
+const EXPECTED_VIEWPORT = "width=device-width, initial-scale=1";
 const EXPECTED_ORGANIZATION_TOPICS = [
   "AI product development",
   "AI-assisted application development",
@@ -1029,6 +1030,9 @@ function assertPageMetadata(html, url) {
   }
 
   if (canonical !== url) fail(`${url}: canonical mismatch "${canonical}"`);
+  if (metaContent(html, "viewport") !== EXPECTED_VIEWPORT) {
+    fail(`${url}: viewport meta should be "${EXPECTED_VIEWPORT}"`);
+  }
   if (metaContent(html, "robots") !== INDEXABLE_META_ROBOTS) {
     fail(`${url}: meta robots is missing indexable preview directives`);
   }
@@ -2176,6 +2180,10 @@ async function auditMissingPage() {
     fail(`${url}: 404 body contains indexable page metadata`);
   }
 
+  if (metaContent(body, "viewport") !== EXPECTED_VIEWPORT) {
+    fail(`${url}: 404 body has an incomplete viewport meta tag`);
+  }
+
   if (!body.includes("<h1>Page not found</h1>")) {
     fail(`${url}: 404 body should render the custom not-found document`);
   }
@@ -2214,6 +2222,10 @@ async function auditErrorDocumentDirect() {
       /<link\b[^>]*rel=["']canonical["']/i.test(body)
     ) {
       fail(`${url}: direct error document contains indexable page metadata`);
+    }
+
+    if (metaContent(body, "viewport") !== EXPECTED_VIEWPORT) {
+      fail(`${url}: direct error document has an incomplete viewport meta tag`);
     }
 
     if (!/<meta\b[^>]*name=["']robots["'][^>]*noindex,nofollow/i.test(body)) {

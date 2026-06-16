@@ -56,6 +56,7 @@ const INDEXABLE_META_ROBOTS =
   "index,follow,max-snippet:-1,max-image-preview:large,max-video-preview:-1";
 const EXPECTED_UPDATED_AT = "2026-06-16";
 const EXPECTED_LASTMOD = `${EXPECTED_UPDATED_AT}T00:00:00.000Z`;
+const EXPECTED_VIEWPORT = "width=device-width, initial-scale=1";
 const EXPECTED_ORGANIZATION_TOPICS = [
   "AI product development",
   "AI-assisted application development",
@@ -753,8 +754,12 @@ function auditHtmlIntegrity(html, url) {
     fail(`${url}: html lang should be en`);
   }
 
-  if (!/<meta\b[^>]*name=["']viewport["'][^>]*>/i.test(html)) {
-    fail(`${url}: missing viewport meta`);
+  const viewport = metaContent(html, "viewport");
+
+  if (viewport !== EXPECTED_VIEWPORT) {
+    fail(
+      `${url}: viewport meta expected "${EXPECTED_VIEWPORT}", got "${viewport || "(missing)"}"`,
+    );
   }
 
   if (!/<main\b[^>]*\bid=["']main-content["'][^>]*>/i.test(html)) {
@@ -1658,6 +1663,10 @@ function auditErrorDocument() {
 
   if (/<link\b[^>]*rel=["']canonical["']/i.test(html)) {
     fail("404.html must not include a canonical URL");
+  }
+
+  if (metaContent(html, "viewport") !== EXPECTED_VIEWPORT) {
+    fail("404.html has an incomplete viewport meta tag");
   }
 
   if (/<meta\b[^>]*(?:property|name)=["'](?:og:|twitter:)/i.test(html)) {
