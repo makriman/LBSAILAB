@@ -34,6 +34,7 @@ const CANONICAL_HOST = "lbsailab.com";
 const INDEXNOW_KEY = "5e5bfddcc11447d381079b24b2d1e213";
 const INDEXNOW_KEY_PATH = `/${INDEXNOW_KEY}.txt`;
 const SECURITY_TXT_PATH = "/.well-known/security.txt";
+const ERROR_DOCUMENT_PATHS = new Set(["/404.html", "/404/"]);
 const INDEXABLE_ROBOTS =
   "index, follow, max-snippet:-1, max-image-preview:large, max-video-preview:-1";
 const NOINDEX_ROBOTS = "noindex, nofollow";
@@ -114,6 +115,12 @@ export default {
     if (GONE_PATHS.has(url.pathname)) return gone();
     if (url.pathname === INDEXNOW_KEY_PATH) return indexNowKey();
     if (url.pathname === "/healthz") return healthCheck();
+    if (ERROR_DOCUMENT_PATHS.has(url.pathname)) {
+      return withSeoHeaders(
+        await errorDocumentResponse(request, env, 200),
+        url.pathname,
+      );
+    }
 
     if (url.pathname === "/api/applications") {
       if (request.method === "GET") {
@@ -243,21 +250,7 @@ async function notFoundPageResponse(
   }
 
   const pageUrl = new URL("/404.html", request.url);
-  const pageRequest = new Request(pageUrl, {
-    headers: {
-      Accept: "text/html",
-    },
-    method: "GET",
-  });
-  const page = await env.ASSETS.fetch(pageRequest);
-
-  if (page.status !== 200) return response;
-
-  return new Response(request.method === "HEAD" ? null : page.body, {
-    headers: page.headers,
-    status: 404,
-    statusText: "Not Found",
-  });
+  return errorDocumentResponse(request, env, 404, response, pageUrl);
 }
 
 function shouldServeNotFoundPage(request: Request, pathname: string): boolean {
@@ -273,6 +266,30 @@ function shouldServeNotFoundPage(request: Request, pathname: string): boolean {
     accept.includes("text/html") ||
     accept.includes("*/*")
   );
+}
+
+async function errorDocumentResponse(
+  request: Request,
+  env: Env,
+  status: number,
+  fallback?: Response,
+  pageUrl = new URL("/404.html", request.url),
+): Promise<Response> {
+  const pageRequest = new Request(pageUrl, {
+    headers: {
+      Accept: "text/html",
+    },
+    method: "GET",
+  });
+  const page = await env.ASSETS.fetch(pageRequest);
+
+  if (page.status !== 200) return fallback ?? page;
+
+  return new Response(request.method === "HEAD" ? null : page.body, {
+    headers: page.headers,
+    status,
+    statusText: status === 404 ? "Not Found" : "OK",
+  });
 }
 
 function isLocalHost(hostname: string): boolean {
@@ -350,7 +367,7 @@ function shouldSetLastModified(
 function isNoindexPath(pathname: string): boolean {
   const normalizedPath = pathname.toLowerCase();
   return (
-    normalizedPath === "/404.html" ||
+    ERROR_DOCUMENT_PATHS.has(normalizedPath) ||
     normalizedPath === SECURITY_TXT_PATH ||
     NOINDEX_PATH_PREFIXES.some((prefix) => normalizedPath.startsWith(prefix))
   );

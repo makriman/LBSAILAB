@@ -821,29 +821,35 @@ async function auditMissingPage() {
 }
 
 async function auditErrorDocumentDirect() {
-  const url = `${SITE_ORIGIN}/404.html`;
-  const { response, body } = await text(url, { accept: "text/html" });
+  for (const path of ["/404.html", "/404/"]) {
+    const url = `${SITE_ORIGIN}${path}`;
+    const { response, body } = await text(url, { accept: "text/html" });
 
-  if (response.status !== 200) {
-    fail(`${url}: expected direct error document 200, got ${response.status}`);
-  }
+    if (response.status !== 200) {
+      fail(
+        `${url}: expected direct error document 200, got ${response.status}`,
+      );
+    }
 
-  assertSecurityHeaders(response, url);
-  assertShortCache(response, url);
+    assertSecurityHeaders(response, url);
+    assertShortCache(response, url);
 
-  if ((response.headers.get("x-robots-tag") || "") !== NOINDEX_ROBOTS) {
-    fail(`${url}: expected ${NOINDEX_ROBOTS} X-Robots-Tag`);
-  }
+    if ((response.headers.get("x-robots-tag") || "") !== NOINDEX_ROBOTS) {
+      fail(`${url}: expected ${NOINDEX_ROBOTS} X-Robots-Tag`);
+    }
 
-  if (
-    body.includes(INDEXABLE_META_ROBOTS) ||
-    /<link\b[^>]*rel=["']canonical["']/i.test(body)
-  ) {
-    fail(`${url}: direct error document contains indexable page metadata`);
-  }
+    if (
+      body.includes(INDEXABLE_META_ROBOTS) ||
+      /<link\b[^>]*rel=["']canonical["']/i.test(body)
+    ) {
+      fail(`${url}: direct error document contains indexable page metadata`);
+    }
 
-  if (!/<meta\b[^>]*name=["']robots["'][^>]*noindex,nofollow/i.test(body)) {
-    fail(`${url}: direct error document missing noindex,nofollow meta robots`);
+    if (!/<meta\b[^>]*name=["']robots["'][^>]*noindex,nofollow/i.test(body)) {
+      fail(
+        `${url}: direct error document missing noindex,nofollow meta robots`,
+      );
+    }
   }
 }
 

@@ -214,6 +214,7 @@ async function checkStatus() {
     [`${SITE_ORIGIN}/feed.xml`, 200, "HEAD"],
     [`${SITE_ORIGIN}/.well-known/security.txt`, 200, "HEAD"],
     [`${SITE_ORIGIN}/404.html`, 200, "HEAD"],
+    [`${SITE_ORIGIN}/404/`, 200, "HEAD"],
     [`${SITE_ORIGIN}/healthz`, 200, "HEAD"],
     [`${SITE_ORIGIN}/api/applications`, 200, "GET"],
     [`${SITE_ORIGIN}/images/lbs-ai-lab-workshop-hero.png`, 410, "HEAD"],
@@ -270,6 +271,7 @@ async function checkNoindex() {
     `${SITE_ORIGIN}/api/applications`,
     `${SITE_ORIGIN}/.well-known/security.txt`,
     `${SITE_ORIGIN}/404.html`,
+    `${SITE_ORIGIN}/404/`,
     `${SITE_ORIGIN}/missing-seo-monitor-page/`,
   ]) {
     const response = await requestStatus(
