@@ -525,6 +525,18 @@ function auditExternalPerformanceMonitorConfig() {
     fail("seo:production should reuse the live SEO smoke suite");
   }
 
+  if (!packageJson.includes("npx wrangler deploy --keep-vars")) {
+    fail("deploy script should preserve dashboard-set Worker variables");
+  }
+
+  if (!packageJson.includes('"deploy": "npm run build')) {
+    fail("deploy script should build before publishing");
+  }
+
+  if (!packageJson.includes("npm run seo:indexnow && npm run seo:live")) {
+    fail("deploy script should ping IndexNow and run live SEO verification");
+  }
+
   if (!workflow.includes("Run live SEO smoke suite")) {
     fail("SEO workflow should run the live SEO smoke suite on main pushes");
   }
