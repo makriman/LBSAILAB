@@ -484,11 +484,15 @@ async function checkVitalsEndpoint() {
   const url = `${SITE_ORIGIN}/api/vitals`;
   const body = JSON.stringify({
     metrics: [
+      { name: "TTFB", value: 120 },
+      { name: "FCP", value: 700 },
       { name: "LCP", value: 1200 },
       { name: "CLS", value: 0.01 },
       { name: "INP", value: 80 },
     ],
+    navigationType: "navigate",
     path: "/seo-monitor",
+    visibilityState: "hidden",
   });
   const response = await requestStatus(url, "POST", body, {
     "Content-Type": "application/json",

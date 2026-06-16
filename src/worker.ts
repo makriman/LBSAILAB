@@ -26,7 +26,9 @@ interface WebVitalsPayload {
     name?: unknown;
     value?: unknown;
   }>;
+  navigationType?: unknown;
   path?: unknown;
+  visibilityState?: unknown;
 }
 
 const DEFAULT_BRANCH = "main";
@@ -545,8 +547,10 @@ async function handleVitals(request: Request): Promise<Response> {
     console.log(
       JSON.stringify({
         metrics,
+        navigationType: sanitizeNavigationType(payload.navigationType),
         path: sanitizePath(payload.path),
         type: "web-vitals",
+        visibilityState: sanitizeVisibilityState(payload.visibilityState),
       }),
     );
   }
@@ -557,7 +561,7 @@ async function handleVitals(request: Request): Promise<Response> {
 function sanitizeVitals(metrics: WebVitalsPayload["metrics"]) {
   if (!Array.isArray(metrics)) return [];
 
-  const allowedNames = new Set(["LCP", "CLS", "INP"]);
+  const allowedNames = new Set(["CLS", "FCP", "INP", "LCP", "TTFB"]);
 
   return metrics
     .map((metric) => ({
@@ -571,7 +575,7 @@ function sanitizeVitals(metrics: WebVitalsPayload["metrics"]) {
         metric.value >= 0 &&
         metric.value < 120000,
     )
-    .slice(0, 3);
+    .slice(0, 5);
 }
 
 function sanitizePath(path: unknown): string {
@@ -580,6 +584,18 @@ function sanitizePath(path: unknown): string {
   return value.startsWith("/") && !value.startsWith("//")
     ? value.slice(0, 160)
     : "/";
+}
+
+function sanitizeNavigationType(value: unknown): string {
+  const type = typeof value === "string" ? value : "navigate";
+  return ["back_forward", "navigate", "prerender", "reload"].includes(type)
+    ? type
+    : "navigate";
+}
+
+function sanitizeVisibilityState(value: unknown): string {
+  const state = typeof value === "string" ? value : "hidden";
+  return ["hidden", "visible"].includes(state) ? state : "hidden";
 }
 
 async function appendSubmission(

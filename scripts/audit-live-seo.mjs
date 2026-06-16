@@ -711,9 +711,13 @@ function assertPageMetadata(html, url) {
     "PerformanceObserver",
     "/api/vitals",
     "sendBeacon",
+    "TTFB",
+    "FCP",
     "LCP",
     "CLS",
     "INP",
+    "navigationType",
+    "visibilityState",
   ]) {
     if (!vitalsMonitors[0][0].includes(expected)) {
       fail(`${url}: web vitals monitor missing ${expected}`);
@@ -914,11 +918,15 @@ async function auditNoindexAndGone() {
   const vitalsPost = await fetch(vitalsUrl, {
     body: JSON.stringify({
       metrics: [
+        { name: "TTFB", value: 120 },
+        { name: "FCP", value: 700 },
         { name: "LCP", value: 1200 },
         { name: "CLS", value: 0.01 },
         { name: "INP", value: 80 },
       ],
+      navigationType: "navigate",
       path: "/seo-audit",
+      visibilityState: "hidden",
     }),
     headers: {
       "Content-Type": "application/json",

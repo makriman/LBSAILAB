@@ -208,6 +208,19 @@ const bingSiteVerification = import.meta.env.PUBLIC_BING_SITE_VERIFICATION;
           }
         };
 
+        const navigationEntry =
+          performance.getEntriesByType?.("navigation")?.[0];
+
+        if (navigationEntry) {
+          remember("TTFB", navigationEntry.responseStart);
+        }
+
+        observe({ type: "paint", buffered: true }, (entry) => {
+          if (entry.name === "first-contentful-paint") {
+            remember("FCP", entry.startTime);
+          }
+        });
+
         observe({ type: "largest-contentful-paint", buffered: true }, (entry) =>
           remember("LCP", entry.startTime),
         );
@@ -239,6 +252,8 @@ const bingSiteVerification = import.meta.env.PUBLIC_BING_SITE_VERIFICATION;
 
           const body = JSON.stringify({
             path: window.location.pathname,
+            navigationType: navigationEntry?.type || "navigate",
+            visibilityState: document.visibilityState,
             metrics: [...metrics].map(([name, value]) => ({ name, value })),
           });
           const blob = new Blob([body], { type: "application/json" });

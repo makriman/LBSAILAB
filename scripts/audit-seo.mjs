@@ -973,9 +973,13 @@ function auditVitalsMonitor(url, html) {
     "PerformanceObserver",
     "/api/vitals",
     "sendBeacon",
+    "TTFB",
+    "FCP",
     "LCP",
     "CLS",
     "INP",
+    "navigationType",
+    "visibilityState",
   ]) {
     if (!monitor.includes(expected)) {
       fail(`${url}: web vitals monitor missing ${expected}`);
