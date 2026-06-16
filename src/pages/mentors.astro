@@ -5,12 +5,23 @@ import Button from "@components/atoms/Button.astro";
 import DirectorCard from "@components/cards/DirectorCard.astro";
 import MentorGrid from "@components/sections/MentorGrid.astro";
 import { MENTOR_APPLICATION_URL } from "@utils/site";
-import { itemListJsonLd, pageJsonLd } from "@utils/seo";
+import { itemListJsonLd, pageJsonLd, personJsonLd } from "@utils/seo";
 
 const mentors = await getCollection("mentors");
 const pageTitle = "Mentors";
 const pageDescription =
   "Meet the product and technical mentors supporting LBS AI Lab teams";
+const academicLead = {
+  id: "/mentors/#academic-lead-kostis-christodoulou",
+  name: "Kostis Christodoulou",
+  role: "Academic lead",
+  focus:
+    "Academic direction for the Lab, connecting participant teams with rigorous AI, analytics, decision-making, and product learning",
+  profileUrl:
+    "https://www.london.edu/faculty-and-research/faculty-profiles/k/kostis-christodoulou",
+  image: "/mentors/kostis-christodoulou.jpg",
+};
+const mentorPersonId = (id: string) => `/mentors/#mentor-${id}`;
 const jsonLd = [
   ...pageJsonLd({
     title: pageTitle,
@@ -26,21 +37,43 @@ const jsonLd = [
     description: pageDescription,
     items: [
       {
-        name: "Kostis Christodoulou",
-        url: "https://www.london.edu/faculty-and-research/faculty-profiles/k/kostis-christodoulou",
+        id: academicLead.id,
+        name: academicLead.name,
+        url: academicLead.id,
         type: "Person",
-        description: "Academic lead",
-        image: "/mentors/kostis-christodoulou.jpg",
+        description: academicLead.role,
+        image: academicLead.image,
       },
       ...mentors.map((mentor) => ({
+        id: mentorPersonId(mentor.data.id),
         name: mentor.data.name,
-        url: mentor.data.linkedinUrl ?? "/mentors/",
+        url: mentorPersonId(mentor.data.id),
         type: "Person",
         description: mentor.data.mentorType ?? mentor.data.role,
         image: mentor.data.image,
       })),
     ],
   }),
+  personJsonLd({
+    id: academicLead.id,
+    name: academicLead.name,
+    description: academicLead.focus,
+    image: academicLead.image,
+    jobTitle: academicLead.role,
+    sameAs: academicLead.profileUrl,
+    url: academicLead.profileUrl,
+  }),
+  ...mentors.map((mentor) =>
+    personJsonLd({
+      id: mentorPersonId(mentor.data.id),
+      name: mentor.data.name,
+      description: mentor.data.focus,
+      image: mentor.data.image,
+      jobTitle: mentor.data.mentorType ?? mentor.data.role,
+      sameAs: mentor.data.linkedinUrl,
+      url: mentorPersonId(mentor.data.id),
+    }),
+  ),
 ];
 ---
 

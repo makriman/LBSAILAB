@@ -41,6 +41,7 @@ interface PageJsonLdOptions {
 }
 
 interface ItemListEntry {
+  id?: string;
   name: string;
   url: string;
   type?: string;
@@ -60,6 +61,17 @@ interface TeamProfileJsonLdOptions {
   category: string;
   members: TeamMemberJsonLdInput[];
   productUrl?: string;
+}
+
+interface PersonJsonLdOptions {
+  id: string;
+  name: string;
+  description?: string;
+  image?: string;
+  jobTitle?: string;
+  sameAs?: string;
+  url?: string;
+  worksFor?: string;
 }
 
 export function absoluteUrl(pathOrUrl: string | URL) {
@@ -180,12 +192,44 @@ export function itemListJsonLd({
       url: absoluteUrl(item.url),
       item: {
         "@type": item.type ?? "WebPage",
+        "@id": item.id ? absoluteUrl(item.id) : undefined,
         name: item.name,
         url: absoluteUrl(item.url),
         description: item.description,
         image: item.image ? absoluteUrl(item.image) : undefined,
       },
     })),
+  };
+}
+
+export function personJsonLd({
+  id,
+  name,
+  description,
+  image,
+  jobTitle,
+  sameAs,
+  url,
+  worksFor = SITE_NAME,
+}: PersonJsonLdOptions): JsonLd {
+  return {
+    "@context": "https://schema.org",
+    "@type": "Person",
+    "@id": absoluteUrl(id),
+    name,
+    description,
+    image: image ? absoluteUrl(image) : undefined,
+    jobTitle,
+    sameAs,
+    url: url ? absoluteUrl(url) : absoluteUrl(id),
+    worksFor: {
+      "@id": `${SITE_URL}/#organization`,
+      name: worksFor,
+    },
+    affiliation: {
+      "@id": `${SITE_URL}/#organization`,
+      name: SITE_NAME,
+    },
   };
 }
 

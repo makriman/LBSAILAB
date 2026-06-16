@@ -452,6 +452,117 @@ function auditTeamJsonLd(url, items, html) {
   }
 }
 
+function auditMentorJsonLd(url, items) {
+  if (url !== `${SITE_URL}/mentors/`) return;
+
+  const expectedMentors = [
+    {
+      name: "Kostis Christodoulou",
+      id: `${SITE_URL}/mentors/#academic-lead-kostis-christodoulou`,
+      sameAsPrefix: "https://www.london.edu/",
+    },
+    {
+      name: "Ramakrishnan Lokanathan",
+      id: `${SITE_URL}/mentors/#mentor-ramakrishnan-lokanathan`,
+      sameAsPrefix: "https://www.linkedin.com/",
+    },
+    {
+      name: "Akshay Nagpal",
+      id: `${SITE_URL}/mentors/#mentor-akshay-nagpal`,
+      sameAsPrefix: "https://www.linkedin.com/",
+    },
+    {
+      name: "Zara Mogadasi",
+      id: `${SITE_URL}/mentors/#mentor-zara-mogadasi`,
+      sameAsPrefix: "https://www.linkedin.com/",
+    },
+    {
+      name: "Rhea Bisaria",
+      id: `${SITE_URL}/mentors/#mentor-rhea-bisaria`,
+      sameAsPrefix: "https://www.linkedin.com/",
+    },
+  ];
+  const people = items.filter((item) => item?.["@type"] === "Person");
+  const mentorList = items.find(
+    (item) =>
+      item?.["@type"] === "ItemList" && item?.name === "LBS AI Lab mentors",
+  );
+
+  if (people.length < expectedMentors.length) {
+    fail(
+      `${url}: expected ${expectedMentors.length} mentor Person JSON-LD nodes, found ${people.length}`,
+    );
+  }
+
+  if (!mentorList) {
+    fail(`${url}: missing mentors ItemList JSON-LD`);
+  } else {
+    const elements = Array.isArray(mentorList.itemListElement)
+      ? mentorList.itemListElement
+      : [];
+
+    if (elements.length !== expectedMentors.length) {
+      fail(
+        `${url}: mentors ItemList should include ${expectedMentors.length} people`,
+      );
+    }
+
+    for (const expected of expectedMentors) {
+      const listEntry = elements.find(
+        (entry) => entry?.item?.["@id"] === expected.id,
+      );
+
+      if (!listEntry) {
+        fail(`${url}: mentors ItemList missing ${expected.name}`);
+      }
+    }
+  }
+
+  for (const expected of expectedMentors) {
+    const person = people.find((item) => item?.["@id"] === expected.id);
+
+    if (!person) {
+      fail(`${url}: missing Person JSON-LD for ${expected.name}`);
+      continue;
+    }
+
+    assertEqual(person.name, expected.name, `${url}: Person name`);
+
+    if (!person.description) {
+      fail(`${url}: ${expected.name} Person JSON-LD missing description`);
+    }
+
+    if (!person.jobTitle) {
+      fail(`${url}: ${expected.name} Person JSON-LD missing jobTitle`);
+    }
+
+    if (
+      !person.image ||
+      !person.image.startsWith(`${SITE_URL}/mentors/`) ||
+      !existsSync(
+        path.join(
+          DIST,
+          decodeURIComponent(new URL(person.image).pathname.slice(1)),
+        ),
+      )
+    ) {
+      fail(`${url}: ${expected.name} Person JSON-LD missing valid image`);
+    }
+
+    if (!person.sameAs?.startsWith(expected.sameAsPrefix)) {
+      fail(`${url}: ${expected.name} Person JSON-LD missing valid sameAs`);
+    }
+
+    if (person.worksFor?.["@id"] !== `${SITE_URL}/#organization`) {
+      fail(`${url}: ${expected.name} Person JSON-LD missing worksFor`);
+    }
+
+    if (person.affiliation?.["@id"] !== `${SITE_URL}/#organization`) {
+      fail(`${url}: ${expected.name} Person JSON-LD missing affiliation`);
+    }
+  }
+}
+
 function auditSitemap() {
   const sitemapIndex = readDist("sitemap-index.xml");
   const sitemap = readDist("sitemap-0.xml");
@@ -772,6 +883,7 @@ function auditPage(url, metadataIndex) {
   }
 
   auditTeamJsonLd(url, jsonLdItems, html);
+  auditMentorJsonLd(url, jsonLdItems);
 
   for (const tag of allTags(html, "img")) {
     const image = attrs(tag);
