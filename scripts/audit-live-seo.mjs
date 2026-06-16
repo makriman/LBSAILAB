@@ -1381,6 +1381,10 @@ function assertPageMetadata(html, url) {
     fail(`${url}: meta robots is missing indexable preview directives`);
   }
 
+  if (!/<html\b[^>]*\blang=["']en-GB["']/i.test(html)) {
+    fail(`${url}: html lang should be en-GB`);
+  }
+
   if (
     manifestLinks.length !== 1 ||
     manifestLinks[0].href !== "/site.webmanifest"
@@ -2720,6 +2724,10 @@ async function auditMissingPage() {
     fail(`${url}: 404 body should render the custom not-found document`);
   }
 
+  if (!/<html\b[^>]*\blang=["']en-GB["']/i.test(body)) {
+    fail(`${url}: 404 body html lang should be en-GB`);
+  }
+
   if (!/<meta\b[^>]*name=["']robots["'][^>]*noindex,nofollow/i.test(body)) {
     fail(`${url}: 404 body is missing noindex,nofollow meta robots`);
   }
@@ -2793,6 +2801,10 @@ async function auditErrorDocumentDirect() {
 
     if (metaContent(body, "viewport") !== EXPECTED_VIEWPORT) {
       fail(`${url}: direct error document has an incomplete viewport meta tag`);
+    }
+
+    if (!/<html\b[^>]*\blang=["']en-GB["']/i.test(body)) {
+      fail(`${url}: direct error document html lang should be en-GB`);
     }
 
     if (!/<meta\b[^>]*name=["']robots["'][^>]*noindex,nofollow/i.test(body)) {

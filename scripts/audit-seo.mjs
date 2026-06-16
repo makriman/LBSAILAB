@@ -1146,8 +1146,8 @@ function auditHtmlIntegrity(html, url) {
     );
   }
 
-  if (!/<html\b[^>]*\blang=["']en["']/i.test(html)) {
-    fail(`${url}: html lang should be en`);
+  if (!/<html\b[^>]*\blang=["']en-GB["']/i.test(html)) {
+    fail(`${url}: html lang should be en-GB`);
   }
 
   const viewport = metaContent(html, "viewport");
@@ -2294,6 +2294,10 @@ function auditErrorDocument() {
 
   if (!/<meta\b[^>]*name=["']robots["'][^>]*noindex,nofollow/i.test(html)) {
     fail("404.html is missing noindex,nofollow meta robots");
+  }
+
+  if (!/<html\b[^>]*\blang=["']en-GB["']/i.test(html)) {
+    fail("404.html html lang should be en-GB");
   }
 
   if (html.includes(INDEXABLE_META_ROBOTS)) {
