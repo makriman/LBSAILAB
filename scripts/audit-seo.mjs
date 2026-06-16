@@ -556,6 +556,34 @@ function auditCrawlerFiles() {
   }
 }
 
+function auditErrorDocument() {
+  const html = readDist("404.html");
+
+  if (!html) return;
+
+  if (!/<meta\b[^>]*name=["']robots["'][^>]*noindex,nofollow/i.test(html)) {
+    fail("404.html is missing noindex,nofollow meta robots");
+  }
+
+  if (html.includes(INDEXABLE_META_ROBOTS)) {
+    fail("404.html contains indexable robots metadata");
+  }
+
+  if (/<link\b[^>]*rel=["']canonical["']/i.test(html)) {
+    fail("404.html must not include a canonical URL");
+  }
+
+  if (/<meta\b[^>]*(?:property|name)=["'](?:og:|twitter:)/i.test(html)) {
+    fail("404.html must not include social preview metadata");
+  }
+
+  for (const href of ['href="/"', 'href="/sitemap/"']) {
+    if (!html.includes(href)) {
+      fail(`404.html missing recovery link ${href}`);
+    }
+  }
+}
+
 function auditPage(url, metadataIndex) {
   const relativeFile = pageFileForUrl(url);
   const html = readDist(relativeFile);
@@ -751,6 +779,7 @@ function audit() {
 
   auditRobots();
   auditCrawlerFiles();
+  auditErrorDocument();
 
   const pages = auditSitemap();
   const metadataIndex = {

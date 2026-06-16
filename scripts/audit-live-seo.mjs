@@ -804,6 +804,47 @@ async function auditMissingPage() {
   ) {
     fail(`${url}: 404 body contains indexable page metadata`);
   }
+
+  if (!body.includes("<h1>Page not found</h1>")) {
+    fail(`${url}: 404 body should render the custom not-found document`);
+  }
+
+  if (!/<meta\b[^>]*name=["']robots["'][^>]*noindex,nofollow/i.test(body)) {
+    fail(`${url}: 404 body is missing noindex,nofollow meta robots`);
+  }
+
+  for (const href of ['href="/"', 'href="/sitemap/"']) {
+    if (!body.includes(href)) {
+      fail(`${url}: 404 body missing recovery link ${href}`);
+    }
+  }
+}
+
+async function auditErrorDocumentDirect() {
+  const url = `${SITE_ORIGIN}/404.html`;
+  const { response, body } = await text(url, { accept: "text/html" });
+
+  if (response.status !== 200) {
+    fail(`${url}: expected direct error document 200, got ${response.status}`);
+  }
+
+  assertSecurityHeaders(response, url);
+  assertShortCache(response, url);
+
+  if ((response.headers.get("x-robots-tag") || "") !== NOINDEX_ROBOTS) {
+    fail(`${url}: expected ${NOINDEX_ROBOTS} X-Robots-Tag`);
+  }
+
+  if (
+    body.includes(INDEXABLE_META_ROBOTS) ||
+    /<link\b[^>]*rel=["']canonical["']/i.test(body)
+  ) {
+    fail(`${url}: direct error document contains indexable page metadata`);
+  }
+
+  if (!/<meta\b[^>]*name=["']robots["'][^>]*noindex,nofollow/i.test(body)) {
+    fail(`${url}: direct error document missing noindex,nofollow meta robots`);
+  }
 }
 
 async function auditSecurityText() {
@@ -860,6 +901,7 @@ async function auditLiveSeo() {
   await auditRedirects();
   await auditNoindexAndGone();
   await auditMissingPage();
+  await auditErrorDocumentDirect();
   await auditReachability(pages);
 
   if (warnings.length) {

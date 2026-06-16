@@ -127,7 +127,11 @@ export default {
       return json({ error: "Method not allowed" }, 405);
     }
 
-    return withSeoHeaders(await env.ASSETS.fetch(request), url.pathname);
+    const assetResponse = await env.ASSETS.fetch(request);
+    return withSeoHeaders(
+      await notFoundPageResponse(request, env, assetResponse, url.pathname),
+      url.pathname,
+    );
   },
 };
 
@@ -228,6 +232,49 @@ function shouldNormalizePathCase(pathname: string): boolean {
   return !lastSegment.includes(".");
 }
 
+async function notFoundPageResponse(
+  request: Request,
+  env: Env,
+  response: Response,
+  pathname: string,
+): Promise<Response> {
+  if (response.status !== 404 || !shouldServeNotFoundPage(request, pathname)) {
+    return response;
+  }
+
+  const pageUrl = new URL("/404.html", request.url);
+  const pageRequest = new Request(pageUrl, {
+    headers: {
+      Accept: "text/html",
+    },
+    method: "GET",
+  });
+  const page = await env.ASSETS.fetch(pageRequest);
+
+  if (page.status !== 200) return response;
+
+  return new Response(request.method === "HEAD" ? null : page.body, {
+    headers: page.headers,
+    status: 404,
+    statusText: "Not Found",
+  });
+}
+
+function shouldServeNotFoundPage(request: Request, pathname: string): boolean {
+  if (!["GET", "HEAD"].includes(request.method)) return false;
+
+  const lastSegment = pathname.split("/").at(-1) ?? "";
+  if (lastSegment.includes(".")) return false;
+
+  const accept = request.headers.get("Accept") || "";
+  return (
+    request.method === "HEAD" ||
+    !accept ||
+    accept.includes("text/html") ||
+    accept.includes("*/*")
+  );
+}
+
 function isLocalHost(hostname: string): boolean {
   return (
     hostname === "localhost" ||
@@ -303,6 +350,7 @@ function shouldSetLastModified(
 function isNoindexPath(pathname: string): boolean {
   const normalizedPath = pathname.toLowerCase();
   return (
+    normalizedPath === "/404.html" ||
     normalizedPath === SECURITY_TXT_PATH ||
     NOINDEX_PATH_PREFIXES.some((prefix) => normalizedPath.startsWith(prefix))
   );
