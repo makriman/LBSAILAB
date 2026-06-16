@@ -262,6 +262,18 @@ function extractLocs(xml) {
   );
 }
 
+function extractImageLocs(xml) {
+  return [...xml.matchAll(/<image:loc>(.*?)<\/image:loc>/g)].map((match) =>
+    match[1].trim(),
+  );
+}
+
+function extractLastmods(xml) {
+  return [...xml.matchAll(/<lastmod>(.*?)<\/lastmod>/g)].map((match) =>
+    match[1].trim(),
+  );
+}
+
 function pageFileForUrl(url) {
   const { pathname } = new URL(url);
 
@@ -1363,7 +1375,43 @@ function auditCrawlerFiles() {
 
   assertEqual(key, INDEXNOW_KEY, "IndexNow key file");
 
-  for (const imageUrl of extractLocs(imageSitemap)) {
+  const imageSitemapPageLocs = extractLocs(imageSitemap);
+  const imageSitemapImageLocs = extractImageLocs(imageSitemap);
+  const imageSitemapLastmods = extractLastmods(imageSitemap);
+
+  if (!imageSitemapPageLocs.length) {
+    fail("image-sitemap.xml has no page URLs");
+  }
+
+  if (!imageSitemapImageLocs.length) {
+    fail("image-sitemap.xml has no image URLs");
+  }
+
+  if (imageSitemapLastmods.length !== imageSitemapPageLocs.length) {
+    fail("image-sitemap.xml should include one lastmod per page URL");
+  }
+
+  for (const lastmod of imageSitemapLastmods) {
+    if (lastmod !== EXPECTED_LASTMOD) {
+      fail(`image-sitemap.xml has unexpected lastmod ${lastmod}`);
+    }
+  }
+
+  for (const pageUrl of imageSitemapPageLocs) {
+    const url = new URL(pageUrl);
+
+    assertEqual(
+      url.origin,
+      SITE_URL,
+      `Image sitemap page origin for ${pageUrl}`,
+    );
+
+    if (!url.pathname.endsWith("/")) {
+      fail(`Image sitemap page URL is missing trailing slash: ${pageUrl}`);
+    }
+  }
+
+  for (const imageUrl of imageSitemapImageLocs) {
     const url = new URL(imageUrl);
 
     assertEqual(url.origin, SITE_URL, `Image sitemap origin for ${imageUrl}`);

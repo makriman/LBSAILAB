@@ -25,7 +25,8 @@ const escapeXml = (value: string) =>
     .replaceAll(">", "&gt;")
     .replaceAll('"', "&quot;")
     .replaceAll("'", "&apos;");
-const lastModified = new Date(`${SEO_UPDATED_AT}T00:00:00.000Z`).toUTCString();
+const sitemapLastModified = `${SEO_UPDATED_AT}T00:00:00.000Z`;
+const lastModified = new Date(sitemapLastModified).toUTCString();
 
 const imageNode = ({ loc, title, caption }: SitemapImage) => `
     <image:image>
@@ -44,7 +45,8 @@ const imageNode = ({ loc, title, caption }: SitemapImage) => `
 
 const urlNode = ({ loc, images }: SitemapEntry) => `
   <url>
-    <loc>${escapeXml(absoluteUrl(loc))}</loc>${images.map(imageNode).join("")}
+    <loc>${escapeXml(absoluteUrl(loc))}</loc>
+    <lastmod>${escapeXml(sitemapLastModified)}</lastmod>${images.map(imageNode).join("")}
   </url>`;
 
 export async function GET() {

@@ -273,6 +273,12 @@ function extractImageLocs(xml) {
   );
 }
 
+function extractLastmods(xml) {
+  return [...xml.matchAll(/<lastmod>(.*?)<\/lastmod>/g)].map((match) =>
+    decodeHtml(match[1].trim()),
+  );
+}
+
 function executableInlineScriptHashes(html) {
   return fullTags(html, "script")
     .map((tag) => ({
@@ -780,6 +786,32 @@ async function auditSitemaps() {
   }
 
   const imageUrls = extractImageLocs(imageSitemap);
+  const imagePageUrls = extractLocs(imageSitemap);
+  const imageLastmods = extractLastmods(imageSitemap);
+
+  if (!imagePageUrls.length) {
+    fail(`${imageSitemapUrl}: missing page URLs`);
+  }
+
+  if (!imageUrls.length) {
+    fail(`${imageSitemapUrl}: missing image URLs`);
+  }
+
+  if (imageLastmods.length !== imagePageUrls.length) {
+    fail(`${imageSitemapUrl}: expected one lastmod per page URL`);
+  }
+
+  for (const lastmod of imageLastmods) {
+    if (lastmod !== EXPECTED_UPDATED_TIME) {
+      fail(`${imageSitemapUrl}: unexpected lastmod ${lastmod}`);
+    }
+  }
+
+  for (const imagePageUrl of imagePageUrls) {
+    if (!isCanonicalPageUrl(imagePageUrl)) {
+      fail(`${imageSitemapUrl}: non-canonical page URL ${imagePageUrl}`);
+    }
+  }
 
   for (const imageUrl of imageUrls) {
     if (!sameOrigin(imageUrl)) {
