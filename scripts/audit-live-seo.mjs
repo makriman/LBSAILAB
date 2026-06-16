@@ -73,6 +73,7 @@ const CANONICAL_REDIRECTS = [
   [`${SITE_ORIGIN}/About`, `${SITE_ORIGIN}/about/`],
   [`${SITE_ORIGIN}/about`, `${SITE_ORIGIN}/about/`],
   [`${SITE_ORIGIN}/about/?utm_source=test&gclid=test`, `${SITE_ORIGIN}/about/`],
+  [`${SITE_ORIGIN}/about/?preview=true&foo=bar`, `${SITE_ORIGIN}/about/`],
   ...DUPLICATE_ORIGINS.map((origin) => [
     `${origin}/about`,
     `${SITE_ORIGIN}/about/`,

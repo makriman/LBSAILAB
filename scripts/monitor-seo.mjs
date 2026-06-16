@@ -237,6 +237,7 @@ async function checkRedirects() {
     [`http://${SITE_HOST}/about`, `${SITE_ORIGIN}/about/`],
     [`https://www.${SITE_HOST}/about`, `${SITE_ORIGIN}/about/`],
     [`${SITE_ORIGIN}/about`, `${SITE_ORIGIN}/about/`],
+    [`${SITE_ORIGIN}/about?preview=true&foo=bar`, `${SITE_ORIGIN}/about/`],
     [`${SITE_ORIGIN}/cohorts`, `${SITE_ORIGIN}/batches/`],
     [
       `${SITE_ORIGIN}/teams/wayfinders`,
