@@ -8,7 +8,14 @@ const MAX_INLINE_SCRIPT_BYTES = 18 * 1024;
 const MAX_IMAGE_BYTES = 220 * 1024;
 const MAX_FONT_BYTES = 110 * 1024;
 const MAX_DOCUMENT_MS = 2200;
+const MAX_FONT_FACE_DECLARATIONS = 4;
 const REQUIRED_FONT_PRELOADS = 2;
+const DISALLOWED_FONT_SUBSETS = [
+  "cyrillic",
+  "greek",
+  "latin-ext",
+  "vietnamese",
+];
 const ALLOWED_EXTERNAL_SCRIPT_PATTERNS = [
   /^https:\/\/static\.cloudflareinsights\.com\/beacon\.min\.js(?:\/|$)/,
 ];
@@ -315,9 +322,22 @@ async function auditStylesheet(url) {
   }
 
   const css = bytes.toString("utf8");
+  const fontFaceCount = (css.match(/@font-face/g) || []).length;
 
   if (css.includes("@font-face") && !css.includes("font-display:swap")) {
     fail(`${url}: font CSS missing font-display swap`);
+  }
+
+  if (fontFaceCount > MAX_FONT_FACE_DECLARATIONS) {
+    fail(
+      `${url}: expected at most ${MAX_FONT_FACE_DECLARATIONS} font-face declarations, found ${fontFaceCount}`,
+    );
+  }
+
+  for (const subset of DISALLOWED_FONT_SUBSETS) {
+    if (css.includes(subset)) {
+      fail(`${url}: includes non-Latin font subset "${subset}"`);
+    }
   }
 
   return bytes.byteLength;

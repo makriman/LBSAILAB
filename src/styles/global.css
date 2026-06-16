@@ -1,10 +1,18 @@
-@import "@fontsource-variable/inter/index.css";
-@import "@fontsource/source-serif-4/400.css";
-@import "@fontsource/source-serif-4/600.css";
-@import "@fontsource/source-serif-4/700.css";
+@import "@fontsource/source-serif-4/latin-400.css";
+@import "@fontsource/source-serif-4/latin-600.css";
+@import "@fontsource/source-serif-4/latin-700.css";
 @import "./tokens.css";
 @import "./typography.css";
 @import "./utilities.css";
+
+@font-face {
+  font-family: "Inter Variable";
+  font-style: normal;
+  font-display: swap;
+  font-weight: 100 900;
+  src: url("../../node_modules/@fontsource-variable/inter/files/inter-latin-wght-normal.woff2")
+    format("woff2-variations");
+}
 
 *,
 *::before,

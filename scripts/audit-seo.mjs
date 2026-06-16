@@ -94,6 +94,13 @@ const REQUIRED_WORKER_GONE_PATHS = [
 ];
 const MAX_DOM_ELEMENTS = 500;
 const MAX_DOM_DEPTH = 18;
+const MAX_FONT_FACE_DECLARATIONS = 4;
+const DISALLOWED_FONT_SUBSETS = [
+  "cyrillic",
+  "greek",
+  "latin-ext",
+  "vietnamese",
+];
 const VOID_HTML_ELEMENTS = new Set([
   "area",
   "base",
@@ -2287,6 +2294,41 @@ function auditManifestAndIcons() {
   }
 }
 
+function auditFontCssBudget() {
+  const cssFiles = distFiles().filter((file) => file.endsWith(".css"));
+  let fontStylesheetCount = 0;
+
+  for (const file of cssFiles) {
+    const relative = path.relative(DIST, file);
+    const css = readFileSync(file, "utf8");
+    const fontFaceCount = (css.match(/@font-face/g) || []).length;
+
+    if (!fontFaceCount) continue;
+
+    fontStylesheetCount += 1;
+
+    if (!css.includes("font-display:swap")) {
+      fail(`dist/${relative}: font CSS missing font-display swap`);
+    }
+
+    if (fontFaceCount > MAX_FONT_FACE_DECLARATIONS) {
+      fail(
+        `dist/${relative}: expected at most ${MAX_FONT_FACE_DECLARATIONS} font-face declarations, found ${fontFaceCount}`,
+      );
+    }
+
+    for (const subset of DISALLOWED_FONT_SUBSETS) {
+      if (css.includes(subset)) {
+        fail(`dist/${relative}: includes non-Latin font subset "${subset}"`);
+      }
+    }
+  }
+
+  if (!fontStylesheetCount) {
+    fail("Generated CSS is missing self-hosted font-face declarations");
+  }
+}
+
 function auditErrorDocument() {
   const html = readDist("404.html");
 
@@ -2694,6 +2736,7 @@ function audit() {
   auditCrawlerFiles();
   auditSecurityTxt();
   auditManifestAndIcons();
+  auditFontCssBudget();
   auditErrorDocument();
   auditWorkerRetiredPaths();
   auditWorkerSeoAccessLogging();
