@@ -9,6 +9,9 @@ const MAX_IMAGE_BYTES = 220 * 1024;
 const MAX_FONT_BYTES = 110 * 1024;
 const MAX_DOCUMENT_MS = 2200;
 const REQUIRED_FONT_PRELOADS = 2;
+const ALLOWED_EXTERNAL_SCRIPT_PATTERNS = [
+  /^https:\/\/static\.cloudflareinsights\.com\/beacon\.min\.js(?:\/|$)/,
+];
 const failures = [];
 
 function fail(message) {
@@ -67,6 +70,10 @@ function extractLocs(xml) {
 
 function isSameOrigin(url) {
   return new URL(url).origin === SITE_ORIGIN;
+}
+
+function isAllowedExternalScript(url) {
+  return ALLOWED_EXTERNAL_SCRIPT_PATTERNS.some((pattern) => pattern.test(url));
 }
 
 function isTextLike(url, contentType) {
@@ -374,9 +381,13 @@ async function auditPage(pageUrl) {
     );
   }
 
-  if (assets.externalScripts.length) {
+  const unexpectedExternalScripts = assets.externalScripts.filter(
+    (script) => !isAllowedExternalScript(script),
+  );
+
+  if (unexpectedExternalScripts.length) {
     fail(
-      `${pageUrl}: external scripts found (${assets.externalScripts.join(", ")})`,
+      `${pageUrl}: unexpected external scripts found (${unexpectedExternalScripts.join(", ")})`,
     );
   }
 
