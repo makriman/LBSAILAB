@@ -206,6 +206,29 @@ function pageUrlForFile(file) {
   return `${SITE_URL}/${pathname}/`;
 }
 
+function normalizePageLink(href, baseUrl) {
+  if (
+    !href ||
+    href.startsWith("#") ||
+    href.startsWith("mailto:") ||
+    href.startsWith("tel:")
+  ) {
+    return null;
+  }
+
+  try {
+    const url = new URL(decodeHtml(href), baseUrl);
+    url.hash = "";
+
+    if (url.origin !== SITE_URL || url.search) return null;
+    if (!url.pathname.endsWith("/")) return null;
+
+    return url.toString();
+  } catch {
+    return null;
+  }
+}
+
 function assertEqual(actual, expected, label) {
   if (actual !== expected) {
     fail(`${label}: expected "${expected}", got "${actual || "(missing)"}"`);
@@ -1082,6 +1105,7 @@ function auditPage(url, metadataIndex) {
 
   const title = pageTitle(html);
   const description = metaContent(html, "description");
+  const internalPageLinks = new Set();
 
   auditHtmlIntegrity(html, url);
   auditContentQuality(url, html, metadataIndex);
@@ -1259,6 +1283,10 @@ function auditPage(url, metadataIndex) {
     if (href === "#" || href.startsWith("javascript:")) {
       fail(`${url}: non-crawlable link href "${href}"`);
     }
+
+    const normalized = normalizePageLink(href, url);
+
+    if (normalized) internalPageLinks.add(normalized);
   }
 
   if (
@@ -1274,6 +1302,33 @@ function auditPage(url, metadataIndex) {
 
   if (/\bCohort\b/.test(html)) {
     fail(`${url}: user-facing Cohort language found`);
+  }
+
+  return internalPageLinks;
+}
+
+function auditStaticReachability(pages, pageLinks) {
+  const sitemapPages = new Set(pages);
+  const inbound = new Map(pages.map((page) => [page, new Set()]));
+
+  for (const [source, links] of pageLinks) {
+    for (const linked of links) {
+      if (sitemapPages.has(linked)) {
+        inbound.get(linked)?.add(source);
+      } else if (linked.startsWith(`${SITE_URL}/`)) {
+        fail(`${source}: links to same-origin page outside sitemap ${linked}`);
+      }
+    }
+  }
+
+  for (const page of pages) {
+    if (page === `${SITE_URL}/`) continue;
+
+    const sources = inbound.get(page) || new Set();
+
+    if (!sources.size) {
+      fail(`${page}: sitemap page has no crawlable inbound link`);
+    }
   }
 }
 
@@ -1294,12 +1349,14 @@ function audit() {
     mainContent: new Map(),
     titles: new Map(),
   };
+  const pageLinks = new Map();
 
   for (const page of pages) {
-    auditPage(page, metadataIndex);
+    pageLinks.set(page, auditPage(page, metadataIndex) || new Set());
   }
 
   auditWorkerCsp(pages);
+  auditStaticReachability(pages, pageLinks);
   auditDuplicateMainContent(metadataIndex.mainContent);
   auditGeneratedPageCoverage(pages);
 
