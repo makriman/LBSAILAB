@@ -1880,42 +1880,57 @@ async function auditExternalLinks(inbound) {
 
 async function auditRedirects() {
   for (const [source, expected] of CANONICAL_REDIRECTS) {
-    const hops = await redirectTrace(source);
-    const first = hops[0];
-    const last = hops.at(-1);
-
-    if (first.status !== 301) {
-      fail(`${source}: expected initial 301, got ${first.status}`);
-    }
-
-    if (hops.length > 2) {
-      fail(`${source}: redirect chain has ${hops.length - 1} hops`);
-    }
-
-    const finalUrl =
-      last.status >= 300 && last.status < 400 && last.location
-        ? new URL(last.location, last.url).toString()
-        : last.url;
-
-    if (finalUrl !== expected) {
-      fail(`${source}: expected redirect target ${expected}, got ${finalUrl}`);
-    }
+    await auditRedirectTarget(source, expected);
   }
 
   for (const [path, expected] of LEGACY_URLS) {
     const source = `${SITE_ORIGIN}${path}`;
-    const hops = await redirectTrace(source);
-    const first = hops[0];
-    const target = first.location
-      ? new URL(first.location, first.url).toString()
-      : first.url;
+    await auditRedirectTarget(source, expected);
+  }
+}
 
-    if (first.status !== 301) {
-      fail(`${source}: expected legacy 301, got ${first.status}`);
-    }
+async function auditRedirectTarget(source, expected) {
+  const hops = await redirectTrace(source);
+  const first = hops[0];
+  const last = hops.at(-1);
 
-    if (target !== expected) {
-      fail(`${source}: expected ${expected}, got ${target}`);
+  if (first.status !== 301) {
+    fail(`${source}: expected initial 301, got ${first.status}`);
+  }
+
+  if (hops.length > 2) {
+    fail(`${source}: redirect chain has ${hops.length - 1} hops`);
+  }
+
+  const finalUrl =
+    last.status >= 300 && last.status < 400 && last.location
+      ? new URL(last.location, last.url).toString()
+      : last.url;
+
+  if (finalUrl !== expected) {
+    fail(`${source}: expected redirect target ${expected}, got ${finalUrl}`);
+  }
+}
+
+function canonicalDuplicateVariants(page) {
+  const url = new URL(page);
+  const variants = [
+    `${page}?utm_source=seo-audit&gclid=seo-audit&preview=true`,
+    new URL("index.html", page).toString(),
+  ];
+
+  if (url.pathname !== "/") {
+    variants.push(`${SITE_ORIGIN}${url.pathname.replace(/\/$/, "")}`);
+    variants.push(`${SITE_ORIGIN}${url.pathname.toUpperCase()}`);
+  }
+
+  return [...new Set(variants)].filter((variant) => variant !== page);
+}
+
+async function auditCanonicalDuplicateRedirects(pages) {
+  for (const page of pages) {
+    for (const variant of canonicalDuplicateVariants(page)) {
+      await auditRedirectTarget(variant, page);
     }
   }
 }
@@ -2116,6 +2131,7 @@ async function auditLiveSeo() {
   await auditWebManifest();
   await auditSecurityText();
   await auditRedirects();
+  await auditCanonicalDuplicateRedirects(pages);
   await auditNoindexAndGone();
   await auditMissingPage();
   await auditErrorDocumentDirect();
