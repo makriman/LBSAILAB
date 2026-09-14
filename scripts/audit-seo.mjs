@@ -801,7 +801,9 @@ function auditApplicationsApiHygiene() {
     'return json({ error: "Please submit the form again." }, 413)',
     "if (asString(body.website))",
     "return json({ ok: true }, 202)",
-    "if (!env.GITHUB_TOKEN)",
+    "env.APPLICATIONS_DB.prepare(",
+    ".bind(",
+    ".run();",
   ]) {
     if (!worker.includes(expected)) {
       fail(`Worker applications API hygiene is missing ${expected}`);
@@ -813,9 +815,22 @@ function auditApplicationsApiHygiene() {
     "contentLength > MAX_APPLICATION_PAYLOAD_BYTES",
     handlerStart,
   );
-  const bodyParse = worker.indexOf("body = (await request.json())", handlerStart);
-  const honeypotCheck = worker.indexOf("if (asString(body.website))", handlerStart);
-  const tokenCheck = worker.indexOf("if (!env.GITHUB_TOKEN)", handlerStart);
+  const bodyParse = worker.indexOf(
+    "body = (await request.json())",
+    handlerStart,
+  );
+  const honeypotCheck = worker.indexOf(
+    "if (asString(body.website))",
+    handlerStart,
+  );
+  const validationCheck = worker.indexOf(
+    "validateSubmission(body)",
+    handlerStart,
+  );
+  const databaseWrite = worker.indexOf(
+    "env.APPLICATIONS_DB.prepare(",
+    handlerStart,
+  );
 
   if (handlerStart === -1) {
     fail("Worker applications API handler could not be found");
@@ -825,9 +840,15 @@ function auditApplicationsApiHygiene() {
     fail("Worker applications API should cap payload size before JSON parsing");
   }
 
-  if (honeypotCheck === -1 || tokenCheck === -1 || honeypotCheck > tokenCheck) {
+  if (
+    honeypotCheck === -1 ||
+    validationCheck === -1 ||
+    databaseWrite === -1 ||
+    honeypotCheck > validationCheck ||
+    validationCheck > databaseWrite
+  ) {
     fail(
-      "Worker applications API should absorb honeypot submissions before backend configuration checks",
+      "Worker applications API should absorb honeypot submissions and validate input before D1 writes",
     );
   }
 
@@ -1047,7 +1068,7 @@ function auditExternalPerformanceMonitorConfig() {
 
   if (
     !packageJson.includes(
-      '"seo:startup": "npx wrangler check startup --outfile /tmp/lbsailab-worker-startup.cpuprofile"',
+      '"seo:startup": "wrangler check startup --outfile /tmp/lbsailab-worker-startup.cpuprofile"',
     )
   ) {
     fail("package.json is missing the Worker startup performance script");
@@ -1069,7 +1090,7 @@ function auditExternalPerformanceMonitorConfig() {
     fail("seo:production should reuse the live SEO smoke suite");
   }
 
-  if (!packageJson.includes("npx wrangler deploy --keep-vars")) {
+  if (!packageJson.includes("wrangler deploy --keep-vars")) {
     fail("deploy script should preserve dashboard-set Worker variables");
   }
 

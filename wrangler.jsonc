@@ -1,8 +1,9 @@
 {
   "$schema": "node_modules/wrangler/config-schema.json",
-  "name": "lbsailab",
+  "name": "ailab",
+  "account_id": "7734f000a1b41206ff95d798c7b5da80",
   "main": "src/worker.ts",
-  "compatibility_date": "2026-05-23",
+  "compatibility_date": "2026-09-14",
   "workers_dev": true,
   "preview_urls": false,
   "assets": {
@@ -14,6 +15,14 @@
     "enabled": true,
     "head_sampling_rate": 1,
   },
+  "d1_databases": [
+    {
+      "binding": "APPLICATIONS_DB",
+      "database_name": "ailab-applications",
+      "database_id": "291280c7-00e3-4ab9-a5a7-c49e264dcdfb",
+      "migrations_dir": "migrations",
+    },
+  ],
   "routes": [
     {
       "pattern": "lbsailab.com",

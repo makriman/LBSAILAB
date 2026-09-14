@@ -8,6 +8,9 @@
   "scripts": {
     "dev": "astro dev",
     "build": "npm run seo:assets && npm run seo:images && astro check && astro build && npm run seo:sitemap-index",
+    "cf:types": "wrangler types",
+    "db:migrate:local": "wrangler d1 migrations apply ailab-applications --local",
+    "db:migrate:remote": "wrangler d1 migrations apply ailab-applications --remote",
     "preview": "astro preview",
     "check": "astro check",
     "seo:assets": "node scripts/optimize-images.mjs",
@@ -27,8 +30,8 @@
     "seo:perf": "node scripts/audit-performance.mjs",
     "seo:production": "npm run seo:live && npm run seo:perf && npm run seo:lighthouse && npm run seo:pagespeed && npm run seo:crux",
     "seo:sitemap-index": "node scripts/finalize-sitemap-index.mjs",
-    "seo:startup": "npx wrangler check startup --outfile /tmp/lbsailab-worker-startup.cpuprofile",
-    "deploy": "npm run seo:ci && npx wrangler deploy --keep-vars && npm run seo:live && npm run seo:perf && npm run seo:indexnow",
+    "seo:startup": "wrangler check startup --outfile /tmp/lbsailab-worker-startup.cpuprofile",
+    "deploy": "npm run seo:ci && wrangler deploy --keep-vars && npm run seo:live && npm run seo:perf && npm run seo:indexnow",
     "format": "prettier --write .",
     "format:check": "prettier --check .",
     "astro": "astro"
@@ -48,7 +51,8 @@
     "prettier-plugin-astro": "^0.14.1",
     "rollup": "npm:@rollup/wasm-node@^4.60.4",
     "sharp": "^0.34.5",
-    "typescript": "^6.0.3"
+    "typescript": "^6.0.3",
+    "wrangler": "^4.131.2"
   },
   "license": "MIT",
   "description": "A content-driven Astro website for London Business School participants building AI products for LBS workflows.",

@@ -16,7 +16,7 @@ Static Astro site for the London Business School AI Lab and Data Science & AI In
 
 - Batch, team, mentor, application, contact, and about pages
 - Spring 2026 Batch presentation with Google DeepMind partnership assets
-- Secure application form endpoint writing public opt-in submissions to Markdown
+- Secure application form endpoint writing public opt-in submissions to Cloudflare D1
 - Static headers, redirects, robots, sitemap, and Open Graph metadata
 
 ## Tech Stack
@@ -25,7 +25,7 @@ Static Astro site for the London Business School AI Lab and Data Science & AI In
 - Astro Content Collections
 - Fontsource local fonts
 - Cloudflare Workers
-- GitHub Contents API for opt-in application submissions
+- Cloudflare D1 for opt-in application submissions
 
 ## Getting Started
 
@@ -50,23 +50,17 @@ npm run build
 wrangler deploy
 ```
 
-Worker deployments need a repository-scoped `GITHUB_TOKEN` secret for public submissions.
+Application submissions are stored in the `ailab-applications` Cloudflare D1
+database through the `APPLICATIONS_DB` Worker binding. No runtime GitHub token
+is required.
 
-```sh
-npx wrangler secret put GITHUB_TOKEN
+Apply database migrations before deploying a schema change:
+
+```bash
+npm run db:migrate:remote
 ```
 
-A fine-grained GitHub token is enough. Scope it to this repository and grant `Contents: Read and write`. The Worker uses GitHub's Contents API to update the Markdown file on `main`.
-
-Optional Worker variables:
-
-```sh
-npx wrangler secret put GITHUB_REPO
-npx wrangler secret put GITHUB_BRANCH
-npx wrangler secret put GITHUB_SUBMISSIONS_PATH
-```
-
-Defaults are `makriman/LBSAILAB`, `main`, and `data/application-submissions.md`.
+For local development, use `npm run db:migrate:local` before starting Wrangler.
 
 Search engine ownership verification can be enabled without changing visible
 site copy:
