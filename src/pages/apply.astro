@@ -123,8 +123,8 @@ const jsonLd = pageJsonLd({
         <label class="consent-field">
           <input name="public_consent" type="checkbox" value="yes" required />
           <span>
-            Show my name, course, and idea on this page so other LBS builders
-            can contact me about working together
+            Show my name, course, and idea on this page. My email address is not
+            published
           </span>
         </label>
         <label class="bot-field" aria-hidden="true">
@@ -198,8 +198,7 @@ const jsonLd = pageJsonLd({
         <h2>See who is looking for people to build with</h2>
         <p>
           Participants who opt in can share their name, course, and build idea
-          here. Use the contact button to start a conversation about working
-          together.
+          here. Email addresses are not shown.
         </p>
       </div>
 
@@ -238,12 +237,6 @@ const jsonLd = pageJsonLd({
       submissionsStatus.textContent = text;
       submissionsStatus.hidden = hidden;
     }
-  };
-
-  const contactHref = (application) => {
-    const subject = `LBS AI Lab: exploring your ${application.course} build idea`;
-    const body = `Hi ${application.name.split(" ")[0]},\n\nI saw your LBS AI Lab submission. Would you be open to chatting about working together?\n\n`;
-    return `mailto:${application.email}?subject=${encodeURIComponent(subject)}&body=${encodeURIComponent(body)}`;
   };
 
   const tableCell = (label, text) => {
@@ -319,12 +312,9 @@ const jsonLd = pageJsonLd({
     const thead = document.createElement("thead");
     const headerRow = document.createElement("tr");
 
-    for (const label of ["Name", "Course", "Idea", ""]) {
+    for (const label of ["Name", "Course", "Idea"]) {
       const header = document.createElement("th");
       header.scope = "col";
-      if (!label) {
-        header.setAttribute("aria-label", "Connect");
-      }
       header.textContent = label;
       headerRow.append(header);
     }
@@ -344,16 +334,7 @@ const jsonLd = pageJsonLd({
 
       const idea = ideaCell(application);
 
-      const action = document.createElement("td");
-      action.className = "submission-action";
-
-      const contact = document.createElement("a");
-      contact.href = contactHref(application);
-      contact.className = "connect-button";
-      contact.textContent = "Connect";
-
-      action.append(contact);
-      row.append(name, course, idea, action);
+      row.append(name, course, idea);
       tbody.append(row);
     }
 
@@ -860,12 +841,7 @@ const jsonLd = pageJsonLd({
 
   :global(.submissions-table th:nth-child(2)),
   :global(.submissions-table td:nth-child(2)) {
-    width: 15%;
-  }
-
-  :global(.submissions-table th:nth-child(4)),
-  :global(.submissions-table td:nth-child(4)) {
-    width: 24%;
+    width: 18%;
   }
 
   :global(.submission-name) {
@@ -908,26 +884,6 @@ const jsonLd = pageJsonLd({
   :global(.idea-toggle:focus-visible) {
     background: transparent;
     color: var(--color-lbs-red);
-  }
-
-  :global(.connect-button) {
-    align-items: center;
-    background: var(--color-lbs-blue);
-    border-radius: var(--radius-button);
-    color: var(--color-white);
-    display: inline-flex;
-    font-size: 0.88rem;
-    font-weight: 850;
-    justify-content: center;
-    line-height: 1.1;
-    min-height: 42px;
-    padding: 10px 14px;
-    text-decoration: none;
-    width: 100%;
-  }
-
-  :global(.connect-button:hover) {
-    background: var(--color-lbs-red);
   }
 
   @media (max-width: 940px) {
@@ -1064,15 +1020,6 @@ const jsonLd = pageJsonLd({
       font-size: 0.76rem;
       font-weight: 820;
       text-transform: uppercase;
-    }
-
-    :global(.submission-action::before) {
-      content: none;
-    }
-
-    :global(.connect-button) {
-      margin-top: 4px;
-      width: 100%;
     }
   }
 </style>
