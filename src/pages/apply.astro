@@ -128,8 +128,8 @@ const jsonLd = pageJsonLd({
           </span>
         </label>
         <label class="bot-field" aria-hidden="true">
-          <span>Website</span>
-          <input name="website" tabindex="-1" autocomplete="off" />
+          <span>Leave this field empty</span>
+          <input name="lbs_hp" tabindex="-1" autocomplete="off" />
         </label>
         <p class="form-status" data-form-status role="status"></p>
         <button type="submit">Submit interest</button>
@@ -427,8 +427,10 @@ const jsonLd = pageJsonLd({
         ? await response.json()
         : {};
 
-      if (!response.ok) {
-        throw new Error(data.error || "Submission failed.");
+      if (response.status !== 201) {
+        throw new Error(
+          data.error || "Submission could not be saved. Please try again.",
+        );
       }
 
       form.reset();

@@ -60,6 +60,11 @@ Apply database migrations before deploying a schema change:
 npm run db:migrate:remote
 ```
 
+`migrations/0003_align_application_checks.sql` is in the repo and is not applied
+by opening a pull request. A person has to export the D1 database, confirm
+existing rows fit the tighter checks, and run the command above. Details are
+in [docs/review-followups-2026-09-23.md](docs/review-followups-2026-09-23.md).
+
 For local development, use `npm run db:migrate:local` before starting Wrangler.
 
 Search engine ownership verification can be enabled without changing visible

@@ -796,11 +796,20 @@ function auditApplicationsApiHygiene() {
     "utf8",
   );
 
+  const applyPage = readFileSync(
+    path.join(ROOT, "src", "pages", "apply.astro"),
+    "utf8",
+  );
+
   for (const expected of [
+    "readCappedJson(",
     "MAX_APPLICATION_PAYLOAD_BYTES",
-    'return json({ error: "Please submit the form again." }, 413)',
-    "if (asString(body.website))",
+    "isApplicationHoneypot(body)",
+    "asString(body.lbs_hp)",
+    "asString(body.website)",
+    'return json({ error: "Please submit the form again." }, parsed.status)',
     "return json({ ok: true }, 202)",
+    "APPLICATION_IDEA_MAX_LENGTH",
     "env.APPLICATIONS_DB.prepare(",
     ".bind(",
     ".run();",
@@ -810,17 +819,19 @@ function auditApplicationsApiHygiene() {
     }
   }
 
+  if (worker.includes("request.json(")) {
+    fail(
+      "Worker should read capped request bytes instead of calling request.json()",
+    );
+  }
+
   const handlerStart = worker.indexOf("async function handleCreateApplication");
   const payloadCheck = worker.indexOf(
-    "contentLength > MAX_APPLICATION_PAYLOAD_BYTES",
-    handlerStart,
-  );
-  const bodyParse = worker.indexOf(
-    "body = (await request.json())",
+    "readCappedJson(request, MAX_APPLICATION_PAYLOAD_BYTES)",
     handlerStart,
   );
   const honeypotCheck = worker.indexOf(
-    "if (asString(body.website))",
+    "isApplicationHoneypot(body)",
     handlerStart,
   );
   const validationCheck = worker.indexOf(
@@ -836,8 +847,10 @@ function auditApplicationsApiHygiene() {
     fail("Worker applications API handler could not be found");
   }
 
-  if (payloadCheck === -1 || bodyParse === -1 || payloadCheck > bodyParse) {
-    fail("Worker applications API should cap payload size before JSON parsing");
+  if (payloadCheck === -1 || payloadCheck > honeypotCheck) {
+    fail(
+      "Worker applications API should cap payload bytes before the honeypot check",
+    );
   }
 
   if (
@@ -852,14 +865,51 @@ function auditApplicationsApiHygiene() {
     );
   }
 
+  if (applyPage.includes('name="website"')) {
+    fail("Apply form honeypot must not use the autofill name website");
+  }
+
+  for (const expected of [
+    'name="lbs_hp"',
+    "response.status !== 201",
+    "Submission could not be saved. Please try again.",
+  ]) {
+    if (!applyPage.includes(expected)) {
+      fail(`Apply form success handling is missing ${expected}`);
+    }
+  }
+
   for (const expected of [
     "assertNoindexNoStoreJsonApiResponse",
     "auditApplicationsApiNoindex",
+    "lbs_email",
+    "course_name",
+    "build_interest",
+    "public_consent",
+    "lbs_hp",
     "expected honeypot POST 202",
+    "expected validation POST 400",
   ]) {
     if (!liveAudit.includes(expected)) {
       fail(`Live SEO applications API audit is missing ${expected}`);
     }
+  }
+
+  const behavior = spawnSync(
+    process.execPath,
+    [
+      "--experimental-strip-types",
+      "--test",
+      path.join(ROOT, "scripts", "read-capped-json.test.ts"),
+      path.join(ROOT, "scripts", "application-limits.test.ts"),
+    ],
+    { encoding: "utf8" },
+  );
+
+  if (behavior.status !== 0) {
+    fail(
+      `Application payload and limit tests failed:\n${behavior.stdout || ""}${behavior.stderr || ""}`,
+    );
   }
 }
 
