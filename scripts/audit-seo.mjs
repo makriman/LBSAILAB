@@ -856,10 +856,49 @@ function auditApplicationsApiHygiene() {
     "assertNoindexNoStoreJsonApiResponse",
     "auditApplicationsApiNoindex",
     "expected honeypot POST 202",
+    "public applications response includes an email field",
   ]) {
     if (!liveAudit.includes(expected)) {
       fail(`Live SEO applications API audit is missing ${expected}`);
     }
+  }
+
+  const listStart = worker.indexOf("async function handleListApplications");
+  const listEnd = worker.indexOf("\nasync function handleVitals", listStart);
+  const listHandler =
+    listStart === -1 || listEnd === -1 ? "" : worker.slice(listStart, listEnd);
+  const publicStart = worker.indexOf("function toPublicApplication");
+  const publicEnd = worker.indexOf(
+    "\nasync function handleListApplications",
+    publicStart,
+  );
+  const publicMapper =
+    publicStart === -1 || publicEnd === -1
+      ? ""
+      : worker.slice(publicStart, publicEnd);
+  const applyPage = readFileSync(
+    path.join(ROOT, "src", "pages", "apply.astro"),
+    "utf8",
+  );
+
+  if (!listHandler.includes("toPublicApplication")) {
+    fail("Worker public applications list must map rows before responding");
+  }
+
+  if (/\bemail\b/i.test(listHandler)) {
+    fail("Worker public applications list must not read or return email");
+  }
+
+  if (!publicMapper.includes("submittedAt") || !publicMapper.includes("idea")) {
+    fail("Worker public applications mapper could not be found");
+  }
+
+  if (/\bemail\b/i.test(publicMapper)) {
+    fail("Worker public applications mapper must not copy email");
+  }
+
+  if (/application\.email|mailto:/i.test(applyPage)) {
+    fail("Apply page must not publish application email addresses");
   }
 }
 

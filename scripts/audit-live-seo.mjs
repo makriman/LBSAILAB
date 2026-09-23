@@ -2808,6 +2808,25 @@ async function auditNoindexAndGone() {
   }
 }
 
+function assertPublicApplicationsOmitEmail(applications, url) {
+  for (const application of applications) {
+    if (
+      !application ||
+      typeof application !== "object" ||
+      Array.isArray(application)
+    ) {
+      continue;
+    }
+
+    for (const key of Object.keys(application)) {
+      if (/email/i.test(key)) {
+        fail(`${url}: public applications response includes an email field`);
+        return;
+      }
+    }
+  }
+}
+
 async function auditApplicationsApiNoindex() {
   const applicationsUrl = `${SITE_ORIGIN}/api/applications`;
   const { response: applicationsGet, body } = await text(applicationsUrl, {
@@ -2825,6 +2844,8 @@ async function auditApplicationsApiNoindex() {
 
     if (!Array.isArray(parsed.applications)) {
       fail(`${applicationsUrl}: expected applications array in GET response`);
+    } else {
+      assertPublicApplicationsOmitEmail(parsed.applications, applicationsUrl);
     }
   } catch {
     fail(`${applicationsUrl}: GET response is not valid JSON`);

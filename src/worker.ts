@@ -10,8 +10,11 @@ interface ApplicationSubmission {
   idea: string;
 }
 
-interface StoredApplication extends ApplicationSubmission {
+interface PublicApplication {
   submittedAt: string;
+  name: string;
+  course: string;
+  idea: string;
 }
 
 interface WebVitalsPayload {
@@ -53,7 +56,7 @@ const SHORT_CACHE_CONTROL = "public, max-age=300, must-revalidate";
 const LONG_CACHE_CONTROL = "public, max-age=31536000, immutable";
 const SECURITY_HEADERS = {
   "Content-Security-Policy":
-    "default-src 'self'; base-uri 'self'; object-src 'none'; img-src 'self' data:; script-src 'self' 'sha256-gjeSSMIXG9BbI3JOaYbZjuKjgLQWtyZzrKeJWWpTW5w=' 'sha256-2VsAOLriGmzau9euyTar/WJk/JxKiuqkiONHcwQ2igg=' 'sha256-7N/6kzpAEcU9XVA3Q1vOiFuNNeInJvanrCIhejjujMY=' https://static.cloudflareinsights.com; script-src-attr 'none'; style-src 'self' 'unsafe-inline'; font-src 'self'; connect-src 'self' https://cloudflareinsights.com; form-action 'self'; frame-ancestors 'none'; upgrade-insecure-requests",
+    "default-src 'self'; base-uri 'self'; object-src 'none'; img-src 'self' data:; script-src 'self' 'sha256-gjeSSMIXG9BbI3JOaYbZjuKjgLQWtyZzrKeJWWpTW5w=' 'sha256-2VsAOLriGmzau9euyTar/WJk/JxKiuqkiONHcwQ2igg=' 'sha256-gSidlGkk2DWAtd/eo/XrAM4C8DD8+ek8QceN9+p88cE=' https://static.cloudflareinsights.com; script-src-attr 'none'; style-src 'self' 'unsafe-inline'; font-src 'self'; connect-src 'self' https://cloudflareinsights.com; form-action 'self'; frame-ancestors 'none'; upgrade-insecure-requests",
   "Cross-Origin-Opener-Policy": "same-origin",
   "Origin-Agent-Cluster": "?1",
   "X-Frame-Options": "DENY",
@@ -752,18 +755,32 @@ async function handleCreateApplication(
   }
 }
 
+function toPublicApplication(row: PublicApplication): PublicApplication {
+  return {
+    submittedAt: row.submittedAt,
+    name: row.name,
+    course: row.course,
+    idea: row.idea,
+  };
+}
+
 async function handleListApplications(env: WorkerEnv): Promise<Response> {
   try {
     const result = await env.APPLICATIONS_DB.prepare(
-      `SELECT submitted_at AS "submittedAt", name, email, course, idea
+      `SELECT submitted_at AS "submittedAt", name, course, idea
        FROM applications
        ORDER BY submitted_at DESC, id ASC
        LIMIT ?1`,
     )
       .bind(APPLICATIONS_QUERY_LIMIT)
-      .all<StoredApplication>();
+      .all<PublicApplication>();
 
-    return json({ applications: result.results }, 200);
+    return json(
+      {
+        applications: result.results.map((row) => toPublicApplication(row)),
+      },
+      200,
+    );
   } catch (error) {
     logApplicationStorageError("read", error);
     return json(
