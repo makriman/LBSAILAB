@@ -1,6 +1,8 @@
 type WorkerEnv = Env & {
   GOOGLE_SITE_VERIFICATION_FILE?: string;
   BING_SITE_VERIFICATION_TOKEN?: string;
+  TURNSTILE_SECRET_KEY?: string;
+  TURNSTILE_SITE_KEY?: string;
 };
 
 interface ApplicationSubmission {
@@ -36,8 +38,16 @@ interface RequestWithCloudflareContext extends Request {
 
 const APPLICATIONS_QUERY_LIMIT = 500;
 const MAX_APPLICATION_PAYLOAD_BYTES = 8192;
+const MAX_TURNSTILE_TOKEN_LENGTH = 2048;
+const TURNSTILE_VERIFY_URL =
+  "https://challenges.cloudflare.com/turnstile/v0/siteverify";
 const MAX_VITALS_PAYLOAD_BYTES = 4096;
 const CANONICAL_HOST = "lbsailab.com";
+const TURNSTILE_WIDGET_HOSTS = new Set([
+  CANONICAL_HOST,
+  `www.${CANONICAL_HOST}`,
+  "ailab.zahra-moghadasi.workers.dev",
+]);
 const INDEXNOW_KEY = "5e5bfddcc11447d381079b24b2d1e213";
 const INDEXNOW_KEY_PATH = `/${INDEXNOW_KEY}.txt`;
 const SECURITY_TXT_PATH = "/.well-known/security.txt";
@@ -53,7 +63,7 @@ const SHORT_CACHE_CONTROL = "public, max-age=300, must-revalidate";
 const LONG_CACHE_CONTROL = "public, max-age=31536000, immutable";
 const SECURITY_HEADERS = {
   "Content-Security-Policy":
-    "default-src 'self'; base-uri 'self'; object-src 'none'; img-src 'self' data:; script-src 'self' 'sha256-gjeSSMIXG9BbI3JOaYbZjuKjgLQWtyZzrKeJWWpTW5w=' 'sha256-2VsAOLriGmzau9euyTar/WJk/JxKiuqkiONHcwQ2igg=' 'sha256-7N/6kzpAEcU9XVA3Q1vOiFuNNeInJvanrCIhejjujMY=' https://static.cloudflareinsights.com; script-src-attr 'none'; style-src 'self' 'unsafe-inline'; font-src 'self'; connect-src 'self' https://cloudflareinsights.com; form-action 'self'; frame-ancestors 'none'; upgrade-insecure-requests",
+    "default-src 'self'; base-uri 'self'; object-src 'none'; img-src 'self' data:; script-src 'self' 'sha256-gjeSSMIXG9BbI3JOaYbZjuKjgLQWtyZzrKeJWWpTW5w=' 'sha256-2VsAOLriGmzau9euyTar/WJk/JxKiuqkiONHcwQ2igg=' 'sha256-hpvPcoUULto0ZXbJEceAtAEGW0G0aUzuObOjdNFVPCo=' https://challenges.cloudflare.com https://static.cloudflareinsights.com; script-src-attr 'none'; style-src 'self' 'unsafe-inline'; font-src 'self'; connect-src 'self' https://challenges.cloudflare.com https://cloudflareinsights.com; frame-src https://challenges.cloudflare.com; form-action 'self'; frame-ancestors 'none'; upgrade-insecure-requests",
   "Cross-Origin-Opener-Policy": "same-origin",
   "Origin-Agent-Cluster": "?1",
   "X-Frame-Options": "DENY",
@@ -168,6 +178,14 @@ async function handleRequest(
       await errorDocumentResponse(request, env, 200),
       url.pathname,
     );
+  }
+
+  if (url.pathname === "/api/turnstile") {
+    if (request.method === "GET") {
+      return handleTurnstileSiteKey(env);
+    }
+
+    return json({ error: "Method not allowed" }, 405);
   }
 
   if (url.pathname === "/api/applications") {
@@ -702,6 +720,21 @@ function indexNowKey(): Response {
   });
 }
 
+function handleTurnstileSiteKey(env: WorkerEnv): Response {
+  const siteKey = asString(env.TURNSTILE_SITE_KEY);
+
+  if (!/^[0-9A-Za-z_-]{20,120}$/.test(siteKey)) {
+    return json(
+      {
+        error: "Applications are temporarily unavailable. Please try again.",
+      },
+      503,
+    );
+  }
+
+  return json({ siteKey }, 200);
+}
+
 async function handleCreateApplication(
   request: Request,
   env: WorkerEnv,
@@ -712,9 +745,43 @@ async function handleCreateApplication(
     return json({ error: "Please submit the form again." }, 413);
   }
 
-  let body: Record<string, unknown>;
+  if (!request.body) {
+    return json({ error: "Please submit the form again." }, 400);
+  }
+
+  const reader = request.body.getReader();
+  const chunks: Uint8Array[] = [];
+  let received = 0;
+
   try {
-    body = (await request.json()) as Record<string, unknown>;
+    while (true) {
+      const { done, value } = await reader.read();
+      if (done) break;
+      if (!value?.byteLength) continue;
+
+      received += value.byteLength;
+      if (received > MAX_APPLICATION_PAYLOAD_BYTES) {
+        await reader.cancel();
+        return json({ error: "Please submit the form again." }, 413);
+      }
+
+      chunks.push(value);
+    }
+  } catch {
+    return json({ error: "Please submit the form again." }, 400);
+  }
+
+  const rawBody = new TextDecoder().decode(concatBytes(chunks));
+  let body: Record<string, unknown>;
+
+  try {
+    const parsed = JSON.parse(rawBody) as unknown;
+
+    if (!parsed || typeof parsed !== "object" || Array.isArray(parsed)) {
+      return json({ error: "Please submit the form again." }, 400);
+    }
+
+    body = parsed as Record<string, unknown>;
   } catch {
     return json({ error: "Please submit the form again." }, 400);
   }
@@ -723,10 +790,20 @@ async function handleCreateApplication(
     return json({ ok: true }, 202);
   }
 
+  const rateLimitResponse = await applicationRateLimitResponse(request, env);
+  if (rateLimitResponse) return rateLimitResponse;
+
   const submission = validateSubmission(body);
   if ("error" in submission) {
     return json({ error: submission.error }, 400);
   }
+
+  const turnstileResponse = await verifyApplicationTurnstile(
+    request,
+    env,
+    body,
+  );
+  if (turnstileResponse) return turnstileResponse;
 
   try {
     await env.APPLICATIONS_DB.prepare(
@@ -869,6 +946,195 @@ function sanitizeVisibilityState(value: unknown): string {
   return ["hidden", "visible"].includes(state) ? state : "hidden";
 }
 
+function concatBytes(chunks: Uint8Array[]): Uint8Array {
+  const body = new Uint8Array(
+    chunks.reduce((total, chunk) => total + chunk.byteLength, 0),
+  );
+  let offset = 0;
+
+  for (const chunk of chunks) {
+    body.set(chunk, offset);
+    offset += chunk.byteLength;
+  }
+
+  return body;
+}
+
+async function applicationRateLimitResponse(
+  request: Request,
+  env: WorkerEnv,
+): Promise<Response | null> {
+  const limiter = env.APPLICATIONS_RATE_LIMITER;
+
+  if (!limiter) {
+    logAbuseControl("rate-limit-unconfigured");
+    return json(
+      {
+        error: "Applications are temporarily unavailable. Please try again.",
+      },
+      503,
+    );
+  }
+
+  try {
+    const { success } = await limiter.limit({
+      key: `applications:${clientIp(request) || "unknown"}`,
+    });
+
+    if (success) return null;
+
+    logAbuseControl("rate-limited");
+    return json(
+      {
+        error:
+          "Too many submissions from this network. Please wait a minute and try again.",
+      },
+      429,
+      { "Retry-After": "60" },
+    );
+  } catch (error) {
+    console.error(
+      JSON.stringify({
+        error: errorMessage(error).slice(0, 240),
+        reason: "rate-limit-error",
+        type: "application-abuse-control",
+      }),
+    );
+    return json(
+      {
+        error: "Applications are temporarily unavailable. Please try again.",
+      },
+      503,
+    );
+  }
+}
+
+async function verifyApplicationTurnstile(
+  request: Request,
+  env: WorkerEnv,
+  body: Record<string, unknown>,
+): Promise<Response | null> {
+  const secret = asString(env.TURNSTILE_SECRET_KEY);
+
+  if (!secret) {
+    logAbuseControl("turnstile-unconfigured");
+    return json(
+      {
+        error: "Applications are temporarily unavailable. Please try again.",
+      },
+      503,
+    );
+  }
+
+  const token = asString(body["cf-turnstile-response"]);
+
+  if (!token || token.length > MAX_TURNSTILE_TOKEN_LENGTH) {
+    logAbuseControl("turnstile-rejected");
+    return json(
+      { error: "Please complete the security check and try again." },
+      403,
+    );
+  }
+
+  const payload: {
+    remoteip?: string;
+    response: string;
+    secret: string;
+  } = {
+    response: token,
+    secret,
+  };
+  const remoteip = clientIp(request);
+
+  if (remoteip) payload.remoteip = remoteip;
+
+  let outcome: { hostname?: unknown; success?: unknown };
+
+  try {
+    const response = await fetch(TURNSTILE_VERIFY_URL, {
+      body: JSON.stringify(payload),
+      headers: { "Content-Type": "application/json" },
+      method: "POST",
+      signal: AbortSignal.timeout(5000),
+    });
+
+    if (!response.ok) {
+      logAbuseControl("turnstile-unavailable");
+      return json(
+        {
+          error: "Applications are temporarily unavailable. Please try again.",
+        },
+        503,
+      );
+    }
+
+    outcome = (await response.json()) as {
+      hostname?: unknown;
+      success?: unknown;
+    };
+  } catch {
+    logAbuseControl("turnstile-unavailable");
+    return json(
+      {
+        error: "Applications are temporarily unavailable. Please try again.",
+      },
+      503,
+    );
+  }
+
+  if (
+    outcome.success !== true ||
+    !turnstileHostnameAllowed(request, outcome.hostname)
+  ) {
+    logAbuseControl("turnstile-rejected");
+    return json(
+      { error: "Please complete the security check and try again." },
+      403,
+    );
+  }
+
+  return null;
+}
+
+function turnstileHostnameAllowed(
+  request: Request,
+  hostname: unknown,
+): boolean {
+  const requestHost = new URL(request.url).hostname.toLowerCase();
+
+  if (typeof hostname !== "string" || !hostname.trim()) {
+    return isLocalHost(requestHost);
+  }
+
+  const host = hostname.trim().toLowerCase();
+
+  if (
+    isLocalHost(requestHost) &&
+    (host === "example.com" || isLocalHost(host))
+  ) {
+    return true;
+  }
+
+  return TURNSTILE_WIDGET_HOSTS.has(host);
+}
+
+function clientIp(request: Request): string | undefined {
+  const ip = (request.headers.get("CF-Connecting-IP") || "").trim();
+
+  if (!ip || ip.length > 45 || !/^[0-9a-f:.]+$/i.test(ip)) return undefined;
+
+  return ip;
+}
+
+function logAbuseControl(reason: string): void {
+  console.log(
+    JSON.stringify({
+      reason,
+      type: "application-abuse-control",
+    }),
+  );
+}
+
 function validateSubmission(
   body: Record<string, unknown>,
 ): ApplicationSubmission | { error: string } {
@@ -917,9 +1183,14 @@ function errorMessage(error: unknown): string {
     : "Something went wrong. Please try again.";
 }
 
-function json(body: unknown, status = 200): Response {
+function json(
+  body: unknown,
+  status = 200,
+  extraHeaders: Record<string, string> = {},
+): Response {
   const headers = new Headers(jsonHeaders);
   setHeaders(headers, SECURITY_HEADERS);
+  setHeaders(headers, extraHeaders);
 
   return new Response(JSON.stringify(body), {
     status,

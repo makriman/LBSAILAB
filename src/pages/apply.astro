@@ -129,8 +129,9 @@ const jsonLd = pageJsonLd({
         </label>
         <label class="bot-field" aria-hidden="true">
           <span>Website</span>
-          <input name="website" tabindex="-1" autocomplete="off" />
+          <input name="website" tabindex="-1" autocomplete="nope" />
         </label>
+        <div class="turnstile-widget" data-turnstile-widget></div>
         <p class="form-status" data-form-status role="status"></p>
         <button type="submit">Submit interest</button>
       </form>
@@ -225,7 +226,13 @@ const jsonLd = pageJsonLd({
   const formStatus = document.querySelector("[data-form-status]");
   const submissionsStatus = document.querySelector("[data-submissions-status]");
   const submissionsList = document.querySelector("[data-submission-list]");
+  const turnstileWidget = document.querySelector("[data-turnstile-widget]");
   const IDEA_PREVIEW_LENGTH = 280;
+  const turnstileMessage = "Please complete the security check and try again.";
+  const unavailableMessage =
+    "Applications are temporarily unavailable. Please try again.";
+  let turnstileWidgetId = null;
+  let turnstileUnavailable = false;
 
   const setText = (node, text) => {
     if (node) {
@@ -401,14 +408,83 @@ const jsonLd = pageJsonLd({
     }
   };
 
+  const loadTurnstileApi = () =>
+    new Promise((resolve, reject) => {
+      if (window.turnstile) {
+        window.turnstile.ready(resolve);
+        return;
+      }
+
+      const script = document.createElement("script");
+      script.src =
+        "https://challenges.cloudflare.com/turnstile/v0/api.js?render=explicit";
+      script.async = true;
+      script.defer = true;
+      script.onload = () => window.turnstile.ready(resolve);
+      script.onerror = () => reject(new Error(turnstileMessage));
+      document.head.appendChild(script);
+    });
+
+  const mountTurnstile = async () => {
+    if (!turnstileWidget) return;
+
+    try {
+      const response = await fetch("/api/turnstile", {
+        headers: { Accept: "application/json" },
+      });
+      const data = response.headers
+        .get("Content-Type")
+        ?.includes("application/json")
+        ? await response.json()
+        : {};
+
+      if (!response.ok || !data.siteKey) {
+        throw new Error(data.error || unavailableMessage);
+      }
+
+      await loadTurnstileApi();
+      turnstileWidgetId = window.turnstile.render(turnstileWidget, {
+        sitekey: data.siteKey,
+        theme: "light",
+        callback() {},
+        "expired-callback"() {},
+        "error-callback"() {
+          setText(formStatus, turnstileMessage);
+        },
+      });
+    } catch (error) {
+      turnstileUnavailable = true;
+      setText(
+        formStatus,
+        error instanceof Error ? error.message : unavailableMessage,
+      );
+    }
+  };
+
   loadSubmissions();
+  mountTurnstile();
 
   form?.addEventListener("submit", async (event) => {
     event.preventDefault();
 
     const submitButton = form.querySelector('button[type="submit"]');
     const payload = Object.fromEntries(new FormData(form).entries());
+    const token =
+      turnstileWidgetId === null
+        ? ""
+        : window.turnstile?.getResponse(turnstileWidgetId) || "";
 
+    if (turnstileUnavailable) {
+      setText(formStatus, unavailableMessage);
+      return;
+    }
+
+    if (!token) {
+      setText(formStatus, turnstileMessage);
+      return;
+    }
+
+    payload["cf-turnstile-response"] = token;
     setText(formStatus, "Submitting...");
     submitButton?.setAttribute("disabled", "true");
 
@@ -446,6 +522,9 @@ const jsonLd = pageJsonLd({
       );
     } finally {
       submitButton?.removeAttribute("disabled");
+      if (turnstileWidgetId !== null) {
+        window.turnstile?.reset(turnstileWidgetId);
+      }
     }
   });
 </script>
@@ -716,6 +795,10 @@ const jsonLd = pageJsonLd({
     position: absolute;
     white-space: nowrap;
     width: 1px;
+  }
+
+  .turnstile-widget {
+    min-height: 65px;
   }
 
   input,

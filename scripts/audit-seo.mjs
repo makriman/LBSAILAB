@@ -801,6 +801,11 @@ function auditApplicationsApiHygiene() {
     'return json({ error: "Please submit the form again." }, 413)',
     "if (asString(body.website))",
     "return json({ ok: true }, 202)",
+    "applicationRateLimitResponse(request, env)",
+    "const turnstileResponse = await verifyApplicationTurnstile(",
+    "https://challenges.cloudflare.com/turnstile/v0/siteverify",
+    "env.APPLICATIONS_RATE_LIMITER",
+    "limiter.limit(",
     "env.APPLICATIONS_DB.prepare(",
     ".bind(",
     ".run();",
@@ -811,44 +816,30 @@ function auditApplicationsApiHygiene() {
   }
 
   const handlerStart = worker.indexOf("async function handleCreateApplication");
-  const payloadCheck = worker.indexOf(
-    "contentLength > MAX_APPLICATION_PAYLOAD_BYTES",
-    handlerStart,
-  );
-  const bodyParse = worker.indexOf(
-    "body = (await request.json())",
-    handlerStart,
-  );
-  const honeypotCheck = worker.indexOf(
-    "if (asString(body.website))",
-    handlerStart,
-  );
-  const validationCheck = worker.indexOf(
-    "validateSubmission(body)",
-    handlerStart,
-  );
-  const databaseWrite = worker.indexOf(
-    "env.APPLICATIONS_DB.prepare(",
-    handlerStart,
-  );
-
-  if (handlerStart === -1) {
-    fail("Worker applications API handler could not be found");
-  }
-
-  if (payloadCheck === -1 || bodyParse === -1 || payloadCheck > bodyParse) {
-    fail("Worker applications API should cap payload size before JSON parsing");
-  }
+  const steps = [
+    worker.indexOf(
+      "contentLength > MAX_APPLICATION_PAYLOAD_BYTES",
+      handlerStart,
+    ),
+    worker.indexOf("received > MAX_APPLICATION_PAYLOAD_BYTES", handlerStart),
+    worker.indexOf("JSON.parse(rawBody)", handlerStart),
+    worker.indexOf("if (asString(body.website))", handlerStart),
+    worker.indexOf("applicationRateLimitResponse(request, env)", handlerStart),
+    worker.indexOf("validateSubmission(body)", handlerStart),
+    worker.indexOf(
+      "const turnstileResponse = await verifyApplicationTurnstile(",
+      handlerStart,
+    ),
+    worker.indexOf("env.APPLICATIONS_DB.prepare(", handlerStart),
+  ];
 
   if (
-    honeypotCheck === -1 ||
-    validationCheck === -1 ||
-    databaseWrite === -1 ||
-    honeypotCheck > validationCheck ||
-    validationCheck > databaseWrite
+    handlerStart === -1 ||
+    steps.some((step) => step === -1) ||
+    steps.some((step, index) => index > 0 && steps[index - 1] >= step)
   ) {
     fail(
-      "Worker applications API should absorb honeypot submissions and validate input before D1 writes",
+      "Worker applications API should cap the body, absorb honeypot submissions, rate limit, validate, verify Turnstile, and only then write to D1",
     );
   }
 
