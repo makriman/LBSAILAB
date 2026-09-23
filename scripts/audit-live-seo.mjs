@@ -4,6 +4,11 @@ import { Resolver } from "node:dns/promises";
 import { readFileSync } from "node:fs";
 import http from "node:http";
 import https from "node:https";
+import {
+  SITE_LAST_MODIFIED,
+  SITE_UPDATED_AT_ISO,
+  SITE_UPDATED_ON,
+} from "../src/site-revision.mjs";
 
 const SITE_URL = process.env.SEO_SITE_URL || "https://lbsailab.com";
 const SITE = new URL(SITE_URL);
@@ -21,9 +26,9 @@ const INDEXABLE_ROBOTS =
 const INDEXABLE_META_ROBOTS =
   "index,follow,max-snippet:-1,max-image-preview:large,max-video-preview:-1";
 const NOINDEX_ROBOTS = "noindex, nofollow";
-const EXPECTED_LAST_MODIFIED = "Tue, 16 Jun 2026 00:00:00 GMT";
-const EXPECTED_DATE_MODIFIED = "2026-06-16";
-const EXPECTED_UPDATED_TIME = "2026-06-16T00:00:00.000Z";
+const EXPECTED_LAST_MODIFIED = SITE_LAST_MODIFIED;
+const EXPECTED_DATE_MODIFIED = SITE_UPDATED_ON;
+const EXPECTED_UPDATED_TIME = SITE_UPDATED_AT_ISO;
 const EXPECTED_CONTENT_LANGUAGE = "en-GB";
 const EXPECTED_VIEWPORT = "width=device-width, initial-scale=1";
 const EXPECTED_ORGANIZATION_TOPICS = [

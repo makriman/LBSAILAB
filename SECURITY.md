@@ -35,3 +35,7 @@ If you are unsure whether something is security-sensitive, report it privately f
 ## Supported Versions
 
 Security fixes target the current default branch unless maintainers announce a release policy.
+
+## Choosing the contact
+
+Zahra chooses the private security contact. Do not add a personal email to this repository as a guess. `public/.well-known/security.txt` stays pointed at the public contact page until that choice. The steps and the two options are in [docs/security-contact-decision.md](docs/security-contact-decision.md).

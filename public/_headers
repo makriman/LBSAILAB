@@ -1,3 +1,6 @@
+# Not the live response policy. src/worker.ts sets headers and returns
+# 410 for /_headers and /_redirects. Do not add CSP or HSTS here and
+# expect them to apply. Last-Modified comes from src/site-revision.mjs.
 /*
   X-Frame-Options: DENY
   X-Content-Type-Options: nosniff

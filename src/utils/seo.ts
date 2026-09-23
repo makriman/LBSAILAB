@@ -6,9 +6,10 @@ import {
   SITE_NAME,
   SITE_URL,
 } from "@utils/site";
+import { SITE_UPDATED_AT_ISO, SITE_UPDATED_ON } from "../site-revision.mjs";
 
-export const SEO_UPDATED_AT = "2026-06-16";
-export const SEO_UPDATED_AT_ISO = "2026-06-16T00:00:00.000Z";
+export const SEO_UPDATED_AT = SITE_UPDATED_ON;
+export const SEO_UPDATED_AT_ISO = SITE_UPDATED_AT_ISO;
 export const DEFAULT_ROBOTS =
   "index,follow,max-snippet:-1,max-image-preview:large,max-video-preview:-1";
 export const DEFAULT_OG_IMAGE = "/og-default.png";

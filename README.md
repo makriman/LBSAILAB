@@ -21,7 +21,7 @@ Static Astro site for the London Business School AI Lab and Data Science & AI In
 
 ## Tech Stack
 
-- Astro 6 with TypeScript
+- Astro 7 with TypeScript
 - Astro Content Collections
 - Fontsource local fonts
 - Cloudflare Workers
@@ -98,6 +98,12 @@ Read [CONTRIBUTING.md](CONTRIBUTING.md) before opening a pull request.
 ## Security
 
 Please do not open public issues for secrets, auth bypasses, data exposure, provider key leaks, or abuse vectors. Follow [SECURITY.md](SECURITY.md).
+
+These notes are for a person. They do not change production. The short list of what this branch changed is in [docs/review-residuals-2026-09-23.md](docs/review-residuals-2026-09-23.md).
+
+- [Security contact](docs/security-contact-decision.md). Zahra chooses the mailbox or GitHub private advisories. `security.txt` is unchanged.
+- [SEO workflow](docs/seo-workflow-reenable.md). The Action is `disabled_inactivity`. Re-enable it in the GitHub UI.
+- [sharp 0.35](docs/sharp-upgrade-decision.md). Hero image quality is a separate decision. Committed images are unchanged.
 
 ## Code of Conduct
 
