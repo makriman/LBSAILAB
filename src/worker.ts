@@ -1084,7 +1084,7 @@ async function verifyApplicationTurnstile(
 
   if (
     outcome.success !== true ||
-    !turnstileHostnameAllowed(request, outcome.hostname)
+    !turnstileHostnameAllowed(request, outcome.hostname, secret)
   ) {
     logAbuseControl("turnstile-rejected");
     return json(
@@ -1099,14 +1099,22 @@ async function verifyApplicationTurnstile(
 function turnstileHostnameAllowed(
   request: Request,
   hostname: unknown,
+  secret: string,
 ): boolean {
   const requestHost = new URL(request.url).hostname.toLowerCase();
+  // Wrangler dev reports the production host. Siteverify answers the published
+  // always-pass test secret with hostname example.com. A real secret does not.
+  const testingSecret = secret === "1x0000000000000000000000000000000AA";
 
   if (typeof hostname !== "string" || !hostname.trim()) {
-    return isLocalHost(requestHost);
+    return isLocalHost(requestHost) || testingSecret;
   }
 
   const host = hostname.trim().toLowerCase();
+
+  if (testingSecret && (host === "example.com" || isLocalHost(host))) {
+    return true;
+  }
 
   if (
     isLocalHost(requestHost) &&

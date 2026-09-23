@@ -201,8 +201,10 @@ npx wrangler dev
 
 Open the local apply page, confirm the widget renders, and submit once.
 `.dev.vars` is gitignored. The example file uses Cloudflare’s published
-always-pass test keys, which Siteverify answers with hostname `example.com`.
-The Worker accepts that hostname only when the request host is local.
+always-pass test keys. Siteverify answers that secret with hostname
+`example.com`. `wrangler dev` still reports the production host, so the Worker
+accepts `example.com` only for that published test secret. A real secret still
+rejects it. Do not put the test secret on `ailab`.
 
 ## Deploy
 
