@@ -1,10 +1,11 @@
 import { existsSync, readFileSync, writeFileSync } from "node:fs";
 import path from "node:path";
 import { fileURLToPath } from "node:url";
+import { SITE_UPDATED_AT_ISO } from "../src/site-revision.mjs";
 
 const ROOT = path.resolve(path.dirname(fileURLToPath(import.meta.url)), "..");
 const SITEMAP_INDEX = path.join(ROOT, "dist", "sitemap-index.xml");
-const SITEMAP_LASTMOD = "2026-06-16T00:00:00.000Z";
+const SITEMAP_LASTMOD = SITE_UPDATED_AT_ISO;
 
 if (!existsSync(SITEMAP_INDEX)) {
   console.error("dist/sitemap-index.xml is missing. Run astro build first.");

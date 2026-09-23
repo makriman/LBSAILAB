@@ -1,8 +1,7 @@
 // @ts-check
 import { defineConfig } from "astro/config";
 import sitemap from "@astrojs/sitemap";
-
-const SITE_UPDATED_AT = "2026-06-16";
+import { SITE_UPDATED_ON } from "./src/site-revision.mjs";
 
 // https://astro.build/config
 export default defineConfig({
@@ -13,7 +12,7 @@ export default defineConfig({
       serialize(item) {
         return {
           ...item,
-          lastmod: SITE_UPDATED_AT,
+          lastmod: SITE_UPDATED_ON,
         };
       },
     }),

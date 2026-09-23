@@ -3,6 +3,8 @@ import { createHash } from "node:crypto";
 import { spawnSync } from "node:child_process";
 import path from "node:path";
 import { fileURLToPath } from "node:url";
+import { SITE_UPDATED_AT_ISO, SITE_UPDATED_ON } from "../src/site-revision.mjs";
+import { renderPublicHeaders } from "./public-headers.mjs";
 
 const ROOT = path.resolve(path.dirname(fileURLToPath(import.meta.url)), "..");
 const DIST = path.join(ROOT, "dist");
@@ -70,8 +72,8 @@ const REQUIRED_FAVICON_ASSETS = [
 ];
 const INDEXABLE_META_ROBOTS =
   "index,follow,max-snippet:-1,max-image-preview:large,max-video-preview:-1";
-const EXPECTED_UPDATED_AT = "2026-06-16";
-const EXPECTED_LASTMOD = `${EXPECTED_UPDATED_AT}T00:00:00.000Z`;
+const EXPECTED_UPDATED_AT = SITE_UPDATED_ON;
+const EXPECTED_LASTMOD = SITE_UPDATED_AT_ISO;
 const EXPECTED_VIEWPORT = "width=device-width, initial-scale=1";
 const EXPECTED_ORGANIZATION_TOPICS = [
   "AI product development",
@@ -3019,6 +3021,17 @@ function auditStaticReachability(pages, pageLinks) {
   }
 }
 
+function auditPublicHeadersPin() {
+  const committed = readFileSync(path.join(ROOT, "public", "_headers"), "utf8");
+  const rendered = renderPublicHeaders();
+
+  if (committed !== rendered) {
+    fail(
+      "public/_headers drifted from scripts/public-headers.mjs. Last-Modified must come from src/site-revision.mjs.",
+    );
+  }
+}
+
 function audit() {
   if (!existsSync(DIST)) {
     throw new Error(
@@ -3026,6 +3039,7 @@ function audit() {
     );
   }
 
+  auditPublicHeadersPin();
   auditRobots();
   auditCrawlerFiles();
   auditSecurityTxt();

@@ -13,6 +13,7 @@
     "db:migrate:remote": "wrangler d1 migrations apply ailab-applications --remote",
     "preview": "astro preview",
     "check": "astro check",
+    "test:applications": "node --experimental-strip-types --test scripts/validate-submission.test.ts scripts/public-headers.test.mjs",
     "seo:assets": "node scripts/optimize-images.mjs",
     "seo:audit": "node scripts/audit-seo.mjs",
     "seo:audit:live": "node scripts/audit-live-seo.mjs",
@@ -37,13 +38,13 @@
     "astro": "astro"
   },
   "dependencies": {
-    "@astrojs/sitemap": "^3.7.2",
+    "@astrojs/sitemap": "^3.7.4",
     "@fontsource-variable/inter": "^5.2.8",
     "@fontsource/source-serif-4": "^5.2.9",
-    "astro": "^6.3.7"
+    "astro": "^7.3.4"
   },
   "devDependencies": {
-    "@astrojs/check": "^0.9.9",
+    "@astrojs/check": "^0.9.10",
     "@resvg/resvg-js": "^2.6.2",
     "@rollup/wasm-node": "^4.60.4",
     "js-yaml": "^4.2.0",

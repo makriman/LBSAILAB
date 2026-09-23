@@ -1,6 +1,7 @@
 import { defineCollection } from "astro:content";
 import { file, glob } from "astro/loaders";
 import { z } from "astro/zod";
+import { SITE_UPDATED_ON } from "./site-revision.mjs";
 
 const peopleSchema = z.object({
   id: z.string(),
@@ -55,7 +56,7 @@ const teams = defineCollection({
     seoDescription: z.string().optional(),
     seoImage: z.string().optional(),
     seoImageAlt: z.string().optional(),
-    updatedAt: z.string().default("2026-06-16"),
+    updatedAt: z.string().default(SITE_UPDATED_ON),
   }),
 });
 
@@ -82,7 +83,7 @@ const batches = defineCollection({
     seoDescription: z.string().optional(),
     seoImage: z.string().optional(),
     seoImageAlt: z.string().optional(),
-    updatedAt: z.string().default("2026-06-16"),
+    updatedAt: z.string().default(SITE_UPDATED_ON),
   }),
 });
 

@@ -1,14 +1,14 @@
+import { SITE_UPDATED_AT_ISO } from "./site-revision.mjs";
+import {
+  asString,
+  validateSubmission,
+  type ApplicationSubmission,
+} from "./validate-submission.ts";
+
 type WorkerEnv = Env & {
   GOOGLE_SITE_VERIFICATION_FILE?: string;
   BING_SITE_VERIFICATION_TOKEN?: string;
 };
-
-interface ApplicationSubmission {
-  name: string;
-  email: string;
-  course: string;
-  idea: string;
-}
 
 interface StoredApplication extends ApplicationSubmission {
   submittedAt: string;
@@ -47,8 +47,7 @@ const INDEXABLE_ROBOTS =
   "index, follow, max-snippet:-1, max-image-preview:large, max-video-preview:-1";
 const NOINDEX_ROBOTS = "noindex, nofollow";
 const CONTENT_LANGUAGE = "en-GB";
-const SITE_UPDATED_AT = "2026-06-16T00:00:00.000Z";
-const LAST_MODIFIED = new Date(SITE_UPDATED_AT).toUTCString();
+const LAST_MODIFIED = new Date(SITE_UPDATED_AT_ISO).toUTCString();
 const SHORT_CACHE_CONTROL = "public, max-age=300, must-revalidate";
 const LONG_CACHE_CONTROL = "public, max-age=31536000, immutable";
 const SECURITY_HEADERS = {
@@ -869,31 +868,6 @@ function sanitizeVisibilityState(value: unknown): string {
   return ["hidden", "visible"].includes(state) ? state : "hidden";
 }
 
-function validateSubmission(
-  body: Record<string, unknown>,
-): ApplicationSubmission | { error: string } {
-  const name = asString(body.name).slice(0, 120);
-  const email = asString(body.lbs_email).toLowerCase().slice(0, 180);
-  const course = asString(body.course_name).slice(0, 80);
-  const idea = asString(body.build_interest).slice(0, 900);
-  const consent = body.public_consent === "yes";
-
-  if (!name) return { error: "Please enter your name." };
-  if (!/^[^@\s]+@london\.edu$/.test(email)) {
-    return { error: "Please use your LBS email address." };
-  }
-  if (!course) return { error: "Please enter your course." };
-  if (!idea) return { error: "Please share what you would like to build." };
-  if (!consent) {
-    return {
-      error:
-        "Please confirm that your name, course, and idea can be shown to other LBS builders.",
-    };
-  }
-
-  return { name, email, course, idea };
-}
-
 function logApplicationStorageError(
   operation: "read" | "write",
   error: unknown,
@@ -905,10 +879,6 @@ function logApplicationStorageError(
       type: "application-storage-error",
     }),
   );
-}
-
-function asString(value: unknown): string {
-  return typeof value === "string" ? value.trim() : "";
 }
 
 function errorMessage(error: unknown): string {
