@@ -62,6 +62,16 @@ npm run db:migrate:remote
 
 For local development, use `npm run db:migrate:local` before starting Wrangler.
 
+`POST /api/applications` requires a Cloudflare Turnstile token before it
+writes to D1. The Worker also applies a location-scoped rate-limit binding.
+Neither one is a global counter. Setup, failure behavior, and the dashboard
+WAF rule a person has to add are in
+[docs/applications-abuse-controls.md](docs/applications-abuse-controls.md).
+
+The stale `lbsailab` Worker is not torn down from this repository. The
+founder steps are in
+[docs/stale-worker-lbsailab.md](docs/stale-worker-lbsailab.md).
+
 Search engine ownership verification can be enabled without changing visible
 site copy:
 

@@ -3,6 +3,7 @@
 // Runtime types generated with workerd@1.20260911.1 2026-09-14 
 interface __BaseEnv_Env {
 	APPLICATIONS_DB: D1Database;
+	APPLICATIONS_RATE_LIMITER: RateLimit;
 	ASSETS: Fetcher;
 }
 declare namespace Cloudflare {

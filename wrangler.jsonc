@@ -23,6 +23,19 @@
       "migrations_dir": "migrations",
     },
   ],
+  // Colo-local backstop for real application POSTs. Counters are shared by
+  // isolates in one Cloudflare location. They are not global. See
+  // docs/applications-abuse-controls.md before deploying.
+  "ratelimits": [
+    {
+      "name": "APPLICATIONS_RATE_LIMITER",
+      "namespace_id": "81024023",
+      "simple": {
+        "limit": 30,
+        "period": 60,
+      },
+    },
+  ],
   "routes": [
     {
       "pattern": "lbsailab.com",
