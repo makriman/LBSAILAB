@@ -1,3 +1,5 @@
+import { readCappedJson } from "./read-capped-json";
+
 type WorkerEnv = Env & {
   GOOGLE_SITE_VERIFICATION_FILE?: string;
   BING_SITE_VERIFICATION_TOKEN?: string;
@@ -35,6 +37,10 @@ interface RequestWithCloudflareContext extends Request {
 }
 
 const APPLICATIONS_QUERY_LIMIT = 500;
+const APPLICATION_NAME_MAX_LENGTH = 120;
+const APPLICATION_EMAIL_MAX_LENGTH = 180;
+const APPLICATION_COURSE_MAX_LENGTH = 80;
+const APPLICATION_IDEA_MAX_LENGTH = 900;
 const MAX_APPLICATION_PAYLOAD_BYTES = 8192;
 const MAX_VITALS_PAYLOAD_BYTES = 4096;
 const CANONICAL_HOST = "lbsailab.com";
@@ -53,7 +59,7 @@ const SHORT_CACHE_CONTROL = "public, max-age=300, must-revalidate";
 const LONG_CACHE_CONTROL = "public, max-age=31536000, immutable";
 const SECURITY_HEADERS = {
   "Content-Security-Policy":
-    "default-src 'self'; base-uri 'self'; object-src 'none'; img-src 'self' data:; script-src 'self' 'sha256-gjeSSMIXG9BbI3JOaYbZjuKjgLQWtyZzrKeJWWpTW5w=' 'sha256-2VsAOLriGmzau9euyTar/WJk/JxKiuqkiONHcwQ2igg=' 'sha256-7N/6kzpAEcU9XVA3Q1vOiFuNNeInJvanrCIhejjujMY=' https://static.cloudflareinsights.com; script-src-attr 'none'; style-src 'self' 'unsafe-inline'; font-src 'self'; connect-src 'self' https://cloudflareinsights.com; form-action 'self'; frame-ancestors 'none'; upgrade-insecure-requests",
+    "default-src 'self'; base-uri 'self'; object-src 'none'; img-src 'self' data:; script-src 'self' 'sha256-gjeSSMIXG9BbI3JOaYbZjuKjgLQWtyZzrKeJWWpTW5w=' 'sha256-2VsAOLriGmzau9euyTar/WJk/JxKiuqkiONHcwQ2igg=' 'sha256-8GJoymEGiDoyNnY89HAuKsGdOa2Nn1LS5MqFXJG7sTE=' https://static.cloudflareinsights.com; script-src-attr 'none'; style-src 'self' 'unsafe-inline'; font-src 'self'; connect-src 'self' https://cloudflareinsights.com; form-action 'self'; frame-ancestors 'none'; upgrade-insecure-requests",
   "Cross-Origin-Opener-Policy": "same-origin",
   "Origin-Agent-Cluster": "?1",
   "X-Frame-Options": "DENY",
@@ -706,20 +712,15 @@ async function handleCreateApplication(
   request: Request,
   env: WorkerEnv,
 ): Promise<Response> {
-  const contentLength = Number(request.headers.get("Content-Length") || "0");
+  const parsed = await readCappedJson(request, MAX_APPLICATION_PAYLOAD_BYTES);
 
-  if (contentLength > MAX_APPLICATION_PAYLOAD_BYTES) {
-    return json({ error: "Please submit the form again." }, 413);
+  if (!parsed.ok) {
+    return json({ error: "Please submit the form again." }, parsed.status);
   }
 
-  let body: Record<string, unknown>;
-  try {
-    body = (await request.json()) as Record<string, unknown>;
-  } catch {
-    return json({ error: "Please submit the form again." }, 400);
-  }
+  const body = parsed.value;
 
-  if (asString(body.website)) {
+  if (isApplicationHoneypot(body)) {
     return json({ ok: true }, 202);
   }
 
@@ -777,19 +778,11 @@ async function handleListApplications(env: WorkerEnv): Promise<Response> {
 }
 
 async function handleVitals(request: Request): Promise<Response> {
-  const contentLength = Number(request.headers.get("Content-Length") || "0");
+  const parsed = await readCappedJson(request, MAX_VITALS_PAYLOAD_BYTES);
 
-  if (contentLength > MAX_VITALS_PAYLOAD_BYTES) {
-    return noContent();
-  }
+  if (!parsed.ok) return noContent();
 
-  let payload: WebVitalsPayload;
-
-  try {
-    payload = (await request.json()) as WebVitalsPayload;
-  } catch {
-    return noContent();
-  }
+  const payload = parsed.value as WebVitalsPayload;
 
   const metrics = sanitizeVitals(payload.metrics);
 
@@ -869,13 +862,25 @@ function sanitizeVisibilityState(value: unknown): string {
   return ["hidden", "visible"].includes(state) ? state : "hidden";
 }
 
+function isApplicationHoneypot(body: Record<string, unknown>): boolean {
+  return Boolean(asString(body.lbs_hp) || asString(body.website));
+}
+
 function validateSubmission(
   body: Record<string, unknown>,
 ): ApplicationSubmission | { error: string } {
-  const name = asString(body.name).slice(0, 120);
-  const email = asString(body.lbs_email).toLowerCase().slice(0, 180);
-  const course = asString(body.course_name).slice(0, 80);
-  const idea = asString(body.build_interest).slice(0, 900);
+  const name = asString(body.name).slice(0, APPLICATION_NAME_MAX_LENGTH);
+  const email = asString(body.lbs_email)
+    .toLowerCase()
+    .slice(0, APPLICATION_EMAIL_MAX_LENGTH);
+  const course = asString(body.course_name).slice(
+    0,
+    APPLICATION_COURSE_MAX_LENGTH,
+  );
+  const idea = asString(body.build_interest).slice(
+    0,
+    APPLICATION_IDEA_MAX_LENGTH,
+  );
   const consent = body.public_consent === "yes";
 
   if (!name) return { error: "Please enter your name." };

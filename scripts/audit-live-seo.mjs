@@ -2830,13 +2830,18 @@ async function auditApplicationsApiNoindex() {
     fail(`${applicationsUrl}: GET response is not valid JSON`);
   }
 
+  // Field names match validateSubmission. `website` is the previous honeypot
+  // and `lbs_hp` is the form field. Either one must return 202 with no insert.
+  // The address is not @london.edu, so a Worker that ignores both fields still
+  // fails validation instead of writing a row.
   const honeypotPost = await fetch(applicationsUrl, {
     body: JSON.stringify({
-      consent: true,
-      course: "SEO audit",
-      email: "seo-audit@example.com",
-      idea: "Crawler hygiene verification",
+      build_interest: "Crawler hygiene verification",
+      course_name: "SEO audit",
+      lbs_email: "seo-audit@example.com",
+      lbs_hp: "filled",
       name: "SEO audit",
+      public_consent: "yes",
       website: "https://example.com",
     }),
     headers: {
@@ -2853,6 +2858,29 @@ async function auditApplicationsApiNoindex() {
   }
 
   assertNoindexNoStoreJsonApiResponse(honeypotPost, applicationsUrl);
+
+  const validationPost = await fetch(applicationsUrl, {
+    body: JSON.stringify({
+      build_interest: "Crawler hygiene verification",
+      course_name: "SEO audit",
+      lbs_email: "seo-audit@example.com",
+      name: "SEO audit",
+      public_consent: "yes",
+    }),
+    headers: {
+      "Content-Type": "application/json",
+      "User-Agent": "lbsailab-seo-audit/1.0",
+    },
+    method: "POST",
+  });
+
+  if (validationPost.status !== 400) {
+    fail(
+      `${applicationsUrl}: expected validation POST 400, got ${validationPost.status}`,
+    );
+  }
+
+  assertNoindexNoStoreJsonApiResponse(validationPost, applicationsUrl);
 }
 
 async function auditMissingPage() {

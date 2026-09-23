@@ -16,6 +16,8 @@ If you find a vulnerability, contact the repository owner privately with:
 
 If you are unsure whether something is security-sensitive, report it privately first.
 
+Zahra still needs to choose the private security contact. Do not put a personal email address in this repository as a guess. `public/.well-known/security.txt` is unchanged until that choice is made. The contact page is not a vulnerability inbox. `.github/ISSUE_TEMPLATE/config.yml` already links GitHub private vulnerability reporting, which is one option she can confirm. See [docs/review-followups-2026-09-23.md](docs/review-followups-2026-09-23.md).
+
 ## Report Privately
 
 - Exposed API keys, OAuth secrets, database URLs, or tokens.
